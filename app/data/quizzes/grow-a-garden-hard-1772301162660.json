@@ -1,0 +1,108 @@
+{
+  "slug": "grow-a-garden-hard-1772301162660",
+  "title": "Grow a Garden Expert Challenge",
+  "game": "Grow a Garden",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "What is the exact growth time for a Rainbow Flower from seed to full maturity?",
+      "a": [
+        "45 minutes",
+        "1 hour 15 minutes",
+        "2 hours",
+        "3 hours 30 minutes"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which tool combination provides the maximum efficiency bonus when used together for harvesting Mystic Berries?",
+      "a": [
+        "Golden Watering Can + Diamond Hoe",
+        "Enchanted Shears + Magic Fertilizer",
+        "Crystal Rake + Blessed Water",
+        "Mythical Scythe + Lunar Soil"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the minimum plot level required to unlock the ability to plant Dragon Fruit seeds?",
+      "a": [
+        "Level 75",
+        "Level 85",
+        "Level 95",
+        "Level 100"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "How many different mutation combinations are possible with the base Sunflower seed?",
+      "a": [
+        "12",
+        "16",
+        "24",
+        "32"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the exact sell price of a Perfect Quality Cosmic Melon?",
+      "a": [
+        "15,750 coins",
+        "18,500 coins",
+        "22,250 coins",
+        "25,000 coins"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which weather condition increases the growth speed of Shadow Roses by exactly 40%?",
+      "a": [
+        "Blood Moon",
+        "Eclipse",
+        "Meteor Shower",
+        "Aurora Borealis"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the spawn rate percentage for finding a Legendary seed in a Treasure Chest using a Diamond Key?",
+      "a": [
+        "2.5%",
+        "3.75%",
+        "5.25%",
+        "7.5%"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many times must you water a Phantom Orchid during its growth cycle to guarantee maximum yield?",
+      "a": [
+        "8 times",
+        "12 times",
+        "16 times",
+        "20 times"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which fertilizer type is required to successfully cross-breed a Fire Lily with an Ice Rose?",
+      "a": [
+        "Elemental Harmony Fertilizer",
+        "Chaos Blend Nutrients",
+        "Prismatic Growth Powder",
+        "Void Essence Compound"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the maximum storage capacity of a Mythical Greenhouse when fully upgraded?",
+      "a": [
+        "500 plants",
+        "750 plants",
+        "1,000 plants",
+        "1,250 plants"
+      ],
+      "correct": 2
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "murder-mystery-2-easy-1772301119817",
+  "title": "Murder Mystery 2 Easy Trivia Quiz",
+  "game": "Murder Mystery 2",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "How many players are in a standard Murder Mystery 2 game?",
+      "a": [
+        "8 players",
+        "10 players",
+        "12 players",
+        "15 players"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What role carries a gun to protect the innocents?",
+      "a": [
+        "Murderer",
+        "Sheriff",
+        "Innocent",
+        "Detective"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What happens if the Sheriff shoots an innocent player?",
+      "a": [
+        "Nothing happens",
+        "The Sheriff dies",
+        "The game restarts",
+        "The innocent becomes murderer"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which of these is a classic map in Murder Mystery 2?",
+      "a": [
+        "Factory",
+        "School",
+        "Office",
+        "All of the above"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What weapon does the Murderer start with?",
+      "a": [
+        "Gun",
+        "Knife",
+        "Sword",
+        "Bat"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many Murderers are there in a standard game?",
+      "a": [
+        "1",
+        "2",
+        "3",
+        "It varies"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What should innocents do when they see the Murderer?",
+      "a": [
+        "Fight them",
+        "Hide and run",
+        "Stand still",
+        "Dance"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What happens if an innocent picks up the Sheriff's gun after the Sheriff dies?",
+      "a": [
+        "Nothing",
+        "They become Sheriff",
+        "They become Murderer",
+        "The gun disappears"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which rarity is the most common for knives and guns?",
+      "a": [
+        "Legendary",
+        "Rare",
+        "Common",
+        "Godly"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the main objective for the Murderer?",
+      "a": [
+        "Collect coins",
+        "Hide from everyone",
+        "Eliminate all other players",
+        "Find the gun"
+      ],
+      "correct": 2
+    }
+  ]
+}

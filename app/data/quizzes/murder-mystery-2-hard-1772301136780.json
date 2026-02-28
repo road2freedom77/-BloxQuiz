@@ -1,0 +1,108 @@
+{
+  "slug": "murder-mystery-2-hard-1772301136780",
+  "title": "Murder Mystery 2 Expert Challenge",
+  "game": "Murder Mystery 2",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "Which knife has the highest value in the trading economy and was originally obtainable from the Halloween 2017 event?",
+      "a": [
+        "Chroma Luger",
+        "Corrupt",
+        "Nik's Scythe",
+        "Elderwood Scythe"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the exact spawn rate percentage for becoming the Murderer in a standard Murder Mystery 2 game?",
+      "a": [
+        "12.5%",
+        "16.7%",
+        "20%",
+        "25%"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "On the map 'Workplace', what is the most effective hiding spot that provides both concealment and multiple escape routes?",
+      "a": [
+        "Behind the copy machine",
+        "Under the main desk",
+        "In the bathroom stall",
+        "Behind the water cooler near the exit"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which gun was the first Ancient rarity weapon ever released in MM2?",
+      "a": [
+        "Icebreaker",
+        "Logchopper",
+        "Harvester",
+        "Elderwood Revolver"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What advanced strategy involves the Sheriff intentionally missing shots to psychologically pressure the Murderer?",
+      "a": [
+        "Bait shooting",
+        "Pressure tactics",
+        "False flanking",
+        "Mind gaming"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which map feature in 'Milbase' makes it particularly challenging for Murderers due to limited approach angles?",
+      "a": [
+        "The watchtower's elevation",
+        "The narrow corridors",
+        "The central courtyard design",
+        "The multiple bunker entrances"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the maximum number of players that can be assigned the role of 'Hero' (innocent who picks up gun) in a single round?",
+      "a": [
+        "1",
+        "2",
+        "3",
+        "No limit"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which knife was exclusively obtainable through a code and has never been available through unboxing or events?",
+      "a": [
+        "Prism",
+        "Alex",
+        "Corl",
+        "Denis"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "In competitive MM2 play, what is the 'Shadow Strategy' primarily used by expert Murderers?",
+      "a": [
+        "Staying in one hiding spot the entire round",
+        "Following innocents closely without being detected",
+        "Using map lighting to remain invisible",
+        "Eliminating players in reverse spawn order"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which map has the unique feature of destructible environment elements that can change the gameplay dynamics mid-round?",
+      "a": [
+        "Factory",
+        "Research Facility",
+        "Workplace",
+        "None - no MM2 maps have destructible elements"
+      ],
+      "correct": 3
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "blox-fruits-medium-1772301173729",
+  "title": "Blox Fruits Intermediate Knowledge Quiz",
+  "game": "Blox Fruits",
+  "difficulty": "Medium",
+  "questions": [
+    {
+      "q": "What is the maximum level required to access the Third Sea?",
+      "a": [
+        "1450",
+        "1500",
+        "1525",
+        "1400"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which fruit has the move called 'Sky Ruler'?",
+      "a": [
+        "Phoenix",
+        "Dragon",
+        "Venom",
+        "Dough"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the level requirement to fight the boss Dough King?",
+      "a": [
+        "2000",
+        "2100",
+        "2200",
+        "2300"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which NPC teaches you Fishman Karate?",
+      "a": [
+        "Daigrock",
+        "Horned Man",
+        "Fishman Warrior",
+        "Water Fighter"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the spawn chance of the Leopard fruit?",
+      "a": [
+        "0.5%",
+        "0.6%",
+        "0.7%",
+        "0.8%"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "In which sea can you find the Swan Pirates quest?",
+      "a": [
+        "First Sea",
+        "Second Sea",
+        "Third Sea",
+        "All Seas"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What type of fruit is the Love fruit classified as?",
+      "a": [
+        "Logia",
+        "Paramecia",
+        "Zoan",
+        "Special"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which boss drops the Pole (1st Form) weapon?",
+      "a": [
+        "Thunder God",
+        "Ice Admiral",
+        "Magma Admiral",
+        "Fishman Lord"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the awakening cost for the Light fruit (total for all moves)?",
+      "a": [
+        "17,000 fragments",
+        "18,500 fragments",
+        "19,500 fragments",
+        "20,000 fragments"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which island in the Third Sea contains the Temple of Time?",
+      "a": [
+        "Hydra Island",
+        "Great Tree",
+        "Floating Turtle",
+        "Mansion"
+      ],
+      "correct": 1
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "brookhaven-easy-1772301148515",
+  "title": "Brookhaven RP Basics Quiz",
+  "game": "Brookhaven RP",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What is the main purpose of Brookhaven RP?",
+      "a": [
+        "Racing cars",
+        "Role-playing and social interaction",
+        "Fighting other players",
+        "Collecting coins"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Where do players typically start when they first join Brookhaven RP?",
+      "a": [
+        "Inside a house",
+        "At the spawn area",
+        "In a car",
+        "At the school"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What can you find at the Brookhaven Hospital?",
+      "a": [
+        "Free cars",
+        "Medical roleplay opportunities",
+        "Secret weapons",
+        "Game admin tools"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which of these is a common vehicle type available in Brookhaven RP?",
+      "a": [
+        "Spaceships",
+        "Cars",
+        "Tanks",
+        "Submarines"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the Brookhaven Airport primarily used for?",
+      "a": [
+        "Car racing",
+        "Flying planes and helicopters",
+        "Shopping",
+        "Swimming"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Where can players go to shop for items in Brookhaven RP?",
+      "a": [
+        "The Hospital",
+        "The Store/Shop",
+        "The Police Station",
+        "The School"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is a popular roleplay scenario in Brookhaven RP?",
+      "a": [
+        "Playing as a family",
+        "Competitive gaming tournaments",
+        "Math competitions",
+        "Treasure hunting"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What can you typically do at the Brookhaven School?",
+      "a": [
+        "Buy vehicles",
+        "Educational roleplay",
+        "Get medical treatment",
+        "Arrest criminals"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which building is associated with law enforcement roleplay?",
+      "a": [
+        "The Hospital",
+        "The School",
+        "The Police Station",
+        "The Store"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is one way players can customize their experience in Brookhaven RP?",
+      "a": [
+        "Changing their avatar's appearance",
+        "Modifying the game code",
+        "Creating new maps",
+        "Deleting other players"
+      ],
+      "correct": 0
+    }
+  ]
+}

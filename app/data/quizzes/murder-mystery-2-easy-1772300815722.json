@@ -1,0 +1,108 @@
+{
+  "slug": "murder-mystery-2-easy-1772300815722",
+  "title": "Murder Mystery 2 Basics Quiz",
+  "game": "Murder Mystery 2",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "How many players can be the Murderer in a standard Murder Mystery 2 round?",
+      "a": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What weapon does the Sheriff start with?",
+      "a": [
+        "Knife",
+        "Gun",
+        "Sword",
+        "Bow"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What happens if the Sheriff shoots an innocent player?",
+      "a": [
+        "Nothing happens",
+        "The Sheriff gets extra points",
+        "The Sheriff dies",
+        "The round ends"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which role tries to eliminate all other players?",
+      "a": [
+        "Sheriff",
+        "Innocent",
+        "Murderer",
+        "Hero"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What can innocent players pick up if the Sheriff dies?",
+      "a": [
+        "Knife",
+        "Gun",
+        "Coins",
+        "Keys"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "On which map would you find a camping area with tents?",
+      "a": [
+        "Office",
+        "Factory",
+        "Camping",
+        "House"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the most common knife rarity in Murder Mystery 2?",
+      "a": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Legendary"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "How do innocent players win the game?",
+      "a": [
+        "Kill the Sheriff",
+        "Survive until time runs out",
+        "Collect all coins",
+        "The Sheriff kills the Murderer or they survive until time runs out"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What should you do as an innocent when you see the Murderer?",
+      "a": [
+        "Run towards them",
+        "Stand still",
+        "Run away and alert others",
+        "Try to fight them"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which of these is NOT a standard role in Murder Mystery 2?",
+      "a": [
+        "Sheriff",
+        "Murderer",
+        "Innocent",
+        "Detective"
+      ],
+      "correct": 3
+    }
+  ]
+}
