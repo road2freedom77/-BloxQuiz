@@ -1,26 +1,60 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0B0E17;
+  --bg-card: #141929;
+  --bg-card-hover: #1A2038;
+  --surface: #1E2540;
+  --border: #2A3155;
+  --text: #E8EAF6;
+  --text-muted: #8B92B0;
+  --text-dim: #5C6490;
+  --neon-green: #00F5A0;
+  --neon-blue: #00D9FF;
+  --neon-pink: #FF3CAC;
+  --neon-yellow: #FFE347;
+  --neon-orange: #FF8A47;
+  --neon-purple: #B84CFF;
+  --gradient-main: linear-gradient(135deg, #00F5A0, #00D9FF);
+  --gradient-fire: linear-gradient(135deg, #FF3CAC, #FF8A47);
+  --gradient-gold: linear-gradient(135deg, #FFE347, #FF8A47);
+  --gradient-purple: linear-gradient(135deg, #B84CFF, #00D9FF);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --font-display: 'Lilita One', cursive;
+  --font-body: 'Nunito', sans-serif;
+  --shadow-glow-green: 0 0 30px rgba(0,245,160,0.15);
+  --shadow-glow-pink: 0 0 30px rgba(255,60,172,0.15);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
 }
+
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(0,245,160,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255,60,172,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,217,255,0.03) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+section, nav, footer { position: relative; z-index: 1; }
