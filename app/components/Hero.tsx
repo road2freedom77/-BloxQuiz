@@ -27,7 +27,7 @@ export default function Hero() {
         Test your knowledge on Blox Fruits, Brookhaven, Adopt Me & 50+ more games. Play quizzes, earn XP, climb the leaderboard.
       </p>
       <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-        <a href="/quiz" style={{
+        <a href="/quiz/random" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "var(--gradient-main)",
           color: "var(--bg)", fontWeight: 900, fontSize: 16,
