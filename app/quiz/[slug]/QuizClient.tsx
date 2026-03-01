@@ -92,8 +92,15 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
       
       {/* H1 intro block — hidden during quiz, visible for SEO */}
-      {!finished && current === 0 && !answered && (
-        <div style={{ marginBottom: 24, textAlign: "center" }}>
+      {!finished && (
+  <div style={{
+    marginBottom: current === 0 && !answered ? 24 : 0,
+    height: current === 0 && !answered ? "auto" : 0,
+    opacity: current === 0 && !answered ? 1 : 0,
+    overflow: "hidden",
+    transition: "all 0.3s ease",
+    textAlign: "center"
+  }}>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)" }}>{quiz.game}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
