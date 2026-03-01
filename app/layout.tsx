@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Lilita_One, Nunito } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
+import Nav from "./components/Nav";
+import Footer from "./components/Footer";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -63,7 +65,9 @@ export default function RootLayout({
           </Script>
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`}>
+          <Nav />
           {children}
+          <Footer />
         </body>
       </html>
     </ClerkProvider>
