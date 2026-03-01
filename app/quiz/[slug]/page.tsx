@@ -111,6 +111,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: "summary",
       title: `${quiz.title} | BloxQuiz`,
       description: `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
+    },
+    alternates: {
+      canonical: `https://www.bloxquiz.gg/quiz/${slug}`,
     }
   };
 }
@@ -121,5 +124,36 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
 
   if (!quiz) notFound();
 
-  return <QuizClient quiz={quiz} slug={slug} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
+          { "@type": "ListItem", "position": 2, "name": `${quiz.game} Quizzes`, "item": `https://www.bloxquiz.gg/games/${quiz.game.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` },
+          { "@type": "ListItem", "position": 3, "name": quiz.title, "item": `https://www.bloxquiz.gg/quiz/${slug}` },
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": `https://www.bloxquiz.gg/quiz/${slug}`,
+        "url": `https://www.bloxquiz.gg/quiz/${slug}`,
+        "name": `${quiz.title} | BloxQuiz`,
+        "description": `Test your ${quiz.game} knowledge with this ${quiz.difficulty} quiz. ${quiz.questions.length} questions covering ${quiz.game} gameplay, mechanics and more.`,
+        "inLanguage": "en-US",
+        "isPartOf": { "@id": "https://www.bloxquiz.gg" },
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <QuizClient quiz={quiz} slug={slug} />
+    </>
+  );
 }
