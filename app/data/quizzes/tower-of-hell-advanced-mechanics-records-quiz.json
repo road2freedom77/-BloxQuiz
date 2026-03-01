@@ -1,0 +1,108 @@
+{
+  "slug": "tower-of-hell-advanced-mechanics-records-quiz",
+  "title": "Tower of Hell Advanced Mechanics & Records Quiz",
+  "game": "Tower of Hell",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "What is the exact speed multiplier applied when the 'Low Gravity' modifier is active?",
+      "a": [
+        "0.5x",
+        "0.196x",
+        "0.3x",
+        "0.25x"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which ring type requires the player to maintain a specific speed threshold to successfully pass through?",
+      "a": [
+        "Speed Ring",
+        "Velocity Ring",
+        "Momentum Ring",
+        "Rush Ring"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What happens to your camera when the 'Inverted' modifier is combined with 'Foggy'?",
+      "a": [
+        "Camera flips upside down with reduced visibility",
+        "Camera becomes fixed with fog",
+        "Camera inverts controls with white fog",
+        "Camera rotates 180 degrees with black fog"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "In the section 'Dysphoric', what is the primary obstacle mechanic that players must navigate?",
+      "a": [
+        "Rotating platforms with kill parts",
+        "Invisible walls with fake floors",
+        "Moving kill parts in a maze pattern",
+        "Teleporting platforms with timers"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the world record completion time for Tower of Hell (as of 2023)?",
+      "a": [
+        "Under 20 seconds",
+        "Under 15 seconds",
+        "Under 10 seconds",
+        "Under 25 seconds"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which modifier combination is considered impossible to complete by most players?",
+      "a": [
+        "Foggy + Inverted + Low Gravity",
+        "Double Time + Inverted + Foggy",
+        "Low Gravity + Double Time + Disaster",
+        "Inverted + Disaster + Double Time"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What unique property does the 'Disappearing Platforms' obstacle have regarding its timing mechanism?",
+      "a": [
+        "Platforms disappear based on player proximity",
+        "Platforms follow a random disappearing pattern",
+        "Platforms disappear in a set sequence every 2 seconds",
+        "Platforms disappear when touched and respawn after 5 seconds"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "In the section 'Stravaganza', which specific jumping technique is required to reach the next platform?",
+      "a": [
+        "Wall-jumping between two moving platforms",
+        "Precise corner-jumping on small ledges",
+        "Long-jumping across rotating cylinders",
+        "Momentum-based jumping through spinning rings"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the maximum number of sections that can appear in a single Tower of Hell tower?",
+      "a": [
+        "8 sections",
+        "10 sections",
+        "12 sections",
+        "Variable, no set maximum"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which ring color indicates a ring that will teleport you backwards in the tower?",
+      "a": [
+        "Red Ring",
+        "Black Ring",
+        "Purple Ring",
+        "Dark Blue Ring"
+      ],
+      "correct": 1
+    }
+  ]
+}

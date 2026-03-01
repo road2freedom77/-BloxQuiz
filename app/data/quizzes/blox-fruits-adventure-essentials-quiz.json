@@ -1,0 +1,108 @@
+{
+  "slug": "blox-fruits-adventure-essentials-quiz",
+  "title": "Blox Fruits Adventure Essentials Quiz",
+  "game": "Blox Fruits",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What is the name of the first sea in Blox Fruits?",
+      "a": [
+        "First Sea",
+        "Starting Sea",
+        "Beginner Sea",
+        "New World"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which fruit type allows players to turn their body into their element and avoid physical attacks?",
+      "a": [
+        "Paramecia",
+        "Zoan",
+        "Logia",
+        "Mythical"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the most basic fighting style that all players start with?",
+      "a": [
+        "Combat",
+        "Black Leg",
+        "Fishman Karate",
+        "Electro"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which NPC do players visit to awaken their Devil Fruit abilities?",
+      "a": [
+        "Blox Fruit Dealer",
+        "Mysterious Entity",
+        "Boat Dealer",
+        "Weapon Dealer"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What race do all players start as in Blox Fruits?",
+      "a": [
+        "Fishman",
+        "Sky",
+        "Human",
+        "Ghoul"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which boss is commonly found on Jungle Island in the First Sea?",
+      "a": [
+        "Gorilla King",
+        "Magma Admiral",
+        "Ice Admiral",
+        "Saber Expert"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What type of currency is primarily used to purchase Devil Fruits from dealers?",
+      "a": [
+        "Fragments",
+        "Beli",
+        "Bones",
+        "Ectoplasm"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which quest giver is located in the starting town of the First Sea?",
+      "a": [
+        "Marine Lieutenant",
+        "Bandit Leader",
+        "Quest Giver",
+        "Pirate Captain"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What happens when a player eats a second Devil Fruit?",
+      "a": [
+        "They gain both powers",
+        "They become stronger",
+        "They die and lose their previous fruit",
+        "Nothing happens"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which sea comes after the First Sea?",
+      "a": [
+        "Third Sea",
+        "New World",
+        "Second Sea",
+        "Final Sea"
+      ],
+      "correct": 2
+    }
+  ]
+}
