@@ -1,7 +1,10 @@
 "use client";
 import { useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { useUser } from "@clerk/nextjs";
 
 export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) {
+  const { user } = useUser();
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -12,18 +15,38 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
   const letters = ["A", "B", "C", "D"];
   const pct = Math.round(score / quiz.questions.length * 100);
 
+  async function saveScore(finalScore: number) {
+    if (!user) return;
+
+    await supabase.from("users").upsert({
+      id: user.id,
+      username: user.username || user.firstName || "Anonymous",
+      email: user.emailAddresses[0]?.emailAddress,
+    }, { onConflict: "id" });
+
+    await supabase.from("scores").insert({
+      user_id: user.id,
+      quiz_slug: slug,
+      score: finalScore,
+      total_questions: quiz.questions.length,
+    });
+  }
+
   function selectAnswer(idx: number) {
     if (answered) return;
     setSelected(idx);
     setAnswered(true);
-    if (idx === q.correct) setScore(s => s + 1);
+    const isCorrect = idx === q.correct;
+    if (isCorrect) setScore(s => s + 1);
     setTimeout(() => {
       if (current + 1 < quiz.questions.length) {
         setCurrent(c => c + 1);
         setSelected(null);
         setAnswered(false);
       } else {
+        const finalScore = score + (isCorrect ? 1 : 0);
         setFinished(true);
+        saveScore(finalScore);
       }
     }, 1200);
   }
@@ -73,7 +96,9 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
             <div style={{ fontSize: 72, marginBottom: 16 }}>{getResultLabel().emoji}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score}/{quiz.questions.length}</div>
             <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{getResultLabel().label}</div>
-            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 28 }}>You scored better than {Math.min(95, pct + Math.floor(Math.random() * 15))}% of players</div>
+            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 28 }}>
+              {user ? `+${score * 10} XP earned!` : "Sign in to save your score and earn XP!"}
+            </div>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); }} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>🔄 Play Again</button>
               <a href="/" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>🏠 Home</a>
