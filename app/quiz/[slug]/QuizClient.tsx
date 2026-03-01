@@ -42,10 +42,36 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
 
     if (!user) return;
 
+    // Calculate streak
+    const today = new Date().toISOString().split("T")[0];
+    const { data: userData } = await supabase
+      .from("users")
+      .select("streak, last_played")
+      .eq("id", user.id)
+      .single();
+
+    let newStreak = 1;
+    if (userData?.last_played) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const lastPlayedDate = new Date(userData.last_played).toISOString().split("T")[0];
+      const yesterdayDate = yesterday.toISOString().split("T")[0];
+
+      if (lastPlayedDate === today) {
+        newStreak = userData.streak; // same day, keep streak
+      } else if (lastPlayedDate === yesterdayDate) {
+        newStreak = (userData.streak || 0) + 1; // consecutive day
+      } else {
+        newStreak = 1; // missed a day, reset
+      }
+    }
+
     await supabase.from("users").upsert({
       id: user.id,
       username: user.username || user.firstName || "Anonymous",
       email: user.emailAddresses[0]?.emailAddress,
+      streak: newStreak,
+      last_played: today,
     }, { onConflict: "id" });
 
     await supabase.from("scores").insert({

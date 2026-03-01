@@ -1,8 +1,17 @@
 "use client";
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
 export default function Nav() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
+  const [streak, setStreak] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) { setStreak(null); return; }
+    fetch(`/api/streak?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => setStreak(data.streak));
+  }, [user?.id]);
 
   return (
     <nav style={{
@@ -34,13 +43,18 @@ export default function Nav() {
           <a href="/browse" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Quizzes</a>
           <a href="#codes" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Codes</a>
           <a href="#leaderboard" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Leaderboard</a>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "var(--surface)", padding: "6px 14px",
-            borderRadius: 100, fontSize: 13, fontWeight: 800,
-            color: "var(--neon-yellow)",
-            border: "1px solid rgba(255,227,71,0.2)"
-          }}>🔥 3 Day Streak</div>
+
+          {/* Only show streak if signed in and has a streak */}
+          {isSignedIn && streak !== null && streak > 0 && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "var(--surface)", padding: "6px 14px",
+              borderRadius: 100, fontSize: 13, fontWeight: 800,
+              color: "var(--neon-yellow)",
+              border: "1px solid rgba(255,227,71,0.2)"
+            }}>🔥 {streak} Day Streak</div>
+          )}
+
           {isSignedIn ? (
             <UserButton appearance={{
               elements: {
