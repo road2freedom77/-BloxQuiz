@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = 'force-dynamic';
 export default function RandomQuiz() {
   const staticSlugs = [
     "blox-fruits-ultimate",
