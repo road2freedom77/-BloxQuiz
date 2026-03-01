@@ -18,6 +18,12 @@ export default function QuizzesPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const game = params.get("game");
+    if (game) setGameFilter(game);
+  }, []);
+
+  useEffect(() => {
     fetch("/api/quizzes?limit=100")
       .then(r => r.json())
       .then(data => {
