@@ -16,6 +16,13 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
   const pct = Math.round(score / quiz.questions.length * 100);
 
   async function saveScore(finalScore: number) {
+    // Always track the play (anonymous + logged in)
+    await supabase.from("plays").insert({
+      quiz_slug: slug,
+      score: finalScore,
+      total_questions: quiz.questions.length,
+    });
+
     if (!user) return;
 
     await supabase.from("users").upsert({
@@ -32,7 +39,6 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
     });
 
     const xpGained = finalScore * 10;
-    console.log("Calling increment_xp with:", user.id, xpGained);
     const { data, error } = await supabase.rpc("increment_xp", {
       user_id: user.id,
       amount: xpGained

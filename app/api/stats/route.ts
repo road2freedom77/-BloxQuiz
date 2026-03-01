@@ -6,8 +6,8 @@ import path from "path";
 export async function GET() {
   // Get total scores (quizzes played)
   const { count: quizzesPlayed } = await supabase
-    .from("scores")
-    .select("*", { count: "exact", head: true });
+  .from("plays")
+  .select("*", { count: "exact", head: true });
 
   // Get total users (players)
   const { count: players } = await supabase
