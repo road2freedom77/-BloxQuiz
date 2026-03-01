@@ -4,7 +4,6 @@ import path from "path";
 import QuizClient from "./QuizClient";
 
 function getQuiz(slug: string) {
-  // Check static quizzes first
   const staticQuizzes: Record<string, any> = {
     "blox-fruits-ultimate": {
       title: "Ultimate Blox Fruits Expert Quiz",
@@ -78,7 +77,6 @@ function getQuiz(slug: string) {
 
   if (staticQuizzes[slug]) return staticQuizzes[slug];
 
-  // Check dynamic JSON files
   try {
     const filePath = path.join(process.cwd(), `app/data/quizzes/${slug}.json`);
     const content = fs.readFileSync(filePath, "utf8");
@@ -86,6 +84,35 @@ function getQuiz(slug: string) {
   } catch (e) {
     return null;
   }
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const quiz = getQuiz(slug);
+
+  if (!quiz) return {
+    title: "Quiz Not Found | BloxQuiz",
+    description: "This quiz could not be found."
+  };
+
+  const cleanSlug = slug.replace(/-/g, ' ');
+
+  return {
+    title: `${quiz.title} | BloxQuiz — Roblox Trivia`,
+    description: `Test your ${quiz.game} knowledge! ${quiz.questions.length} questions on ${cleanSlug}. Can you get a perfect score? Free Roblox quiz on BloxQuiz.gg`,
+    openGraph: {
+      title: `${quiz.title} | BloxQuiz`,
+      description: `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
+      url: `https://www.bloxquiz.gg/quiz/${slug}`,
+      siteName: "BloxQuiz",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${quiz.title} | BloxQuiz`,
+      description: `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
+    }
+  };
 }
 
 export default async function QuizPage({ params }: { params: Promise<{ slug: string }> }) {
