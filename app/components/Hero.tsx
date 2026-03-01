@@ -35,7 +35,7 @@ export default function Hero() {
           textDecoration: "none", WebkitTextFillColor: "var(--bg)",
           boxShadow: "0 4px 20px rgba(0,245,160,0.25)"
         }}>⚡ Start Random Quiz</a>
-        <a href="#quizzes" style={{
+        <a href="/browse" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "var(--surface)", color: "var(--text)",
           fontWeight: 800, fontSize: 16,
