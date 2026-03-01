@@ -1,0 +1,108 @@
+{
+  "slug": "tower-of-hell-expert-challenge",
+  "title": "Tower of Hell Expert Challenge",
+  "game": "Tower of Hell",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "What is the exact time limit for completing a tower in Tower of Hell?",
+      "a": [
+        "6 minutes",
+        "7 minutes",
+        "8 minutes",
+        "10 minutes"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which section is known for having the 'Conveyor Doom' stage?",
+      "a": [
+        "Industrial",
+        "Modern",
+        "Neon",
+        "Medieval"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What happens to your speed when you collect a speed coil in Tower of Hell?",
+      "a": [
+        "Increases by 25%",
+        "Increases by 50%",
+        "Doubles your speed",
+        "Increases by 16"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which stage is considered one of the most difficult and features rotating platforms with precise timing?",
+      "a": [
+        "Citrus Slider",
+        "Marble Madness",
+        "Wraparound",
+        "Tornado Twist"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the current world record for completing Tower of Hell (as of 2023)?",
+      "a": [
+        "Under 30 seconds",
+        "Under 45 seconds",
+        "Under 60 seconds",
+        "Under 90 seconds"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "In the 'Caves' section, which environmental hazard is most commonly featured?",
+      "a": [
+        "Lava pools",
+        "Falling rocks",
+        "Poison gas",
+        "Ice patches"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the maximum number of floors a Tower of Hell tower can have?",
+      "a": [
+        "8 floors",
+        "9 floors",
+        "10 floors",
+        "12 floors"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which mechanic allows players to reset their character's position during gameplay?",
+      "a": [
+        "Checkpoint system",
+        "Backspace key",
+        "R key reset",
+        "No reset option exists"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "The 'Dimensional' section is known for featuring stages with what primary characteristic?",
+      "a": [
+        "Invisible platforms",
+        "Teleportation mechanics",
+        "Gravity manipulation",
+        "Time dilation effects"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the name of the stage that features a large spinning cylinder that players must navigate around?",
+      "a": [
+        "Cylinder Slide",
+        "Barrel Roll",
+        "The Spinner",
+        "Round and Round"
+      ],
+      "correct": 3
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "tower-of-hell-basics-quiz",
+  "title": "Tower of Hell Basics Quiz",
+  "game": "Tower of Hell",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What is the main objective in Tower of Hell?",
+      "a": [
+        "Defeat other players",
+        "Reach the top of the tower",
+        "Collect coins",
+        "Build structures"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many sections does a standard Tower of Hell tower have?",
+      "a": [
+        "5",
+        "8",
+        "10",
+        "12"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What happens when you fall off the tower?",
+      "a": [
+        "You lose points",
+        "You respawn at the bottom",
+        "The game ends",
+        "You get teleported to the top"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What color is the win part at the top of the tower?",
+      "a": [
+        "Red",
+        "Blue",
+        "Green",
+        "Yellow"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which of these is a common obstacle type in Tower of Hell?",
+      "a": [
+        "Moving platforms",
+        "Enemy NPCs",
+        "Puzzle doors",
+        "Time limits"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What happens when a new tower generates?",
+      "a": [
+        "All players are teleported to the top",
+        "The old tower disappears",
+        "Players get extra lives",
+        "The difficulty increases"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the basic movement mechanic players use to climb the tower?",
+      "a": [
+        "Flying",
+        "Parkour/jumping",
+        "Using ladders only",
+        "Teleporting"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How often does the tower typically regenerate with new sections?",
+      "a": [
+        "Every 30 seconds",
+        "Every 2 minutes",
+        "Every 5 minutes",
+        "Every 10 minutes"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What type of blocks are towers primarily made of?",
+      "a": [
+        "Wooden planks",
+        "Neon parts",
+        "Basic plastic parts",
+        "Glass blocks"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is displayed when someone completes the tower?",
+      "a": [
+        "Their username in chat",
+        "A victory animation",
+        "Their completion time",
+        "All of the above"
+      ],
+      "correct": 3
+    }
+  ]
+}

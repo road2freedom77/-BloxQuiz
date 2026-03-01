@@ -1,0 +1,108 @@
+{
+  "slug": "grow-a-garden-seeds-tools-harvesting-mastery",
+  "title": "Grow a Garden: Seeds, Tools & Harvesting Mastery",
+  "game": "Grow a Garden",
+  "difficulty": "Medium",
+  "questions": [
+    {
+      "q": "Which tool is required to plant seeds in higher-tier soil plots?",
+      "a": [
+        "Basic Shovel",
+        "Golden Shovel",
+        "Watering Can",
+        "Fertilizer Spreader"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What happens when you use fertilizer on a fully grown plant?",
+      "a": [
+        "The plant grows larger",
+        "Nothing happens",
+        "The plant produces double harvest",
+        "The plant resets its growth timer"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which plant type takes the longest to fully mature?",
+      "a": [
+        "Carrots",
+        "Pumpkins",
+        "Corn",
+        "Tomatoes"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many times can you harvest from a single corn plant before it dies?",
+      "a": [
+        "1 time",
+        "2 times",
+        "3 times",
+        "Infinite times"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the primary benefit of upgrading your watering can?",
+      "a": [
+        "Increases plant growth speed",
+        "Waters multiple plants at once",
+        "Reduces water cost",
+        "Prevents plant diseases"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which seed requires the most expensive soil type to plant?",
+      "a": [
+        "Strawberry Seeds",
+        "Watermelon Seeds",
+        "Dragon Fruit Seeds",
+        "Sunflower Seeds"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What visual indicator shows that a plant needs water?",
+      "a": [
+        "Yellow leaves",
+        "Drooping appearance",
+        "Red soil around the plant",
+        "Steam rising from the plant"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How often do seasonal plants become available for purchase?",
+      "a": [
+        "Daily",
+        "Weekly",
+        "Monthly",
+        "During specific seasons/events"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which mechanic allows players to speed up plant growth without fertilizer?",
+      "a": [
+        "Playing music near plants",
+        "Using the Growth Boost gamepass",
+        "Visiting friends' gardens",
+        "Completing daily quests"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the maximum number of garden plots a free player can own simultaneously?",
+      "a": [
+        "6 plots",
+        "9 plots",
+        "12 plots",
+        "15 plots"
+      ],
+      "correct": 1
+    }
+  ]
+}

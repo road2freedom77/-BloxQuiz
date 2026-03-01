@@ -1,0 +1,108 @@
+{
+  "slug": "grow-a-garden-expert-challenge",
+  "title": "Grow a Garden Expert Challenge",
+  "game": "Grow a Garden",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "What is the exact growth time for Rainbow Roses from seed to full maturity?",
+      "a": [
+        "4 hours 30 minutes",
+        "6 hours 15 minutes",
+        "5 hours 45 minutes",
+        "7 hours 20 minutes"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which tool combination provides the maximum efficiency bonus when used together for harvesting Crystal Carrots?",
+      "a": [
+        "Diamond Hoe + Golden Watering Can",
+        "Platinum Scythe + Crystal Fertilizer Spreader",
+        "Emerald Rake + Diamond Pruning Shears",
+        "Ruby Harvester + Sapphire Tiller"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the minimum soil quality level required to successfully grow Moonlight Orchids?",
+      "a": [
+        "Level 85",
+        "Level 92",
+        "Level 88",
+        "Level 95"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "How many different mutations can occur when cross-pollinating Fire Lilies with Ice Tulips using the Advanced Genetics Kit?",
+      "a": [
+        "7 mutations",
+        "5 mutations",
+        "9 mutations",
+        "6 mutations"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What percentage of base yield is lost when harvesting Dragon Fruit during a thunderstorm without weather protection?",
+      "a": [
+        "25%",
+        "40%",
+        "35%",
+        "30%"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which rare seed can only be obtained by completing the Master Botanist achievement series in under 72 hours?",
+      "a": [
+        "Stellar Sunflower Seeds",
+        "Cosmic Dahlia Seeds",
+        "Galactic Rose Seeds",
+        "Nebula Lily Seeds"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the exact water consumption rate per minute for a fully upgraded Sprinkler System Mark VII?",
+      "a": [
+        "47.5 liters/min",
+        "52.3 liters/min",
+        "49.8 liters/min",
+        "45.2 liters/min"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "How many experience points are awarded for successfully harvesting a perfect quality Ancient Tree after a full seasonal cycle?",
+      "a": [
+        "8,750 XP",
+        "12,500 XP",
+        "10,250 XP",
+        "9,800 XP"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which specific fertilizer combination creates the 'Golden Growth' effect that reduces maturation time by 45%?",
+      "a": [
+        "Mystic Compost + Phoenix Ash + Unicorn Dust",
+        "Dragon Bones + Fairy Essence + Starlight Powder",
+        "Angel Tears + Demon Sulfur + Wizard Stone",
+        "Crystal Shards + Lunar Soil + Solar Extract"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the maximum number of simultaneous plant plots that can be maintained with a Level 100 Garden Mastery skill?",
+      "a": [
+        "485 plots",
+        "520 plots",
+        "500 plots",
+        "475 plots"
+      ],
+      "correct": 2
+    }
+  ]
+}

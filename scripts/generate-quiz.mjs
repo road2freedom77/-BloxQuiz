@@ -34,6 +34,7 @@ Rules:
 - Questions should be factually accurate about the actual Roblox game
 - Difficulty: ${difficulty} (Easy = basic facts, Medium = intermediate knowledge, Hard = expert level)
 - Make questions specific and interesting, not too vague
+- Make the title unique and descriptive, not generic
 
 Respond with ONLY a valid JSON object in this exact format, no other text:
 {
@@ -68,7 +69,20 @@ async function main() {
     const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
 
     const quiz = await generateQuiz(game, difficulty);
-    const slug = `${game.slug}-${difficulty.toLowerCase()}-${Date.now()}`;
+
+    let slug = quiz.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    // Handle duplicates
+    let finalSlug = slug;
+    let counter = 2;
+    while (fs.existsSync(path.join(process.cwd(), `app/data/quizzes/${finalSlug}.json`))) {
+      finalSlug = `${slug}-${counter}`;
+      counter++;
+    }
+    slug = finalSlug;
 
     const outputPath = path.join(process.cwd(), `app/data/quizzes/${slug}.json`);
     fs.writeFileSync(outputPath, JSON.stringify({ slug, ...quiz }, null, 2));

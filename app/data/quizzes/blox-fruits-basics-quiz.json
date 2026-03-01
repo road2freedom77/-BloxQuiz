@@ -1,0 +1,108 @@
+{
+  "slug": "blox-fruits-basics-quiz",
+  "title": "Blox Fruits Basics Quiz",
+  "game": "Blox Fruits",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What type of fruit gives you the ability to stretch your body like rubber?",
+      "a": [
+        "Gum-Gum Fruit",
+        "Fire Fruit",
+        "Ice Fruit",
+        "Light Fruit"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which sea is the starting area for new players?",
+      "a": [
+        "Second Sea",
+        "Third Sea",
+        "First Sea",
+        "Fourth Sea"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the name of the first boss players typically encounter?",
+      "a": [
+        "Greybeard",
+        "Flamingo",
+        "Bandit Leader",
+        "Smoker"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which NPC teaches you the basic combat moves when you first start?",
+      "a": [
+        "Pirate Recruiter",
+        "Quest Giver",
+        "Experienced Fighter",
+        "Marine Captain"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What are the three main types of Devil Fruits in Blox Fruits?",
+      "a": [
+        "Natural, Elemental, Beast",
+        "Logia, Paramecia, Zoan",
+        "Fire, Water, Earth",
+        "Physical, Magic, Rare"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which fruit allows you to control and create fire?",
+      "a": [
+        "Light Fruit",
+        "Flame Fruit",
+        "Magma Fruit",
+        "Smoke Fruit"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What do you need to do to level up in Blox Fruits?",
+      "a": [
+        "Buy fruits only",
+        "Complete quests and defeat enemies",
+        "Talk to NPCs",
+        "Explore islands"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which sea do players travel to after completing the First Sea?",
+      "a": [
+        "Third Sea",
+        "New World",
+        "Second Sea",
+        "Final Sea"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What weapon type uses swords and blades for combat?",
+      "a": [
+        "Gun",
+        "Fighting Style",
+        "Sword",
+        "Fruit"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which NPC type typically gives you quests to complete?",
+      "a": [
+        "Boat Dealer",
+        "Fruit Dealer",
+        "Quest Giver",
+        "Blacksmith"
+      ],
+      "correct": 2
+    }
+  ]
+}

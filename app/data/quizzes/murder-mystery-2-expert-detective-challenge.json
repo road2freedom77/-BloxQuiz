@@ -1,0 +1,108 @@
+{
+  "slug": "murder-mystery-2-expert-detective-challenge",
+  "title": "Murder Mystery 2: Expert Detective Challenge",
+  "game": "Murder Mystery 2",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "What is the exact value requirement in coins to craft the Chroma Luger gun?",
+      "a": [
+        "5,000 coins",
+        "10,000 coins",
+        "15,000 coins",
+        "20,000 coins"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which knife has the special ability to change colors based on the user's movement speed?",
+      "a": [
+        "Chroma Heat",
+        "Chroma Laser",
+        "Pixel",
+        "Virtual"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "On the Hospital map, what is the most effective camping spot for the Murderer to catch multiple victims?",
+      "a": [
+        "The elevator shaft",
+        "The operating room",
+        "The main lobby entrance",
+        "The rooftop helipad"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What happens when the Sheriff dies and drops their gun in a location that's impossible for innocents to reach?",
+      "a": [
+        "A new gun spawns randomly",
+        "The round automatically resets",
+        "The gun teleports to the nearest innocent",
+        "The Murderer automatically wins"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which ancient knife was only obtainable during the 2017 Halloween event and features a pumpkin design?",
+      "a": [
+        "Pumpking",
+        "Harvester",
+        "Spider",
+        "Elderwood Scythe"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the rarest gun tier that requires unboxing from Mystery Box 2?",
+      "a": [
+        "Legendary",
+        "Godly",
+        "Ancient",
+        "Vintage"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "On the Workplace map, which specific room provides the Sheriff with the best vantage point while remaining protected?",
+      "a": [
+        "The conference room",
+        "The server room",
+        "The CEO office",
+        "The break room"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What advanced strategy involves the Sheriff intentionally missing shots to manipulate the Murderer's positioning?",
+      "a": [
+        "Bait shooting",
+        "False flagging",
+        "Pressure building",
+        "Zone control"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which Chroma knife was the first ever released and is considered the most valuable by collectors?",
+      "a": [
+        "Chroma Lightbringer",
+        "Chroma Darkbringer",
+        "Chroma Heat",
+        "Chroma Laser"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "In competitive play, what is the optimal time window for the Murderer to make their first kill without raising suspicion?",
+      "a": [
+        "Within 10 seconds",
+        "Between 15-25 seconds",
+        "Between 30-45 seconds",
+        "After 60 seconds"
+      ],
+      "correct": 2
+    }
+  ]
+}

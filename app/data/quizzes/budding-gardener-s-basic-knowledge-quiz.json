@@ -1,0 +1,108 @@
+{
+  "slug": "budding-gardener-s-basic-knowledge-quiz",
+  "title": "Budding Gardener's Basic Knowledge Quiz",
+  "game": "Grow a Garden",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What is the first tool you receive when starting the game?",
+      "a": [
+        "Watering Can",
+        "Hoe",
+        "Shovel",
+        "Rake"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which seed is typically the cheapest to buy in the shop?",
+      "a": [
+        "Carrot Seeds",
+        "Tomato Seeds",
+        "Corn Seeds",
+        "Potato Seeds"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What do you need to do to plant seeds in your garden?",
+      "a": [
+        "Just drop them on the ground",
+        "Dig holes with a shovel first",
+        "Water the ground first",
+        "Use fertilizer first"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How often do plants typically need to be watered?",
+      "a": [
+        "Every 10 minutes",
+        "Once per day",
+        "Every few minutes",
+        "Only when planted"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What happens when a plant is fully grown and ready for harvest?",
+      "a": [
+        "It turns brown",
+        "It glows or sparkles",
+        "It makes a sound",
+        "It disappears"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which of these is NOT a common plant you can grow in the game?",
+      "a": [
+        "Watermelon",
+        "Pumpkin",
+        "Apple Tree",
+        "Dragon Fruit"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What is the main currency used in the shop to buy seeds?",
+      "a": [
+        "Robux",
+        "Coins",
+        "Gems",
+        "Tickets"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What tool is used to harvest fully grown crops?",
+      "a": [
+        "Harvesting Sickle",
+        "Your hands (clicking)",
+        "Special Scissors",
+        "Watering Can"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What happens if you don't water your plants regularly?",
+      "a": [
+        "They grow faster",
+        "They wilt or die",
+        "They change color",
+        "Nothing happens"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How do you earn money in Grow a Garden?",
+      "a": [
+        "Completing daily quests only",
+        "Selling harvested crops",
+        "Watching advertisements",
+        "Playing mini-games"
+      ],
+      "correct": 1
+    }
+  ]
+}
