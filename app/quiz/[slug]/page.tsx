@@ -124,6 +124,25 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
 
   if (!quiz) notFound();
 
+  const faqs = [
+    {
+      question: `How many questions are in the ${quiz.title}?`,
+      answer: `This quiz contains ${quiz.questions.length} multiple choice questions.`
+    },
+    {
+      question: `What difficulty is the ${quiz.title}?`,
+      answer: `This is a ${quiz.difficulty} difficulty quiz, suitable for ${quiz.difficulty === "Easy" ? "beginners just starting out" : quiz.difficulty === "Medium" ? "players with some experience" : "expert players who know the game deeply"}.`
+    },
+    {
+      question: `Is the ${quiz.game} quiz free to play?`,
+      answer: `Yes! All quizzes on BloxQuiz are completely free to play. Sign up to save your scores and compete on the leaderboard.`
+    },
+    {
+      question: `How do I improve my ${quiz.game} knowledge?`,
+      answer: `Practice by playing more ${quiz.game} quizzes on BloxQuiz, watch YouTube tutorials, and spend time playing the actual game on Roblox.`
+    }
+  ];
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -143,6 +162,17 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         "description": `Test your ${quiz.game} knowledge with this ${quiz.difficulty} quiz. ${quiz.questions.length} questions covering ${quiz.game} gameplay, mechanics and more.`,
         "inLanguage": "en-US",
         "isPartOf": { "@id": "https://www.bloxquiz.gg" },
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(faq => ({
+          "@type": "Question",
+          "name": faq.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.answer
+          }
+        }))
       }
     ]
   };
@@ -153,7 +183,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <QuizClient quiz={quiz} slug={slug} />
+      <QuizClient quiz={quiz} slug={slug} faqs={faqs} />
     </>
   );
 }

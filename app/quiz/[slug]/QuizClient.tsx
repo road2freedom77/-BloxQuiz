@@ -18,13 +18,14 @@ const diffColors: Record<string, { color: string, bg: string }> = {
   Hard: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
 };
 
-export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) {
+export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: string, faqs: any[] }) {
   const { user } = useUser();
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const q = quiz.questions[current];
   const letters = ["A", "B", "C", "D"];
@@ -90,17 +91,17 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
-      
+
       {/* H1 intro block — hidden during quiz, visible for SEO */}
       {!finished && (
-  <div style={{
-    marginBottom: current === 0 && !answered ? 24 : 0,
-    height: current === 0 && !answered ? "auto" : 0,
-    opacity: current === 0 && !answered ? 1 : 0,
-    overflow: "hidden",
-    transition: "all 0.3s ease",
-    textAlign: "center"
-  }}>
+        <div style={{
+          marginBottom: current === 0 && !answered ? 24 : 0,
+          height: current === 0 && !answered ? "auto" : 0,
+          opacity: current === 0 && !answered ? 1 : 0,
+          overflow: "hidden",
+          transition: "all 0.3s ease",
+          textAlign: "center"
+        }}>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)" }}>{quiz.game}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
@@ -189,6 +190,29 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
           </div>
         )}
       </div>
+
+      {/* FAQ Block — always visible for SEO */}
+      <div style={{ marginTop: 32 }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>❓ Frequently Asked Questions</h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {faqs.map((faq, i) => (
+            <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", overflow: "hidden" }}>
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={{ width: "100%", padding: "16px 20px", background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: "var(--font-body)", fontSize: 14, fontWeight: 700, color: "var(--text)", textAlign: "left" }}>
+                {faq.question}
+                <span style={{ fontSize: 18, color: "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>{openFaq === i ? "−" : "+"}</span>
+              </button>
+              {openFaq === i && (
+                <div style={{ padding: "0 20px 16px", fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6 }}>
+                  {faq.answer}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
