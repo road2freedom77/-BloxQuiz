@@ -1,6 +1,42 @@
 "use client";
+import { useEffect, useState } from "react";
 
 export default function Hero() {
+  const [stats, setStats] = useState({
+    quizzesPlayed: 0,
+    players: 0,
+    totalQuizzes: 0,
+    gamesCovered: 6,
+  });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then(r => r.json())
+      .then(data => {
+        setStats(data);
+        setLoaded(true);
+      });
+  }, []);
+
+  function formatNumber(n: number) {
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M+`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K+`;
+    return n.toString();
+  }
+
+  const statItems = loaded ? [
+    [formatNumber(stats.quizzesPlayed), "Quizzes Played"],
+    [formatNumber(stats.players), "Players"],
+    [stats.totalQuizzes.toString(), "Quizzes"],
+    [stats.gamesCovered.toString(), "Games Covered"],
+  ] : [
+    ["—", "Quizzes Played"],
+    ["—", "Players"],
+    ["—", "Quizzes"],
+    ["—", "Games Covered"],
+  ];
+
   return (
     <section style={{
       maxWidth: 1200, margin: "0 auto",
@@ -9,7 +45,7 @@ export default function Hero() {
       position: "relative", zIndex: 1
     }}>
       <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>● 500+ Quizzes</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>● {loaded ? stats.totalQuizzes : "—"}+ Quizzes</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,60,172,0.12)", color: "var(--neon-pink)" }}>● Daily Challenges</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,227,71,0.12)", color: "var(--neon-yellow)" }}>● Free Codes</span>
       </div>
@@ -24,7 +60,7 @@ export default function Hero() {
         <span style={{ background: "var(--gradient-fire)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Roblox?</span>
       </h1>
       <p style={{ fontSize: 18, color: "var(--text-muted)", maxWidth: 540, margin: "0 auto 36px", fontWeight: 600 }}>
-        Test your knowledge on Blox Fruits, Brookhaven, Adopt Me & 50+ more games. Play quizzes, earn XP, climb the leaderboard.
+        Test your knowledge on Blox Fruits, Brookhaven, Adopt Me & more games. Play quizzes, earn XP, climb the leaderboard.
       </p>
       <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
         <a href="/quiz/random" style={{
@@ -44,7 +80,7 @@ export default function Hero() {
         }}>🎮 Browse All Quizzes</a>
       </div>
       <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", justifyContent: "center", gap: 40, padding: "20px 0" }}>
-        {[["127K+","Quizzes Played"],["34K","Players"],["500+","Quizzes"],["50+","Games Covered"]].map(([num, label]) => (
+        {statItems.map(([num, label]) => (
           <div key={label} style={{ textAlign: "center" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 28, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{num}</div>
             <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
