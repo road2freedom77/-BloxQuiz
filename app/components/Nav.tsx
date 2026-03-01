@@ -1,6 +1,9 @@
 "use client";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 
 export default function Nav() {
+  const { isSignedIn } = useUser();
+
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 100,
@@ -38,12 +41,35 @@ export default function Nav() {
             color: "var(--neon-yellow)",
             border: "1px solid rgba(255,227,71,0.2)"
           }}>🔥 3 Day Streak</div>
-          <a href="#" style={{
-            background: "var(--gradient-main)",
-            color: "var(--bg)", fontWeight: 800, fontSize: 14,
-            padding: "8px 20px", borderRadius: 100,
-            textDecoration: "none", WebkitTextFillColor: "var(--bg)"
-          }}>Play Now</a>
+          {isSignedIn ? (
+            <UserButton appearance={{
+              elements: {
+                avatarBox: { width: 36, height: 36 }
+              }
+            }} />
+          ) : (
+            <>
+              <SignInButton mode="modal">
+                <button style={{
+                  background: "var(--surface)", color: "var(--text)",
+                  fontWeight: 800, fontSize: 14,
+                  padding: "8px 20px", borderRadius: 100,
+                  border: "1px solid var(--border)", cursor: "pointer",
+                  fontFamily: "var(--font-body)"
+                }}>Sign In</button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button style={{
+                  background: "var(--gradient-main)",
+                  color: "var(--bg)", fontWeight: 800, fontSize: 14,
+                  padding: "8px 20px", borderRadius: 100,
+                  border: "none", cursor: "pointer",
+                  fontFamily: "var(--font-body)",
+                  WebkitTextFillColor: "var(--bg)"
+                }}>Sign Up</button>
+              </SignUpButton>
+            </>
+          )}
         </div>
       </div>
     </nav>

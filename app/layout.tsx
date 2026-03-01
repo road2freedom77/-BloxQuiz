@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lilita_One, Nunito } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -24,10 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${lilitaOne.variable} ${nunito.variable}`}>
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${lilitaOne.variable} ${nunito.variable}`}>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
