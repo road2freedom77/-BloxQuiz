@@ -30,6 +30,14 @@ export default function QuizClient({ quiz, slug }: { quiz: any, slug: string }) 
       score: finalScore,
       total_questions: quiz.questions.length,
     });
+
+    const xpGained = finalScore * 10;
+    console.log("Calling increment_xp with:", user.id, xpGained);
+    const { data, error } = await supabase.rpc("increment_xp", {
+      user_id: user.id,
+      amount: xpGained
+    });
+    console.log("XP result:", data, error);
   }
 
   function selectAnswer(idx: number) {
