@@ -42,7 +42,7 @@ export default function QuizzesPage() {
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginBottom: 8 }}>🎮 All Quizzes</h1>
-      <p style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 32 }}>{quizzes.length} quizzes across 6 Roblox games</p>
+      <p style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 32 }}>{loading ? "Loading..." : `${quizzes.length} quizzes across 6 Roblox games`}</p>
 
       {/* Filters */}
       <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
