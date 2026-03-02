@@ -149,6 +149,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
   if (!quiz) notFound();
 
   const relatedQuizzes = getRelatedQuizzes(slug, quiz.game);
+  const article = quiz.difficulty === "Easy" ? "an" : "a";
 
   const faqs = [
     {
@@ -157,7 +158,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
     },
     {
       question: `What difficulty is the ${quiz.title}?`,
-      answer: `This is a ${quiz.difficulty} difficulty quiz, suitable for ${quiz.difficulty === "Easy" ? "beginners just starting out" : quiz.difficulty === "Medium" ? "players with some experience" : "expert players who know the game deeply"}.`
+      answer: `This is ${article} ${quiz.difficulty} difficulty quiz, suitable for ${quiz.difficulty === "Easy" ? "beginners just starting out" : quiz.difficulty === "Medium" ? "players with some experience" : "expert players who know the game deeply"}.`
     },
     {
       question: `Is the ${quiz.game} quiz free to play?`,
@@ -210,24 +211,11 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Clean SEO block — no question dump, no spoilers */}
+      {/* Single clean SEO block — no H1 (QuizClient owns the H1), no question dump */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
-        <h1>{quiz.title}</h1>
+        <p>{quiz.title}</p>
         <p>{quiz.game + " — " + quiz.difficulty + " difficulty — " + quiz.questions.length + " multiple choice questions"}</p>
         <p>{"Free " + quiz.game + " trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard."}</p>
-        {/* SSR first question as structured list for crawlers */}
-        {quiz.questions.slice(0, 1).map((q: any, i: number) => (
-          <div key={i}>
-            <p>{"Question 1: " + q.q}</p>
-            <ul>
-              {q.a.map((answer: string, j: number) => (
-                <li key={j}>
-                  <button>{["A", "B", "C", "D"][j] + ". " + answer}</button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
       </div>
 
       <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} />
