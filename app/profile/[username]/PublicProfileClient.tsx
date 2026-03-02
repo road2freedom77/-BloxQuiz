@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { getBadges } from "../../lib/badges";
 
 function getLevel(xp: number) {
   if (xp >= 10000) return { level: 50, title: "Roblox God" };
@@ -36,8 +37,10 @@ export default function PublicProfileClient({ userData, scores, rank }: {
     : 0;
   const perfectScores = scores.filter(s => s.score === s.total_questions).length;
 
+  const badges = getBadges({ rank, streak, xp, totalQuizzes, perfectScores });
+
   function copyProfileLink() {
-    navigator.clipboard.writeText(`https://www.bloxquiz.gg/profile/${userData.username}`);
+    navigator.clipboard.writeText("https://www.bloxquiz.gg/profile/" + userData.username);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -87,6 +90,7 @@ export default function PublicProfileClient({ userData, scores, rank }: {
           </div>
         </div>
 
+        {/* XP Bar */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
           <div>
             <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--neon-yellow)" }}>{xp.toLocaleString()}</span>
@@ -96,9 +100,24 @@ export default function PublicProfileClient({ userData, scores, rank }: {
             {"Next level: " + next.toLocaleString() + " XP"}
           </div>
         </div>
-        <div style={{ background: "var(--surface)", height: 10, borderRadius: 100, overflow: "hidden" }}>
+        <div style={{ background: "var(--surface)", height: 10, borderRadius: 100, overflow: "hidden", marginBottom: 20 }}>
           <div style={{ height: "100%", width: pct + "%", background: "var(--gradient-main)", borderRadius: 100 }} />
         </div>
+
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Badges</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {badges.map(badge => (
+                <div key={badge.id} title={badge.description} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 100, background: badge.bg, border: "1px solid " + badge.color + "30", cursor: "default" }}>
+                  <span style={{ fontSize: 16 }}>{badge.emoji}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: badge.color }}>{badge.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats Row */}
