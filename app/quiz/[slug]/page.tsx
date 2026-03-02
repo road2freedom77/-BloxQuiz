@@ -210,22 +210,11 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hidden semantic HTML for SEO — no correct answers exposed */}
+      {/* Clean SEO block — no question dump, no spoilers */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
         <h1>{quiz.title}</h1>
-        <p>{quiz.game} — {quiz.difficulty} — {quiz.questions.length} Questions</p>
-        {quiz.questions.map((q: any, i: number) => (
-          <div key={i}>
-            <h2>{"Question " + (i + 1) + ": " + q.q}</h2>
-            <ul>
-              {q.a.map((answer: string, j: number) => (
-                <li key={j}>
-                  <button>{["A", "B", "C", "D"][j] + ". " + answer}</button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <p>{quiz.game + " — " + quiz.difficulty + " difficulty — " + quiz.questions.length + " multiple choice questions"}</p>
+        <p>{"Free " + quiz.game + " trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard."}</p>
       </div>
 
       <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} />

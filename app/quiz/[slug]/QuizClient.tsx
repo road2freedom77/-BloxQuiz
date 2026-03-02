@@ -232,21 +232,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
     ctx.fillText("Can you beat my score? bloxquiz.gg", 540, 920);
   }
 
-  function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-    ctx.fill();
-  }
-
   async function shareScore() {
     setSharing(true);
     generateShareCard();
@@ -306,7 +291,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)" }}>{quiz.game}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
-            <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{quiz.questions.length} Questions</span>
+            <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{quiz.questions.length + " Questions"}</span>
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 8 }}>{quiz.title}</h1>
           <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto 8px" }}>
@@ -329,18 +314,18 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
         {!finished ? (
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-              <a href="/" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)", padding: "8px 18px", borderRadius: 100, fontSize: 13, fontWeight: 800, textDecoration: "none" }}>← Back</a>
+              <a href="/" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)", padding: "8px 18px", borderRadius: 100, fontSize: 13, fontWeight: 800, textDecoration: "none" }}>{"← Back"}</a>
               <div style={{ flex: 1, margin: "0 20px", background: "var(--surface)", height: 10, borderRadius: 100, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${(current / quiz.questions.length) * 100}%`, background: "var(--gradient-main)", borderRadius: 100, transition: "width 0.4s ease" }} />
               </div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-green)", display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>Score:</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{"Score: "}</span>
                 <span>{score}</span>
               </div>
             </div>
             <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>{"Question " + (current + 1) + " of " + quiz.questions.length}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, lineHeight: 1.3, marginBottom: 28 }}>{q.q}</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} role="group" aria-label="Answer options">
+            <ul style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, listStyle: "none", padding: 0, margin: 0 }} role="group" aria-label="Answer options">
               {q.a.map((ans: string, i: number) => {
                 let borderColor = "var(--border)";
                 let bg = "var(--surface)";
@@ -351,14 +336,19 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
                   else { bg = "var(--surface)"; color = "var(--text-dim)"; }
                 }
                 return (
-                  <button key={i} onClick={() => selectAnswer(i)} aria-label={"Option " + letters[i] + ": " + ans} aria-pressed={selected === i}
-                    style={{ background: bg, border: `2px solid ${borderColor}`, borderRadius: "var(--radius-sm)", padding: "18px 20px", fontSize: 15, fontWeight: 700, cursor: answered ? "default" : "pointer", fontFamily: "var(--font-body)", color, textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 8, background: "var(--bg-card)", fontSize: 13, fontWeight: 900, color: "var(--text-dim)", flexShrink: 0 }}>{letters[i]}</span>
-                    {ans}
-                  </button>
+                  <li key={i}>
+                    <button
+                      onClick={() => selectAnswer(i)}
+                      aria-label={"Option " + letters[i] + ": " + ans}
+                      aria-pressed={selected === i}
+                      style={{ width: "100%", background: bg, border: `2px solid ${borderColor}`, borderRadius: "var(--radius-sm)", padding: "18px 20px", fontSize: 15, fontWeight: 700, cursor: answered ? "default" : "pointer", fontFamily: "var(--font-body)", color, textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 8, background: "var(--bg-card)", fontSize: 13, fontWeight: 900, color: "var(--text-dim)", flexShrink: 0 }}>{letters[i]}</span>
+                      {ans}
+                    </button>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </>
         ) : (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
@@ -440,10 +430,10 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             {relatedQuizzes.map((rq) => {
               const rdiff = diffColors[rq.difficulty] || diffColors.Medium;
               return (
-                <a key={rq.slug} href={"/quiz/" + rq.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px", textDecoration: "none", display: "block" }}>
+                <a key={rq.slug} href={"/quiz/" + rq.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 16, textDecoration: "none", display: "block" }}>
                   <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: rdiff.bg, color: rdiff.color }}>{rq.difficulty}</span>
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{rq.questions} Q's</span>
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{rq.questions + " Q's"}</span>
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", lineHeight: 1.3 }}>{rq.title}</div>
                 </a>
