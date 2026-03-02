@@ -150,6 +150,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
 
   const relatedQuizzes = getRelatedQuizzes(slug, quiz.game);
   const article = quiz.difficulty === "Easy" ? "an" : "a";
+  const firstQ = quiz.questions[0];
 
   const faqs = [
     {
@@ -211,11 +212,19 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Single clean SEO block — no H1 (QuizClient owns the H1), no question dump */}
+      {/* SSR-only semantic preview — hidden from users, visible to crawlers */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
-        <p>{quiz.title}</p>
         <p>{quiz.game + " — " + quiz.difficulty + " difficulty — " + quiz.questions.length + " multiple choice questions"}</p>
         <p>{"Free " + quiz.game + " trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard."}</p>
+        <p>{"Sample question (1 of " + quiz.questions.length + "):"}</p>
+        <p>{firstQ.q}</p>
+        <ul>
+          {firstQ.a.map((answer: string, j: number) => (
+            <li key={j}>
+              <button type="button">{["A", "B", "C", "D"][j] + ". " + answer}</button>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} />
