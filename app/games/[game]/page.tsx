@@ -3,53 +3,58 @@ import fs from "fs";
 import path from "path";
 import GamesClient from "./GamesClient";
 
-const gameConfig: Record<string, { title: string, description: string, emoji: string, displayName: string }> = {
-  "blox-fruits": {
-    displayName: "Blox Fruits",
-    title: "Blox Fruits Quizzes — Test Your Knowledge | BloxQuiz",
-    description: "How well do you know Blox Fruits? Take trivia quizzes on fruits, combat, seas, bosses and more. Easy, Medium and Hard difficulty levels.",
-    emoji: "⚔️"
-  },
-  "brookhaven": {
-    displayName: "Brookhaven RP",
-    title: "Brookhaven RP Quizzes — Test Your Knowledge | BloxQuiz",
-    description: "Think you know Brookhaven RP? Quiz yourself on locations, secrets, vehicles and roleplay scenarios. Free Roblox trivia.",
-    emoji: "🏠"
-  },
-  "adopt-me": {
-    displayName: "Adopt Me!",
-    title: "Adopt Me! Quizzes — Pet Trivia & Knowledge Test | BloxQuiz",
-    description: "Test your Adopt Me knowledge! Quizzes on pets, eggs, trading values and legendary rarities. Can you get a perfect score?",
-    emoji: "🐾"
-  },
-  "tower-of-hell": {
-    displayName: "Tower of Hell",
-    title: "Tower of Hell Quizzes — Test Your Knowledge | BloxQuiz",
-    description: "How much do you know about Tower of Hell? Quiz yourself on stages, mechanics, records and more.",
-    emoji: "🗼"
-  },
-  "murder-mystery-2": {
-    displayName: "Murder Mystery 2",
-    title: "Murder Mystery 2 Quizzes — MM2 Trivia | BloxQuiz",
-    description: "Think you're an MM2 expert? Test your knowledge on knives, guns, maps and strategies in our Murder Mystery 2 quizzes.",
-    emoji: "🔫"
-  },
-  "grow-a-garden": {
-    displayName: "Grow a Garden",
-    title: "Grow a Garden Quizzes — Test Your Knowledge | BloxQuiz",
-    description: "How well do you know Grow a Garden? Test yourself on plants, seeds, tools and harvesting mechanics.",
-    emoji: "🌱"
-  },
+const gameEmojis: Record<string, string> = {
+  "Blox Fruits": "⚔️",
+  "Brookhaven RP": "🏠",
+  "Adopt Me!": "🐾",
+  "Tower of Hell": "🗼",
+  "Murder Mystery 2": "🔫",
+  "Grow a Garden": "🌱",
+  "Royale High": "👑",
+  "Doors": "🚪",
+  "Arsenal": "🎯",
+  "Anime Fighting Simulator": "🥊",
+  "Berry Avenue": "🍓",
+  "Livetopia": "🏖️",
+  "Natural Disaster Survival": "🌪️",
+  "Anime Defenders": "🐉",
+  "Funky Friday": "🎵",
+  "Kick Off": "⚽",
 };
 
-function getQuizzesForGame(displayName: string) {
-  const staticQuizzes = [
-    { slug: "blox-fruits-ultimate", title: "Ultimate Blox Fruits Expert Quiz", game: "Blox Fruits", difficulty: "Hard", questions: 10 },
-    { slug: "brookhaven-secrets", title: "Brookhaven Secrets You Didn't Know", game: "Brookhaven", difficulty: "Easy", questions: 10 },
-    { slug: "adopt-me-pets", title: "Name That Pet! — Adopt Me Edition", game: "Adopt Me!", difficulty: "Medium", questions: 10 },
-    { slug: "which-roblox-game", title: "Which Roblox Game Are You?", game: "All Games", difficulty: "Medium", questions: 10 },
-  ];
+function getDefaultEmoji(gameName: string) {
+  return gameEmojis[gameName] || "🎮";
+}
 
+function slugToGame(): Record<string, { displayName: string, emoji: string, title: string, description: string }> {
+  const result: Record<string, any> = {};
+  try {
+    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
+    const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json"));
+    for (const file of files) {
+      const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
+      const gameName: string = content.game;
+      if (!gameName) continue;
+      // Generate slug from game name
+      const slug = gameName.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      if (!result[slug]) {
+        result[slug] = {
+          displayName: gameName,
+          emoji: getDefaultEmoji(gameName),
+          title: `${gameName} Quizzes — Test Your Knowledge | BloxQuiz`,
+          description: `Think you know ${gameName}? Take free trivia quizzes and test your Roblox knowledge. Multiple difficulty levels available.`,
+        };
+      }
+    }
+  } catch (e) {}
+  return result;
+}
+
+function getQuizzesForGame(displayName: string) {
   const dynamicQuizzes: any[] = [];
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
@@ -67,7 +72,7 @@ function getQuizzesForGame(displayName: string) {
     }
   } catch (e) {}
 
-  return [...dynamicQuizzes, ...staticQuizzes].filter(q =>
+  return dynamicQuizzes.filter(q =>
     q.game.toLowerCase().includes(displayName.toLowerCase()) ||
     displayName.toLowerCase().includes(q.game.toLowerCase())
   );
@@ -75,7 +80,7 @@ function getQuizzesForGame(displayName: string) {
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const config = gameConfig[game];
+  const config = slugToGame()[game];
   if (!config) return {};
   return {
     title: config.title,
@@ -85,7 +90,8 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 
 export default async function GamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const config = gameConfig[game];
+  const gameMap = slugToGame();
+  const config = gameMap[game];
   if (!config) notFound();
 
   const quizzes = getQuizzesForGame(config.displayName);
