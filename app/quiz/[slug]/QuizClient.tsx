@@ -37,6 +37,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [sharing, setSharing] = useState(false);
   const [shared, setShared] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const q = quiz.questions[current];
@@ -134,18 +135,15 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     canvas.width = 1080;
     canvas.height = 1080;
 
-    // Background
     ctx.fillStyle = "#0B0E17";
     ctx.fillRect(0, 0, 1080, 1080);
 
-    // Neon glow circle
     const gradient = ctx.createRadialGradient(540, 400, 0, 540, 400, 500);
     gradient.addColorStop(0, "rgba(0,245,160,0.12)");
     gradient.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 1080, 1080);
 
-    // Top border accent
     const borderGrad = ctx.createLinearGradient(0, 0, 1080, 0);
     borderGrad.addColorStop(0, "#00F5A0");
     borderGrad.addColorStop(0.5, "#B84CFF");
@@ -153,19 +151,16 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     ctx.fillStyle = borderGrad;
     ctx.fillRect(0, 0, 1080, 6);
 
-    // Game emoji
     ctx.font = "120px serif";
     ctx.textAlign = "center";
     ctx.fillText(gameEmojis[quiz.game] || "🎮", 540, 220);
 
-    // Quiz title
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 42px Arial";
     ctx.textAlign = "center";
     const title = quiz.title.length > 40 ? quiz.title.substring(0, 40) + "..." : quiz.title;
     ctx.fillText(title, 540, 300);
 
-    // Score
     ctx.font = "bold 200px Arial";
     const scoreGrad = ctx.createLinearGradient(0, 350, 0, 580);
     scoreGrad.addColorStop(0, "#00F5A0");
@@ -174,17 +169,14 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     ctx.textAlign = "center";
     ctx.fillText(score + "/" + quiz.questions.length, 540, 580);
 
-    // Result label
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 52px Arial";
     ctx.fillText(getResultLabel().label, 540, 660);
 
-    // XP earned
     ctx.fillStyle = "#FFE347";
     ctx.font = "bold 36px Arial";
     ctx.fillText("+" + (score * 10) + " XP earned", 540, 730);
 
-    // Divider
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -192,7 +184,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     ctx.lineTo(880, 780);
     ctx.stroke();
 
-    // BloxQuiz branding
     ctx.fillStyle = "#00F5A0";
     ctx.font = "bold 48px Arial";
     ctx.fillText("BloxQuiz", 480, 860);
@@ -203,7 +194,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     ctx.font = "28px Arial";
     ctx.fillText("Can you beat my score? bloxquiz.gg", 540, 920);
 
-    // Game + difficulty badges
     ctx.fillStyle = "rgba(0,217,255,0.2)";
     roundRect(ctx, 340, 950, 180, 44, 22);
     ctx.fillStyle = "#00D9FF";
@@ -240,7 +230,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
 
     canvas.toBlob(async (blob) => {
       if (!blob) return;
-      // Try Web Share API first (mobile)
       if (navigator.share && navigator.canShare({ files: [new File([blob], "bloxquiz-score.png", { type: "image/png" })] })) {
         try {
           await navigator.share({
@@ -253,7 +242,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
           downloadCard(canvas);
         }
       } else {
-        // Fallback: download image
         downloadCard(canvas);
       }
       setSharing(false);
@@ -288,7 +276,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 8 }}>{quiz.title}</h1>
           <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto" }}>
-            Test your {quiz.game} knowledge across {quiz.questions.length} questions. Can you get a perfect score?
+            {"Test your " + quiz.game + " knowledge across " + quiz.questions.length + " questions. Can you get a perfect score?"}
           </p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12 }}>
             <a href={"/games/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-green)", textDecoration: "none" }}>{"More " + quiz.game + " Quizzes →"}</a>
@@ -308,7 +296,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
               </div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-green)" }}>{score}</div>
             </div>
-            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Question {current + 1} of {quiz.questions.length}</div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>{"Question " + (current + 1) + " of " + quiz.questions.length}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, lineHeight: 1.3, marginBottom: 28 }}>{q.q}</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} role="group" aria-label="Answer options">
               {q.a.map((ans: string, i: number) => {
@@ -339,39 +327,64 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
             <div style={{ fontSize: 72, marginBottom: 16 }}>{getResultLabel().emoji}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score}/{quiz.questions.length}</div>
             <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{getResultLabel().label}</div>
-            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 28 }}>
+            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 24 }}>
               {user ? "+" + (score * 10) + " XP earned!" : "Sign in to save your score and earn XP!"}
             </div>
 
-            {/* Share Card Button */}
-            <div style={{ marginBottom: 24 }}>
-              <button
-                onClick={shareScore}
-                disabled={sharing}
-                style={{
-                  background: shared ? "var(--surface)" : "linear-gradient(135deg, #B84CFF, #FF3CAC)",
-                  color: "#fff",
-                  fontWeight: 900,
-                  fontSize: 16,
-                  padding: "16px 36px",
-                  borderRadius: 100,
-                  border: shared ? "1px solid var(--border)" : "none",
-                  cursor: sharing ? "default" : "pointer",
-                  fontFamily: "var(--font-body)",
-                  WebkitTextFillColor: "#fff",
-                  opacity: sharing ? 0.7 : 1,
-                  boxShadow: shared ? "none" : "0 4px 24px rgba(184,76,255,0.4)"
-                }}
-              >
-                {sharing ? "⏳ Generating..." : shared ? "✅ Card Downloaded!" : "📸 Share My Score"}
-              </button>
-              <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, marginTop: 8 }}>
-                Download your score card and share on TikTok, Discord or Reddit!
+            {/* Share buttons */}
+            <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+                <button
+                  onClick={shareScore}
+                  disabled={sharing}
+                  style={{
+                    background: shared ? "var(--surface)" : "linear-gradient(135deg, #B84CFF, #FF3CAC)",
+                    color: "#fff",
+                    fontWeight: 900,
+                    fontSize: 16,
+                    padding: "16px 36px",
+                    borderRadius: 100,
+                    border: shared ? "1px solid var(--border)" : "none",
+                    cursor: sharing ? "default" : "pointer",
+                    fontFamily: "var(--font-body)",
+                    WebkitTextFillColor: "#fff",
+                    opacity: sharing ? 0.7 : 1,
+                    boxShadow: shared ? "none" : "0 4px 24px rgba(184,76,255,0.4)"
+                  }}
+                >
+                  {sharing ? "⏳ Generating..." : shared ? "✅ Card Downloaded!" : "📸 Share My Score"}
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText("https://www.bloxquiz.gg/quiz/" + slug);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2000);
+                  }}
+                  style={{
+                    background: "var(--surface)",
+                    color: "var(--text)",
+                    fontWeight: 900,
+                    fontSize: 16,
+                    padding: "16px 36px",
+                    borderRadius: 100,
+                    border: "1px solid var(--border)",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-body)",
+                    WebkitTextFillColor: "var(--text)",
+                  }}
+                >
+                  {copiedLink ? "✅ Link Copied!" : "🔗 Copy Link"}
+                </button>
+              </div>
+              <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
+                Share your score card on TikTok, Discord or Reddit!
               </p>
             </div>
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
-              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+              <button
+                onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }}
+                style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
                 {"🔄 Play Again"}
               </button>
               <a href="/quiz/random" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
