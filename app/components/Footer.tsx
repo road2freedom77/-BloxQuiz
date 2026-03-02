@@ -11,7 +11,7 @@ export default function Footer() {
       { label: "All Quizzes", href: "/browse" },
       { label: "Daily Challenge", href: "/#daily" },
       { label: "Roblox Codes", href: "/codes" },
-      { label: "Leaderboard", href: "/#leaderboard" },
+      { label: "Leaderboard", href: "/leaderboard" },
       { label: "Personality Quizzes", href: "/browse" },
     ];
   
