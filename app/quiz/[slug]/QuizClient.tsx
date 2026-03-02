@@ -278,16 +278,9 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
         </ol>
       </nav>
 
-      {/* H1 intro block */}
-      {!finished && (
-        <div style={{
-          marginBottom: current === 0 && !answered ? 24 : 0,
-          height: current === 0 && !answered ? "auto" : 0,
-          opacity: current === 0 && !answered ? 1 : 0,
-          overflow: "hidden",
-          transition: "all 0.3s ease",
-          textAlign: "center"
-        }}>
+      {/* H1 intro block — single H1, shown only before quiz starts */}
+      {!finished && current === 0 && !answered && (
+        <div style={{ marginBottom: 24, textAlign: "center" }}>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)" }}>{quiz.game}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
@@ -319,8 +312,14 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
                 <div style={{ height: "100%", width: `${(current / quiz.questions.length) * 100}%`, background: "var(--gradient-main)", borderRadius: 100, transition: "width 0.4s ease" }} />
               </div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-green)", display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{"Score: "}</span>
-                <span>{score}</span>
+                {current > 0 || answered ? (
+                  <>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{"Score: "}</span>
+                    <span>{score}</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{(current + 1) + "/" + quiz.questions.length}</span>
+                )}
               </div>
             </div>
             <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>{"Question " + (current + 1) + " of " + quiz.questions.length}</div>
