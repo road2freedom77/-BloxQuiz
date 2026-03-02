@@ -86,6 +86,30 @@ function getQuiz(slug: string) {
   }
 }
 
+function getRelatedQuizzes(currentSlug: string, game: string) {
+  const related: any[] = [];
+  try {
+    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
+    const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json"));
+    for (const file of files) {
+      const slug = file.replace(".json", "");
+      if (slug === currentSlug) continue;
+      const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
+      if (content.game === game) {
+        related.push({
+          slug,
+          title: content.title,
+          game: content.game,
+          difficulty: content.difficulty,
+          questions: content.questions?.length || 10,
+        });
+      }
+      if (related.length >= 6) break;
+    }
+  } catch (e) {}
+  return related;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const quiz = getQuiz(slug);
@@ -123,6 +147,8 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
   const quiz = getQuiz(slug);
 
   if (!quiz) notFound();
+
+  const relatedQuizzes = getRelatedQuizzes(slug, quiz.game);
 
   const faqs = [
     {
@@ -184,7 +210,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hidden semantic HTML for SEO — Google sees real question/answer structure */}
+      {/* Hidden semantic HTML for SEO */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
         <h1>{quiz.title}</h1>
         <p>{quiz.game} — {quiz.difficulty} — {quiz.questions.length} Questions</p>
@@ -204,7 +230,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         ))}
       </div>
 
-      <QuizClient quiz={quiz} slug={slug} faqs={faqs} />
+      <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} />
     </>
   );
 }

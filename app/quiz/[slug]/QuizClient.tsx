@@ -47,7 +47,31 @@ const gameEmojis: Record<string, string> = {
   "Kick Off": "⚽",
 };
 
-export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: string, faqs: any[] }) {
+const whatYouLearn: Record<string, string> = {
+  "Blox Fruits": "Covers fruits, combat mechanics, sea progression, boss strategies and awakening requirements.",
+  "Brookhaven RP": "Covers locations, hidden secrets, vehicles, roleplay scenarios and game mechanics.",
+  "Adopt Me!": "Covers pets, eggs, trading values, legendary rarities and game currency.",
+  "Tower of Hell": "Covers stages, modifiers, rings, obstacle types and section mechanics.",
+  "Murder Mystery 2": "Covers weapons, maps, roles, godly items and trading strategies.",
+  "Grow a Garden": "Covers plants, seeds, tools, harvesting mechanics and rare crop mutations.",
+  "Royale High": "Covers diamonds, halos, trading, realms and seasonal event rewards.",
+  "Doors": "Covers entities, floors, items, hidden secrets and survival strategies.",
+  "Arsenal": "Covers weapons, maps, game modes, killstreaks and combat mechanics.",
+  "Anime Fighting Simulator": "Covers stands, transformations, training zones, quirks and benchmarks.",
+  "Berry Avenue": "Covers locations, roleplay scenarios, vehicles, jobs and hidden features.",
+  "Livetopia": "Covers locations, activities, jobs, vehicles and game secrets.",
+  "Natural Disaster Survival": "Covers disasters, survival strategies, maps and rare events.",
+  "Anime Defenders": "Covers units, traits, evolutions, stages and summon mechanics.",
+  "Funky Friday": "Covers songs, arrow patterns, ranks, characters and battle mechanics.",
+  "Kick Off": "Covers teams, skills, tactics, power shots and tournament mechanics.",
+};
+
+export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
+  quiz: any,
+  slug: string,
+  faqs: any[],
+  relatedQuizzes: any[]
+}) {
   const { user } = useUser();
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
@@ -113,11 +137,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     });
 
     const xpGained = finalScore * 10;
-    const { data, error } = await supabase.rpc("increment_xp", {
-      user_id: user.id,
-      amount: xpGained
-    });
-    console.log("XP result:", data, error);
+    await supabase.rpc("increment_xp", { user_id: user.id, amount: xpGained });
   }
 
   function selectAnswer(idx: number) {
@@ -154,7 +174,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
 
     canvas.width = 1080;
     canvas.height = 1080;
-
     ctx.fillStyle = "#0B0E17";
     ctx.fillRect(0, 0, 1080, 1080);
 
@@ -177,7 +196,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 42px Arial";
-    ctx.textAlign = "center";
     const title = quiz.title.length > 40 ? quiz.title.substring(0, 40) + "..." : quiz.title;
     ctx.fillText(title, 540, 300);
 
@@ -186,7 +204,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     scoreGrad.addColorStop(0, "#00F5A0");
     scoreGrad.addColorStop(1, "#B84CFF");
     ctx.fillStyle = scoreGrad;
-    ctx.textAlign = "center";
     ctx.fillText(score + "/" + quiz.questions.length, 540, 580);
 
     ctx.fillStyle = "#ffffff";
@@ -213,18 +230,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.font = "28px Arial";
     ctx.fillText("Can you beat my score? bloxquiz.gg", 540, 920);
-
-    ctx.fillStyle = "rgba(0,217,255,0.2)";
-    roundRect(ctx, 340, 950, 180, 44, 22);
-    ctx.fillStyle = "#00D9FF";
-    ctx.font = "bold 22px Arial";
-    ctx.fillText(quiz.game, 430, 978);
-
-    ctx.fillStyle = "rgba(0,245,160,0.2)";
-    roundRect(ctx, 540, 950, 160, 44, 22);
-    ctx.fillStyle = "#00F5A0";
-    ctx.font = "bold 22px Arial";
-    ctx.fillText(quiz.difficulty, 620, 978);
   }
 
   function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -247,7 +252,6 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     generateShareCard();
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     canvas.toBlob(async (blob) => {
       if (!blob) return;
       if (navigator.share && navigator.canShare({ files: [new File([blob], "bloxquiz-score.png", { type: "image/png" })] })) {
@@ -258,9 +262,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
             files: [new File([blob], "bloxquiz-score.png", { type: "image/png" })]
           });
           setShared(true);
-        } catch (e) {
-          downloadCard(canvas);
-        }
+        } catch (e) { downloadCard(canvas); }
       } else {
         downloadCard(canvas);
       }
@@ -307,10 +309,15 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{quiz.questions.length} Questions</span>
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 8 }}>{quiz.title}</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto 8px" }}>
             {"Test your " + quiz.game + " knowledge across " + quiz.questions.length + " questions. Can you get a perfect score?"}
           </p>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12 }}>
+          {whatYouLearn[quiz.game] && (
+            <p style={{ color: "var(--text-dim)", fontSize: 13, fontWeight: 600, maxWidth: 500, margin: "0 auto 12px", fontStyle: "italic" }}>
+              {"📚 " + whatYouLearn[quiz.game]}
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 4 }}>
             <a href={"/games/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-green)", textDecoration: "none" }}>{"More " + quiz.game + " Quizzes →"}</a>
             <span style={{ color: "var(--text-dim)" }}>·</span>
             <a href="/browse" style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textDecoration: "none" }}>Browse All →</a>
@@ -326,7 +333,10 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
               <div style={{ flex: 1, margin: "0 20px", background: "var(--surface)", height: 10, borderRadius: 100, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${(current / quiz.questions.length) * 100}%`, background: "var(--gradient-main)", borderRadius: 100, transition: "width 0.4s ease" }} />
               </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-green)" }}>{score}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-green)", display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>Score:</span>
+                <span>{score}</span>
+              </div>
             </div>
             <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>{"Question " + (current + 1) + " of " + quiz.questions.length}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, lineHeight: 1.3, marginBottom: 28 }}>{q.q}</div>
@@ -341,11 +351,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
                   else { bg = "var(--surface)"; color = "var(--text-dim)"; }
                 }
                 return (
-                  <button
-                    key={i}
-                    onClick={() => selectAnswer(i)}
-                    aria-label={"Option " + letters[i] + ": " + ans}
-                    aria-pressed={selected === i}
+                  <button key={i} onClick={() => selectAnswer(i)} aria-label={"Option " + letters[i] + ": " + ans} aria-pressed={selected === i}
                     style={{ background: bg, border: `2px solid ${borderColor}`, borderRadius: "var(--radius-sm)", padding: "18px 20px", fontSize: 15, fontWeight: 700, cursor: answered ? "default" : "pointer", fontFamily: "var(--font-body)", color, textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 8, background: "var(--bg-card)", fontSize: 13, fontWeight: 900, color: "var(--text-dim)", flexShrink: 0 }}>{letters[i]}</span>
                     {ans}
@@ -363,38 +369,27 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
               {user ? "+" + (score * 10) + " XP earned!" : "Sign in to save your score and earn XP!"}
             </div>
 
-            {/* Share Card */}
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-                <button
-                  onClick={shareScore}
-                  disabled={sharing}
-                  style={{ background: shared ? "var(--surface)" : "linear-gradient(135deg, #B84CFF, #FF3CAC)", color: "#fff", fontWeight: 900, fontSize: 16, padding: "16px 36px", borderRadius: 100, border: shared ? "1px solid var(--border)" : "none", cursor: sharing ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "#fff", opacity: sharing ? 0.7 : 1, boxShadow: shared ? "none" : "0 4px 24px rgba(184,76,255,0.4)" }}
-                >
+                <button onClick={shareScore} disabled={sharing}
+                  style={{ background: shared ? "var(--surface)" : "linear-gradient(135deg, #B84CFF, #FF3CAC)", color: "#fff", fontWeight: 900, fontSize: 16, padding: "16px 36px", borderRadius: 100, border: shared ? "1px solid var(--border)" : "none", cursor: sharing ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "#fff", opacity: sharing ? 0.7 : 1, boxShadow: shared ? "none" : "0 4px 24px rgba(184,76,255,0.4)" }}>
                   {sharing ? "⏳ Generating..." : shared ? "✅ Card Downloaded!" : "📸 Share My Score"}
                 </button>
-                <button
-                  onClick={() => { navigator.clipboard.writeText("https://www.bloxquiz.gg/quiz/" + slug); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }}
-                  style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 900, fontSize: 16, padding: "16px 36px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--text)" }}
-                >
+                <button onClick={() => { navigator.clipboard.writeText("https://www.bloxquiz.gg/quiz/" + slug); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }}
+                  style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 900, fontSize: 16, padding: "16px 36px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--text)" }}>
                   {copiedLink ? "✅ Link Copied!" : "🔗 Copy Link"}
                 </button>
               </div>
-              <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
-                Share your score card on TikTok, Discord or Reddit!
-              </p>
+              <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>Share your score card on TikTok, Discord or Reddit!</p>
             </div>
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
-              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }}
+                style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
                 {"🔄 Play Again"}
               </button>
-              <a href="/quiz/random" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-                {"⚡ Random Quiz"}
-              </a>
-              <a href="/" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-                {"🏠 Home"}
-              </a>
+              <a href="/quiz/random" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{"⚡ Random Quiz"}</a>
+              <a href="/" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{"🏠 Home"}</a>
             </div>
 
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, textAlign: "left" }}>
@@ -424,8 +419,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {faqs.map((faq, i) => (
             <details key={i} open={openFaq === i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", overflow: "hidden" }}>
-              <summary
-                onClick={(e) => { e.preventDefault(); setOpenFaq(openFaq === i ? null : i); }}
+              <summary onClick={(e) => { e.preventDefault(); setOpenFaq(openFaq === i ? null : i); }}
                 style={{ padding: "16px 20px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: "var(--font-body)", fontSize: 14, fontWeight: 700, color: "var(--text)", listStyle: "none" }}>
                 {faq.question}
                 <span style={{ fontSize: 18, color: "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>{openFaq === i ? "−" : "+"}</span>
@@ -437,6 +431,27 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
           ))}
         </div>
       </div>
+
+      {/* Related Quizzes */}
+      {relatedQuizzes.length > 0 && (
+        <div style={{ marginTop: 40 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"🎮 More " + quiz.game + " Quizzes"}</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
+            {relatedQuizzes.map((rq) => {
+              const rdiff = diffColors[rq.difficulty] || diffColors.Medium;
+              return (
+                <a key={rq.slug} href={"/quiz/" + rq.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px", textDecoration: "none", display: "block" }}>
+                  <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: rdiff.bg, color: rdiff.color }}>{rq.difficulty}</span>
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{rq.questions} Q's</span>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", lineHeight: 1.3 }}>{rq.title}</div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
     </div>
   );
