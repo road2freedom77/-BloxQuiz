@@ -5,7 +5,7 @@ import ProfileClient from "./ProfileClient";
 
 export default async function ProfilePage() {
   const user = await currentUser();
-  if (!user) redirect("/");
+  if (!user) redirect("/sign-in");
 
   // Get user data from Supabase
   const { data: userData } = await supabase
