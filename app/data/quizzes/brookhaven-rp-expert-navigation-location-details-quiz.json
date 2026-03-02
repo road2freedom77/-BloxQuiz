@@ -1,0 +1,108 @@
+{
+  "slug": "brookhaven-rp-expert-navigation-location-details-quiz",
+  "title": "Brookhaven RP Expert Navigation & Location Details Quiz",
+  "game": "Brookhaven RP",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "Which specific area of the map contains the underground bunker entrance that requires multiple players to access?",
+      "a": [
+        "Behind the Agency building",
+        "Near the Military Base perimeter",
+        "Underneath the Bridge structure",
+        "Inside the Graveyard maze"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the exact number of floors in the tallest apartment building in Brookhaven RP?",
+      "a": [
+        "8 floors",
+        "12 floors",
+        "15 floors",
+        "10 floors"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which vehicle spawn location is exclusively available only during nighttime hours in the game?",
+      "a": [
+        "Police Station garage",
+        "Airport hangar",
+        "Military Base motor pool",
+        "Hospital emergency bay"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "In the Premium Plots area, what unique feature distinguishes the most expensive house lot from others?",
+      "a": [
+        "It has a pre-built helicopter pad",
+        "It includes an underground garage",
+        "It has direct beach access",
+        "It comes with a built-in pool"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which job role in Brookhaven RP requires players to have access to both the Hospital and Police Station to function properly?",
+      "a": [
+        "Detective",
+        "Paramedic",
+        "FBI Agent",
+        "Doctor"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What specific action must be performed at the Radio Tower to unlock the emergency broadcast feature?",
+      "a": [
+        "Climb to the very top platform",
+        "Press a hidden button sequence",
+        "Use a Police radio near the base",
+        "Enter a specific code on the control panel"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which area of Brookhaven contains the most expensive purchasable vehicle in the game?",
+      "a": [
+        "Car Dealership lot",
+        "Airport terminal",
+        "Marina dock",
+        "Military Base"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "In roleplay scenarios, which location is specifically designed for hosting large-scale wedding ceremonies?",
+      "a": [
+        "The Church main hall",
+        "Beach pavilion area",
+        "Town Hall auditorium",
+        "Hotel conference room"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the maximum number of rooms that can be added to a single custom house plot in Brookhaven RP?",
+      "a": [
+        "25 rooms",
+        "30 rooms",
+        "35 rooms",
+        "40 rooms"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which hidden area can only be accessed by using a specific vehicle type and requires knowledge of an obscure map boundary?",
+      "a": [
+        "The Island Cave system",
+        "Underground Subway tunnels",
+        "Rooftop Secret Garden",
+        "Hidden Beach Cove"
+      ],
+      "correct": 3
+    }
+  ]
+}

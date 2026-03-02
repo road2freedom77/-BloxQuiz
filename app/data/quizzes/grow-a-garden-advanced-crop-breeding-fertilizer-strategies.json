@@ -1,0 +1,108 @@
+{
+  "slug": "grow-a-garden-advanced-crop-breeding-fertilizer-strategies",
+  "title": "Grow a Garden: Advanced Crop Breeding & Fertilizer Strategies",
+  "game": "Grow a Garden",
+  "difficulty": "Medium",
+  "questions": [
+    {
+      "q": "Which fertilizer type provides the highest growth speed bonus for most plants?",
+      "a": [
+        "Basic Fertilizer",
+        "Super Fertilizer",
+        "Miracle Growth",
+        "Organic Compost"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What happens when you use the Golden Watering Can on a fully grown rare crop?",
+      "a": [
+        "It doubles the harvest yield",
+        "It increases the chance of getting seeds",
+        "It turns the crop into a golden variant",
+        "It has no additional effect"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "During Winter season, which of these crops can still be planted and grown?",
+      "a": [
+        "Tomatoes",
+        "Pine Trees",
+        "Sunflowers",
+        "Watermelons"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the minimum level requirement to unlock the ability to crossbreed plants?",
+      "a": [
+        "Level 15",
+        "Level 25",
+        "Level 35",
+        "Level 45"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which tool upgrade increases the area of effect when harvesting crops?",
+      "a": [
+        "Diamond Scythe",
+        "Platinum Harvester",
+        "Multi-Tool Pro",
+        "Mega Harvester"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What is the rarest mutation that can occur when crossbreeding Rainbow Roses?",
+      "a": [
+        "Crystal Rose",
+        "Diamond Rose",
+        "Prismatic Rose",
+        "Aurora Rose"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "How many different types of fertilizer can be applied to a single plant simultaneously?",
+      "a": [
+        "1",
+        "2",
+        "3",
+        "No limit"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which seasonal event crop takes exactly 24 hours to fully mature?",
+      "a": [
+        "Halloween Pumpkin",
+        "Christmas Tree",
+        "Easter Lily",
+        "Valentine Rose"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What effect does the Weather Station have on crop growth during rainy weather?",
+      "a": [
+        "Reduces growth time by 15%",
+        "Eliminates need for watering",
+        "Increases mutation chance",
+        "All crops grow 25% faster"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "When using the Gene Splicer tool, what determines the success rate of creating hybrid seeds?",
+      "a": [
+        "Player level only",
+        "Plant rarity and fertilizer used",
+        "Time of day and season",
+        "Random chance only"
+      ],
+      "correct": 1
+    }
+  ]
+}

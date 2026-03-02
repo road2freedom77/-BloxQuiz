@@ -1,0 +1,108 @@
+{
+  "slug": "adopt-me-legendary-pets-and-potion-values-quiz",
+  "title": "Adopt Me! Legendary Pets and Potion Values Quiz",
+  "game": "Adopt Me!",
+  "difficulty": "Medium",
+  "questions": [
+    {
+      "q": "Which legendary pet was the first to be added to the Safari Egg?",
+      "a": [
+        "Lion",
+        "Giraffe",
+        "Elephant",
+        "Crocodile"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many pets of the same type do you need to make a Mega Neon pet?",
+      "a": [
+        "12",
+        "16",
+        "20",
+        "24"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What potion transforms a regular pet into a flying version?",
+      "a": [
+        "Ride Potion",
+        "Fly Potion",
+        "Growth Potion",
+        "Speed Potion"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which egg replaced the Jungle Egg in the gumball machine?",
+      "a": [
+        "Farm Egg",
+        "Aussie Egg",
+        "Safari Egg",
+        "Fossil Egg"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What color do Neon pets glow in their neon areas?",
+      "a": [
+        "Always blue",
+        "Always rainbow",
+        "Cycles through colors",
+        "Matches the pet's original color"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which legendary pet has the highest trade value among these Halloween pets?",
+      "a": [
+        "Evil Unicorn",
+        "Bat Dragon",
+        "Crow",
+        "Owl"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many Robux did the Diamond Egg cost when it was available?",
+      "a": [
+        "600",
+        "750",
+        "800",
+        "1000"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What was unique about the Blue Dog compared to other pets from the same update?",
+      "a": [
+        "It was the only legendary",
+        "It came from a different egg",
+        "It was obtainable through robux purchase",
+        "It had special animations"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which of these pets was NOT available in the Ocean Egg?",
+      "a": [
+        "Shark",
+        "Octopus",
+        "Seahorse",
+        "Axolotl"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What happens to a pet's age when you use an Age-Up Potion?",
+      "a": [
+        "Ages up one stage",
+        "Becomes full grown instantly",
+        "Ages up halfway to next stage",
+        "Doubles current age progress"
+      ],
+      "correct": 0
+    }
+  ]
+}
