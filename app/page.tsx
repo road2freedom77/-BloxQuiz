@@ -14,36 +14,96 @@ async function getInitialStats() {
     const { count: quizzesPlayed } = await supabase
       .from("plays")
       .select("*", { count: "exact", head: true });
-
     const { count: players } = await supabase
       .from("users")
       .select("*", { count: "exact", head: true });
-
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
     const totalQuizzes = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
-
-    return {
-      quizzesPlayed: quizzesPlayed || 0,
-      players: players || 0,
-      totalQuizzes,
-      gamesCovered: 6,
-    };
+    return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 6 };
   } catch {
     return { quizzesPlayed: 0, players: 0, totalQuizzes: 19, gamesCovered: 6 };
   }
 }
 
+async function getInitialQuizzes() {
+  try {
+    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
+    const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).slice(0, 8);
+    return files.map(file => {
+      const data = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
+      return {
+        slug: data.slug,
+        title: data.title,
+        game: data.game,
+        difficulty: data.difficulty,
+        questions: data.questions.length,
+        emoji: "🎮",
+        thumb: "linear-gradient(135deg, rgba(0,245,160,0.15), rgba(184,76,255,0.15))",
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function getInitialLeaderboard() {
+  try {
+    const { data } = await supabase
+      .from("users")
+      .select("id, username, xp")
+      .order("xp", { ascending: false })
+      .limit(10);
+    return (data || []).map((u, i) => ({
+      rank: i + 1,
+      user_id: u.id,
+      username: u.username,
+      xp: u.xp,
+      quizzes_played: 0,
+      total_score: u.xp,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function getInitialDaily() {
+  try {
+    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
+    const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json"));
+    const today = new Date().toISOString().split("T")[0];
+    const seed = today.replace(/-/g, "");
+    const index = parseInt(seed) % files.length;
+    const file = files[index];
+    const data = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
+    return {
+      slug: data.slug,
+      title: data.title,
+      game: data.game,
+      difficulty: data.difficulty,
+      date: today,
+      stats: { playedToday: 0, avgScore: 0, perfectPct: 0 }
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default async function Home() {
-  const initialStats = await getInitialStats();
+  const [initialStats, initialQuizzes, initialLeaderboard, initialDaily] = await Promise.all([
+    getInitialStats(),
+    getInitialQuizzes(),
+    getInitialLeaderboard(),
+    getInitialDaily(),
+  ]);
 
   return (
     <>
       <Hero initialStats={initialStats} />
       <GameCategories />
-      <PopularQuizzes />
-      <DailyChallenge />
+      <PopularQuizzes initialQuizzes={initialQuizzes} />
+      <DailyChallenge initialDaily={initialDaily} />
       <Codes />
-      <Leaderboard />
+      <Leaderboard initialLeaderboard={initialLeaderboard} />
       <EmailSignup />
     </>
   );

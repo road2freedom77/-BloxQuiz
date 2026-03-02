@@ -7,36 +7,26 @@ const diffColors: Record<string, { color: string, bg: string }> = {
   Hard: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
 };
 
-export default function PopularQuizzes() {
-  const [quizzes, setQuizzes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function PopularQuizzes({ initialQuizzes }: { initialQuizzes: any[] }) {
+  const [quizzes, setQuizzes] = useState<any[]>(initialQuizzes);
 
   useEffect(() => {
     fetch("/api/quizzes?limit=8")
       .then(r => r.json())
-      .then(data => {
-        setQuizzes(data.quizzes || []);
-        setLoading(false);
-      });
+      .then(data => setQuizzes(data.quizzes || []));
   }, []);
-
-  if (loading) return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px", textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>
-      Loading quizzes...
-    </div>
-  );
 
   return (
     <div id="quizzes" style={{ position: "relative", zIndex: 1 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>🏆 Popular Quizzes</h2>
-        <a href="/browse" style={{ color: "var(--neon-green)", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>See All →</a>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>{"🏆 Popular Quizzes"}</h2>
+        <a href="/browse" style={{ color: "var(--neon-green)", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{"See All →"}</a>
       </div>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
         {quizzes.map((quiz) => {
           const diff = diffColors[quiz.difficulty] || diffColors.Medium;
           return (
-            <a href={`/quiz/${quiz.slug}`} key={quiz.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
+            <a href={"/quiz/" + quiz.slug} key={quiz.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
               <div style={{ height: 140, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 52, background: quiz.thumb, position: "relative" }}>
                 {quiz.emoji}
                 <span style={{ position: "absolute", bottom: 10, right: 10, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>

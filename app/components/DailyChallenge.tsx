@@ -1,17 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function DailyChallenge() {
-  const [daily, setDaily] = useState<any>(null);
-  const [loaded, setLoaded] = useState(false);
+export default function DailyChallenge({ initialDaily }: { initialDaily: any }) {
+  const [daily, setDaily] = useState<any>(initialDaily);
 
   useEffect(() => {
     fetch("/api/daily")
       .then(r => r.json())
-      .then(data => {
-        setDaily(data);
-        setLoaded(true);
-      });
+      .then(data => setDaily(data));
   }, []);
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
@@ -19,69 +15,46 @@ export default function DailyChallenge() {
   });
 
   const stats = [
-    [loaded ? daily.stats.playedToday.toLocaleString() : "—", "Played Today"],
-    [loaded ? (daily.stats.avgScore || "0") : "—", "Avg Score"],
-    [loaded ? `${daily.stats.perfectPct}%` : "—", "Perfect Score"],
+    [daily?.stats?.playedToday?.toLocaleString() ?? "0", "Played Today"],
+    [daily?.stats?.avgScore ?? "0", "Avg Score"],
+    [`${daily?.stats?.perfectPct ?? 0}%`, "Perfect Score"],
   ];
 
   function goToChallenge() {
-    if (loaded && daily?.slug) {
-      window.location.href = `/quiz/${daily.slug}`;
-    }
+    if (daily?.slug) window.location.href = "/quiz/" + daily.slug;
   }
 
   return (
     <div style={{ maxWidth: 1200, margin: "40px auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
       <div style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius)",
-        padding: 40,
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 40,
-        alignItems: "center",
-        position: "relative",
-        overflow: "hidden"
+        background: "var(--bg-card)", border: "1px solid var(--border)",
+        borderRadius: "var(--radius)", padding: 40,
+        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40,
+        alignItems: "center", position: "relative", overflow: "hidden"
       }}>
         <div style={{ position: "absolute", top: "-60%", right: "-20%", width: 400, height: 400, background: "radial-gradient(circle, rgba(255,60,172,0.08), transparent 70%)", pointerEvents: "none" }} />
-
         <div>
           <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--neon-pink)", marginBottom: 12 }}>
             {"⚡ Daily Challenge — "}{formattedDate}
           </div>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginBottom: 10 }}>
-            {loaded ? "Today: " + daily.title : "Loading today's challenge..."}
+            {daily ? "Today: " + daily.title : "Loading today's challenge..."}
           </h2>
           <p style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 24 }}>
-            {loaded
+            {daily
               ? "A " + daily.difficulty + " quiz about " + daily.game + ". Can you get a perfect score? New challenge drops every day at midnight!"
               : "Get ready to test your Roblox knowledge..."}
           </p>
-          <button
-            onClick={goToChallenge}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "var(--gradient-main)",
-              color: "var(--bg)",
-              fontWeight: 900,
-              fontSize: 16,
-              padding: "16px 36px",
-              borderRadius: 100,
-              border: "none",
-              cursor: loaded ? "pointer" : "default",
-              fontFamily: "var(--font-body)",
-              WebkitTextFillColor: "var(--bg)",
-              boxShadow: "0 4px 20px rgba(0,245,160,0.25)",
-              opacity: loaded ? 1 : 0.6
-            }}
-          >
+          <button onClick={goToChallenge} style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 16,
+            padding: "16px 36px", borderRadius: 100, border: "none",
+            cursor: "pointer", fontFamily: "var(--font-body)",
+            WebkitTextFillColor: "var(--bg)", boxShadow: "0 4px 20px rgba(0,245,160,0.25)"
+          }}>
             {"🎯 Take Today's Challenge"}
           </button>
         </div>
-
         <div style={{ display: "flex", gap: 24 }}>
           {stats.map(([num, label]) => (
             <div key={label} style={{ textAlign: "center", padding: "16px 24px", background: "var(--surface)", borderRadius: "var(--radius-sm)" }}>
