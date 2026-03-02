@@ -66,6 +66,65 @@ const whatYouLearn: Record<string, string> = {
   "Kick Off": "Covers teams, skills, tactics, power shots and tournament mechanics.",
 };
 
+function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionIndex: number }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit() {
+    if (submitting) return;
+    setSubmitting(true);
+    await supabase.from("flags").insert({
+      quiz_slug: quizSlug,
+      question_index: questionIndex,
+      reason: reason || null,
+    });
+    setSubmitted(true);
+    setSubmitting(false);
+    setTimeout(() => { setOpen(false); setSubmitted(false); setReason(""); }, 2000);
+  }
+
+  if (!open) return (
+    <div style={{ marginTop: 12, textAlign: "right" }}>
+      <button onClick={() => setOpen(true)}
+        style={{ fontSize: 11, fontWeight: 700, color: "var(--text-dim)", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-body)" }}>
+        🚩 Report this question
+      </button>
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop: 12, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 16 }}>
+      {submitted ? (
+        <p style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-green)", textAlign: "center" }}>{"✅ Thanks! We'll review this question."}</p>
+      ) : (
+        <>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{"What's wrong with this question?"}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+            {["Wrong answer marked correct", "Question is inaccurate", "Outdated information", "Other"].map(r => (
+              <button key={r} onClick={() => setReason(r)}
+                style={{ padding: "8px 14px", borderRadius: 8, border: "1.5px solid " + (reason === r ? "var(--neon-pink)" : "var(--border)"), background: reason === r ? "rgba(255,60,172,0.1)" : "var(--bg-card)", color: reason === r ? "var(--neon-pink)" : "var(--text-muted)", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)", textAlign: "left" }}>
+                {r}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={submit} disabled={!reason || submitting}
+              style={{ padding: "8px 20px", borderRadius: 100, border: "none", background: reason ? "var(--neon-pink)" : "var(--surface)", color: reason ? "var(--bg)" : "var(--text-dim)", fontWeight: 800, fontSize: 12, cursor: reason ? "pointer" : "default", fontFamily: "var(--font-body)", WebkitTextFillColor: reason ? "var(--bg)" : "var(--text-dim)" }}>
+              {submitting ? "Submitting..." : "Submit Report"}
+            </button>
+            <button onClick={() => { setOpen(false); setReason(""); }}
+              style={{ padding: "8px 20px", borderRadius: 100, border: "1px solid var(--border)", background: "none", color: "var(--text-muted)", fontWeight: 800, fontSize: 12, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   quiz: any,
   slug: string,
@@ -278,7 +337,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
         </ol>
       </nav>
 
-      {/* H1 intro block — single H1, shown only before quiz starts */}
+      {/* H1 intro block */}
       {!finished && current === 0 && !answered && (
         <div style={{ marginBottom: 24, textAlign: "center" }}>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
@@ -348,6 +407,9 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
                 );
               })}
             </ul>
+
+            {/* Report button */}
+            <ReportButton quizSlug={slug} questionIndex={current} />
           </>
         ) : (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
@@ -441,7 +503,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
           </div>
         </div>
       )}
-
     </div>
   );
 }
