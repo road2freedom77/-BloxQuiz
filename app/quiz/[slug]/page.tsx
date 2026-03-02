@@ -210,7 +210,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hidden semantic HTML for SEO */}
+      {/* Hidden semantic HTML for SEO — no correct answers exposed */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
         <h1>{quiz.title}</h1>
         <p>{quiz.game} — {quiz.difficulty} — {quiz.questions.length} Questions</p>
@@ -220,9 +220,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
             <ul>
               {q.a.map((answer: string, j: number) => (
                 <li key={j}>
-                  <span>{["A", "B", "C", "D"][j] + ". "}</span>
-                  <span>{answer}</span>
-                  {j === q.correct && <span>{" (Correct Answer)"}</span>}
+                  <button>{["A", "B", "C", "D"][j] + ". " + answer}</button>
                 </li>
               ))}
             </ul>
