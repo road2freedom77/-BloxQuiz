@@ -44,7 +44,10 @@ export default function Nav() {
           <a href="/codes" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Codes</a>
           <a href="/#leaderboard" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Leaderboard</a>
 
-          {/* Only show streak if signed in and has a streak */}
+          {isSignedIn && (
+            <a href="/profile" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>My Profile</a>
+          )}
+
           {isSignedIn && streak !== null && streak > 0 && (
             <div style={{
               display: "flex", alignItems: "center", gap: 6,
@@ -52,7 +55,7 @@ export default function Nav() {
               borderRadius: 100, fontSize: 13, fontWeight: 800,
               color: "var(--neon-yellow)",
               border: "1px solid rgba(255,227,71,0.2)"
-            }}>🔥 {streak} Day Streak</div>
+            }}>{"🔥 " + streak + " Day Streak"}</div>
           )}
 
           {isSignedIn ? (
