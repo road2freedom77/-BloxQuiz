@@ -13,6 +13,16 @@ const games = [
   { name: "Tower of Hell", slug: "tower-of-hell", topics: "stages, mechanics, records, sections, obstacles, modifiers, rings" },
   { name: "Murder Mystery 2", slug: "murder-mystery-2", topics: "knives, guns, maps, strategies, roles, godly weapons, trading, seasons" },
   { name: "Grow a Garden", slug: "grow-a-garden", topics: "plants, seeds, tools, mechanics, harvesting, rare crops, fertilizer, seasons" },
+  { name: "Royale High", slug: "royale-high", topics: "diamonds, sets, trading, realms, fountain rewards, accessories, halos, seasonal events" },
+  { name: "Kick Off", slug: "kick-off", topics: "teams, skills, positions, tactics, tournaments, power shots, dribbling" },
+  { name: "Doors", slug: "doors", topics: "entities, floors, items, secrets, rooms, hotel, backdoor, achievements" },
+  { name: "Anime Fighting Simulator", slug: "anime-fighting-simulator", topics: "stands, transformations, training, zones, benchmarks, quirks, swords" },
+  { name: "Berry Avenue", slug: "berry-avenue", topics: "locations, roleplay, houses, vehicles, jobs, outfits, secrets" },
+  { name: "Livetopia", slug: "livetopia", topics: "locations, activities, vehicles, jobs, houses, secrets, updates" },
+  { name: "Arsenal", slug: "arsenal", topics: "weapons, maps, game modes, kills, skins, melees, killstreaks" },
+  { name: "Natural Disaster Survival", slug: "natural-disaster-survival", topics: "disasters, survival strategies, maps, items, tips, rare disasters" },
+  { name: "Anime Defenders", slug: "anime-defenders", topics: "units, traits, evolutions, stages, gems, summons, tier list" },
+  { name: "Funky Friday", slug: "funky-friday", topics: "songs, arrows, ranks, emotes, dances, mods, characters" },
 ];
 
 function getExistingQuizzes() {

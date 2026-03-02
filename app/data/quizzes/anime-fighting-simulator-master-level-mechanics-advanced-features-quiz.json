@@ -1,0 +1,108 @@
+{
+  "slug": "anime-fighting-simulator-master-level-mechanics-advanced-features-quiz",
+  "title": "Anime Fighting Simulator: Master-Level Mechanics & Advanced Features Quiz",
+  "game": "Anime Fighting Simulator",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "What is the exact Strength requirement needed to unlock the Desert zone?",
+      "a": [
+        "25,000",
+        "50,000",
+        "75,000",
+        "100,000"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which stand has the ability called 'Time Stop' that can freeze time for other players?",
+      "a": [
+        "Star Platinum",
+        "The World",
+        "King Crimson",
+        "Gold Experience"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the maximum level cap for quirks in Anime Fighting Simulator?",
+      "a": [
+        "50",
+        "75",
+        "100",
+        "150"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which training method provides the highest Strength multiplier when using the 2x Strength gamepass?",
+      "a": [
+        "Punch Training",
+        "Weight Training",
+        "Speed Training",
+        "Chakra Training"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the Chakra requirement to unlock the Final Valley zone?",
+      "a": [
+        "500,000",
+        "750,000",
+        "1,000,000",
+        "1,250,000"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which sword has the special ability 'Demon Slayer' that deals extra damage to demon-type NPCs?",
+      "a": [
+        "Nichirin Blade",
+        "Demon Sword",
+        "Soul Cutter",
+        "Dragon Slayer"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What benchmark reward do you receive for reaching 1 billion total Strength?",
+      "a": [
+        "Legendary Crate",
+        "Champion Title",
+        "Golden Aura",
+        "Mythical Pet"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which transformation requires both 500,000 Strength AND 250,000 Chakra to unlock?",
+      "a": [
+        "Super Saiyan 2",
+        "Nine Tails Mode",
+        "Full Power",
+        "Ultra Instinct"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What is the spawn rate percentage for obtaining a Legendary quirk from the Quirk Spinner?",
+      "a": [
+        "0.5%",
+        "1%",
+        "2%",
+        "5%"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which zone contains the NPC 'Dio' that drops The World stand arrow?",
+      "a": [
+        "City",
+        "Desert",
+        "Space",
+        "Tournament"
+      ],
+      "correct": 2
+    }
+  ]
+}

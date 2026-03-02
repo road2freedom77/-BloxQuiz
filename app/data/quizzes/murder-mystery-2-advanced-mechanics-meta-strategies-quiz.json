@@ -1,0 +1,108 @@
+{
+  "slug": "murder-mystery-2-advanced-mechanics-meta-strategies-quiz",
+  "title": "Murder Mystery 2: Advanced Mechanics & Meta Strategies Quiz",
+  "game": "Murder Mystery 2",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "Which godly knife has the highest trade value among the original godly weapons released in 2015?",
+      "a": [
+        "Chroma Heat",
+        "Bioblade",
+        "Fang",
+        "Laser"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "On the Workshop map, what is the most effective camping spot for murderers due to its blind angle coverage?",
+      "a": [
+        "Behind the large machinery near spawn",
+        "Under the metal staircase",
+        "In the corner between the toolboxes and wall",
+        "On top of the elevated platform"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the exact throw speed multiplier difference between a regular knife and a godly knife in Murder Mystery 2?",
+      "a": [
+        "There is no difference",
+        "Godly knives are 1.5x faster",
+        "Regular knives are 0.8x slower",
+        "Godly knives have 2x range"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "During which season was the 'Chroma' rarity first introduced to Murder Mystery 2?",
+      "a": [
+        "Halloween 2016",
+        "Christmas 2016",
+        "Valentine's 2017",
+        "Summer 2017"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "In competitive play, what is considered the optimal Sheriff strategy when there are exactly 3 players remaining including yourself?",
+      "a": [
+        "Immediately shoot the most suspicious player",
+        "Force both players to stay in your line of sight",
+        "Drop your gun and observe movement patterns",
+        "Hide and wait for the murderer to reveal themselves"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which map feature on Mansion allows murderers to perform the 'phantom kill' technique?",
+      "a": [
+        "The piano room's hidden passage",
+        "The moving chandelier mechanism",
+        "The basement's lighting system",
+        "The balcony's elevation difference"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "What is the frame-perfect window for performing a successful knife deflection using the jumping technique?",
+      "a": [
+        "2-3 frames before impact",
+        "Exactly at impact",
+        "4-6 frames before the throw animation",
+        "Knife deflection is not possible"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "In the trading economy, what caused the massive value crash of 'Tides' godly in late 2019?",
+      "a": [
+        "It was accidentally made craftable",
+        "Nikilis released too many in an event",
+        "A duplication glitch was discovered",
+        "It was downgraded from godly to legendary"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which innocents' movement pattern is statistically most likely to get them killed first according to advanced gameplay analysis?",
+      "a": [
+        "Players who crouch-walk constantly",
+        "Players who jump excessively while moving",
+        "Players who follow other innocents closely",
+        "Players who stand still in corners"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the exact coin multiplier bonus for owning a radio gamepass during double coin events?",
+      "a": [
+        "2x total (no additional bonus)",
+        "3x total (1.5x from radio + 2x event)",
+        "4x total (2x from radio + 2x event)",
+        "6x total (3x from radio + 2x event)"
+      ],
+      "correct": 2
+    }
+  ]
+}

@@ -34,6 +34,16 @@ export default function GameCategories() {
     { name: "Tower of Hell", icon: "🗼", bg: "rgba(0,245,160,0.12)", badge: null, slug: "tower-of-hell" },
     { name: "Grow a Garden", icon: "🌱", bg: "rgba(184,76,255,0.12)", badge: "✨ New", badgeColor: "#00F5A0", badgeBg: "rgba(0,245,160,0.15)", slug: "grow-a-garden" },
     { name: "Murder Mystery 2", icon: "🔫", bg: "rgba(255,138,71,0.12)", badge: null, slug: "murder-mystery-2" },
+    { name: "Royale High", icon: "👑", bg: "rgba(255,105,180,0.12)", badge: "✨ New", badgeColor: "#FF69B4", badgeBg: "rgba(255,105,180,0.15)", slug: "royale-high" },
+    { name: "Doors", icon: "🚪", bg: "rgba(255,60,60,0.12)", badge: "🔥 Hot", badgeColor: "#FF3C3C", badgeBg: "rgba(255,60,60,0.15)", slug: "doors" },
+    { name: "Arsenal", icon: "🎯", bg: "rgba(255,165,0,0.12)", badge: null, slug: "arsenal" },
+    { name: "Anime Fighting Simulator", icon: "🥊", bg: "rgba(0,245,160,0.12)", badge: null, slug: "anime-fighting-simulator" },
+    { name: "Berry Avenue", icon: "🍓", bg: "rgba(255,20,147,0.12)", badge: "✨ New", badgeColor: "#FF1493", badgeBg: "rgba(255,20,147,0.15)", slug: "berry-avenue" },
+    { name: "Livetopia", icon: "🏖️", bg: "rgba(0,191,255,0.12)", badge: null, slug: "livetopia" },
+    { name: "Natural Disaster Survival", icon: "🌪️", bg: "rgba(128,128,128,0.12)", badge: null, slug: "natural-disaster-survival" },
+    { name: "Anime Defenders", icon: "🐉", bg: "rgba(148,0,211,0.12)", badge: "📈 Trending", badgeColor: "#9400D3", badgeBg: "rgba(148,0,211,0.15)", slug: "anime-defenders" },
+    { name: "Funky Friday", icon: "🎵", bg: "rgba(255,215,0,0.12)", badge: null, slug: "funky-friday" },
+    { name: "Kick Off", icon: "⚽", bg: "rgba(0,128,0,0.12)", badge: null, slug: "kick-off" },
   ].map(g => ({ ...g, quizzes: getQuizCountByGame(g.name) }));
 
   const total = getTotalQuizCount();
@@ -44,14 +54,14 @@ export default function GameCategories() {
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>{"🎮 Pick a Game"}</h2>
         <a href="/browse" style={{ color: "var(--neon-green)", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{"View All " + total + "+ →"}</a>
       </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14 }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
         {games.map((game) => (
           <a href={"/games/" + game.slug} key={game.name} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px 16px", textAlign: "center", cursor: "pointer", position: "relative", overflow: "hidden", textDecoration: "none", display: "block" }}>
             {game.badge && (
               <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, background: game.badgeBg, color: game.badgeColor }}>{game.badge}</span>
             )}
             <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 12px", background: game.bg }}>{game.icon}</div>
-            <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 4, color: "var(--text)" }}>{game.name}</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 800, marginBottom: 4, color: "var(--text)" }}>{game.name}</h3>
             <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{game.quizzes} Quizzes</p>
           </a>
         ))}

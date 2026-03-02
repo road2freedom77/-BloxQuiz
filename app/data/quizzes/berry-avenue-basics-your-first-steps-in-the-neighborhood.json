@@ -1,0 +1,108 @@
+{
+  "slug": "berry-avenue-basics-your-first-steps-in-the-neighborhood",
+  "title": "Berry Avenue Basics: Your First Steps in the Neighborhood",
+  "game": "Berry Avenue",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What is the main purpose of Berry Avenue?",
+      "a": [
+        "Fighting other players",
+        "Roleplay and simulation",
+        "Racing cars",
+        "Building structures"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Where do players typically start when they join Berry Avenue?",
+      "a": [
+        "Inside a house",
+        "At the spawn area",
+        "In a car",
+        "At the school"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What can you do to earn money for a house in Berry Avenue?",
+      "a": [
+        "Complete obby courses",
+        "Get a job",
+        "Fight NPCs",
+        "Solve puzzles"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which of these is a popular job option in Berry Avenue?",
+      "a": [
+        "Pizza delivery",
+        "Warrior",
+        "Wizard",
+        "Dragon trainer"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What is the primary way to customize your character's appearance?",
+      "a": [
+        "Paint buckets",
+        "Magic spells",
+        "Outfits and accessories",
+        "Special potions"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What type of building can players purchase and live in?",
+      "a": [
+        "Castles",
+        "Houses",
+        "Spaceships",
+        "Caves"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which location is commonly used for shopping in Berry Avenue?",
+      "a": [
+        "The forest",
+        "The mall",
+        "The ocean",
+        "The mountains"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What can players use to travel around Berry Avenue faster?",
+      "a": [
+        "Teleportation spells",
+        "Flying carpets",
+        "Vehicles",
+        "Portal guns"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Where would you typically go to attend classes in a school roleplay?",
+      "a": [
+        "The hospital",
+        "The school building",
+        "The police station",
+        "The park"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is a common roleplay scenario that players engage in?",
+      "a": [
+        "Space exploration",
+        "Family life",
+        "Monster hunting",
+        "Time travel"
+      ],
+      "correct": 1
+    }
+  ]
+}

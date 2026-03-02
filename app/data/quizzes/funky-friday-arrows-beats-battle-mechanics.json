@@ -1,0 +1,108 @@
+{
+  "slug": "funky-friday-arrows-beats-battle-mechanics",
+  "title": "Funky Friday: Arrows, Beats & Battle Mechanics",
+  "game": "Funky Friday",
+  "difficulty": "Medium",
+  "questions": [
+    {
+      "q": "What happens when you hit a 'Sick' note in Funky Friday?",
+      "a": [
+        "You gain 350 points",
+        "You gain 300 points",
+        "You gain 250 points",
+        "You gain 400 points"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which rank requires exactly 25,000 total points to achieve?",
+      "a": [
+        "Experienced",
+        "Skilled",
+        "Expert",
+        "Master"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What color are the down arrow notes in the default arrow skin?",
+      "a": [
+        "Red",
+        "Blue",
+        "Green",
+        "Purple"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which emote can you unlock by reaching the 'Pro' rank?",
+      "a": [
+        "Dab",
+        "Orange Justice",
+        "Floss",
+        "Default Dance"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "In the song 'Bopeebo', what week does this track originally appear in?",
+      "a": [
+        "Week 2",
+        "Week 3",
+        "Week 1",
+        "Week 4"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the scroll speed setting that most intermediate players use?",
+      "a": [
+        "2.5",
+        "3.0",
+        "3.5",
+        "4.0"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which character mod features songs like 'Worship' and 'Zavodila'?",
+      "a": [
+        "Whitty",
+        "Tricky",
+        "Ruv",
+        "Hex"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What dance move corresponds to hitting four perfect arrows in a row?",
+      "a": [
+        "Spin move",
+        "Jump",
+        "No special dance",
+        "Arm wave"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "How many arrows must you miss consecutively to automatically fail a song?",
+      "a": [
+        "15",
+        "20",
+        "25",
+        "30"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which arrow key corresponds to the right arrow in the default key bindings?",
+      "a": [
+        "D key",
+        "L key",
+        "Right Arrow key",
+        "K key"
+      ],
+      "correct": 1
+    }
+  ]
+}

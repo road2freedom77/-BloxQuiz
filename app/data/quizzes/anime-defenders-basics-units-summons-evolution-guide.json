@@ -1,0 +1,108 @@
+{
+  "slug": "anime-defenders-basics-units-summons-evolution-guide",
+  "title": "Anime Defenders Basics: Units, Summons & Evolution Guide",
+  "game": "Anime Defenders",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What is the primary currency used to summon units in Anime Defenders?",
+      "a": [
+        "Coins",
+        "Gems",
+        "Tokens",
+        "Stars"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many units can you typically deploy at the start of most stages?",
+      "a": [
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which trait is generally considered the best for dealing high damage?",
+      "a": [
+        "Swift",
+        "Flame",
+        "Divine",
+        "Frost"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What happens when you evolve a unit in Anime Defenders?",
+      "a": [
+        "It gains new abilities and increased stats",
+        "It becomes cheaper to deploy",
+        "It changes element completely",
+        "It can be sold for more coins"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "In the tier list, what does 'SS' rank typically represent?",
+      "a": [
+        "Worst units",
+        "Average units",
+        "Good units",
+        "Best units"
+      ],
+      "correct": 3
+    },
+    {
+      "q": "Which stage type typically gives the most experience for leveling units?",
+      "a": [
+        "Story Mode",
+        "Infinite Mode",
+        "Trial Mode",
+        "Event Stages"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is required to perform most unit evolutions?",
+      "a": [
+        "Only gems",
+        "Only coins",
+        "Specific materials and currency",
+        "Other units as sacrifice"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which summon banner typically has the highest chance for rare units?",
+      "a": [
+        "Standard Banner",
+        "Featured Banner",
+        "Beginner Banner",
+        "Friend Banner"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What determines how much damage a unit deals to enemies?",
+      "a": [
+        "Only unit level",
+        "Only unit rarity",
+        "Attack stat and abilities",
+        "Placement position only"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which of these is NOT a common unit trait in Anime Defenders?",
+      "a": [
+        "Swift",
+        "Cursed",
+        "Magic",
+        "Rainbow"
+      ],
+      "correct": 3
+    }
+  ]
+}

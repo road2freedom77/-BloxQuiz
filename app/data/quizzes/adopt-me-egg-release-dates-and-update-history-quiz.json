@@ -1,0 +1,108 @@
+{
+  "slug": "adopt-me-egg-release-dates-and-update-history-quiz",
+  "title": "Adopt Me! Egg Release Dates and Update History Quiz",
+  "game": "Adopt Me!",
+  "difficulty": "Hard",
+  "questions": [
+    {
+      "q": "In what month and year was the Ocean Egg first released in Adopt Me!?",
+      "a": [
+        "March 2021",
+        "April 2021",
+        "May 2021",
+        "February 2021"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which legendary pet was the first ever to be obtainable through the Star Rewards system?",
+      "a": [
+        "Diamond Unicorn",
+        "Diamond Dragon",
+        "Golden Unicorn",
+        "Diamond Griffin"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What was the original price of the Jungle Egg when it was first released?",
+      "a": [
+        "600 Bucks",
+        "750 Bucks",
+        "800 Bucks",
+        "700 Bucks"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which update introduced the ability to make Mega Neon pets?",
+      "a": [
+        "Pet Update",
+        "Mega Neon Update",
+        "Halloween Update 2019",
+        "Christmas Update 2019"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "How many tasks must be completed to fully grow a pet from Newborn to Full Grown without any potions?",
+      "a": [
+        "73 tasks",
+        "75 tasks",
+        "78 tasks",
+        "80 tasks"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which mythical pet was exclusively available during the Mythical Egg period and has never returned?",
+      "a": [
+        "Phoenix",
+        "Goldhorn",
+        "Wyvern",
+        "Sasquatch"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What is the exact probability of hatching a legendary pet from a regular non-themed egg like the Cracked Egg?",
+      "a": [
+        "1.5%",
+        "3%",
+        "5%",
+        "8%"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which pet was the first to be released with the 'fly and ride' potions already applied as a guaranteed feature?",
+      "a": [
+        "Evil Unicorn",
+        "Crow",
+        "Bat Dragon",
+        "Shadow Dragon"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "In the original pet values hierarchy, which pet was considered more valuable: NFR Giraffe or NFR Bat Dragon?",
+      "a": [
+        "NFR Giraffe",
+        "NFR Bat Dragon",
+        "They were equal",
+        "It varied by server"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What was the maximum number of pets a player could have in their inventory when pets were first introduced?",
+      "a": [
+        "50 pets",
+        "75 pets",
+        "100 pets",
+        "60 pets"
+      ],
+      "correct": 0
+    }
+  ]
+}

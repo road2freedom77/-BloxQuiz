@@ -1,0 +1,108 @@
+{
+  "slug": "natural-disaster-survival-basic-survival-skills-quiz",
+  "title": "Natural Disaster Survival: Basic Survival Skills Quiz",
+  "game": "Natural Disaster Survival",
+  "difficulty": "Easy",
+  "questions": [
+    {
+      "q": "What happens during a Tsunami disaster?",
+      "a": [
+        "Water floods the entire map",
+        "The ground shakes violently",
+        "Fire spreads everywhere",
+        "Strong winds blow players around"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which disaster causes the entire map to be covered in green toxic gas?",
+      "a": [
+        "Acid Rain",
+        "Sandstorm",
+        "Toxic Gas",
+        "Fog"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the best survival strategy during an Earthquake?",
+      "a": [
+        "Stand in the open",
+        "Hide under sturdy structures",
+        "Run to the highest point",
+        "Jump continuously"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which disaster involves meteors falling from the sky?",
+      "a": [
+        "Volcanic Eruption",
+        "Meteor Shower",
+        "Thunderstorm",
+        "Blizzard"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "What should you do when you see a Tornado approaching?",
+      "a": [
+        "Run towards it",
+        "Hide underground or in sturdy buildings",
+        "Stand still",
+        "Jump over it"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which item can players use to help survive certain disasters?",
+      "a": [
+        "Balloons",
+        "Magnifying glass",
+        "Rope",
+        "Mirror"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "What happens during a Blizzard disaster?",
+      "a": [
+        "Players get frozen and move slowly",
+        "The map fills with water",
+        "Lightning strikes everywhere",
+        "The ground cracks open"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Which disaster is considered one of the rarest in the game?",
+      "a": [
+        "Tsunami",
+        "Earthquake",
+        "Mystery Disaster",
+        "Tornado"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "What is the main goal in Natural Disaster Survival?",
+      "a": [
+        "Collect the most coins",
+        "Be the last player standing",
+        "Survive until the disaster ends",
+        "Build the tallest structure"
+      ],
+      "correct": 2
+    },
+    {
+      "q": "During a Volcanic Eruption, what should you avoid?",
+      "a": [
+        "Water areas",
+        "The lava balls falling from the sky",
+        "Other players",
+        "Green objects"
+      ],
+      "correct": 1
+    }
+  ]
+}
