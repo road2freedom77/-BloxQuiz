@@ -10,6 +10,16 @@ const gameSlugMap: Record<string, string> = {
   "Tower of Hell": "tower-of-hell",
   "Murder Mystery 2": "murder-mystery-2",
   "Grow a Garden": "grow-a-garden",
+  "Royale High": "royale-high",
+  "Doors": "doors",
+  "Arsenal": "arsenal",
+  "Anime Fighting Simulator": "anime-fighting-simulator",
+  "Berry Avenue": "berry-avenue",
+  "Livetopia": "livetopia",
+  "Natural Disaster Survival": "natural-disaster-survival",
+  "Anime Defenders": "anime-defenders",
+  "Funky Friday": "funky-friday",
+  "Kick Off": "kick-off",
 };
 
 const diffColors: Record<string, { color: string, bg: string }> = {
@@ -25,6 +35,16 @@ const gameEmojis: Record<string, string> = {
   "Tower of Hell": "🗼",
   "Murder Mystery 2": "🔫",
   "Grow a Garden": "🌱",
+  "Royale High": "👑",
+  "Doors": "🚪",
+  "Arsenal": "🎯",
+  "Anime Fighting Simulator": "🥊",
+  "Berry Avenue": "🍓",
+  "Livetopia": "🏖️",
+  "Natural Disaster Survival": "🌪️",
+  "Anime Defenders": "🐉",
+  "Funky Friday": "🎵",
+  "Kick Off": "⚽",
 };
 
 export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: string, faqs: any[] }) {
@@ -260,6 +280,18 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
       <canvas ref={canvasRef} style={{ display: "none" }} />
 
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" style={{ marginBottom: 16, fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>
+        <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+          <li><a href="/" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Home</a></li>
+          <li style={{ color: "var(--text-dim)" }}>{"›"}</li>
+          <li><a href={"/games/" + gameSlug} style={{ color: "var(--text-muted)", textDecoration: "none" }}>{quiz.game}</a></li>
+          <li style={{ color: "var(--text-dim)" }}>{"›"}</li>
+          <li style={{ color: "var(--text)", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{quiz.title}</li>
+        </ol>
+      </nav>
+
+      {/* H1 intro block */}
       {!finished && (
         <div style={{
           marginBottom: current === 0 && !answered ? 24 : 0,
@@ -325,53 +357,25 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
         ) : (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 72, marginBottom: 16 }}>{getResultLabel().emoji}</div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score}/{quiz.questions.length}</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score + "/" + quiz.questions.length}</div>
             <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{getResultLabel().label}</div>
-            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 24 }}>
+            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 28 }}>
               {user ? "+" + (score * 10) + " XP earned!" : "Sign in to save your score and earn XP!"}
             </div>
 
-            {/* Share buttons */}
+            {/* Share Card */}
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
                 <button
                   onClick={shareScore}
                   disabled={sharing}
-                  style={{
-                    background: shared ? "var(--surface)" : "linear-gradient(135deg, #B84CFF, #FF3CAC)",
-                    color: "#fff",
-                    fontWeight: 900,
-                    fontSize: 16,
-                    padding: "16px 36px",
-                    borderRadius: 100,
-                    border: shared ? "1px solid var(--border)" : "none",
-                    cursor: sharing ? "default" : "pointer",
-                    fontFamily: "var(--font-body)",
-                    WebkitTextFillColor: "#fff",
-                    opacity: sharing ? 0.7 : 1,
-                    boxShadow: shared ? "none" : "0 4px 24px rgba(184,76,255,0.4)"
-                  }}
+                  style={{ background: shared ? "var(--surface)" : "linear-gradient(135deg, #B84CFF, #FF3CAC)", color: "#fff", fontWeight: 900, fontSize: 16, padding: "16px 36px", borderRadius: 100, border: shared ? "1px solid var(--border)" : "none", cursor: sharing ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "#fff", opacity: sharing ? 0.7 : 1, boxShadow: shared ? "none" : "0 4px 24px rgba(184,76,255,0.4)" }}
                 >
                   {sharing ? "⏳ Generating..." : shared ? "✅ Card Downloaded!" : "📸 Share My Score"}
                 </button>
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText("https://www.bloxquiz.gg/quiz/" + slug);
-                    setCopiedLink(true);
-                    setTimeout(() => setCopiedLink(false), 2000);
-                  }}
-                  style={{
-                    background: "var(--surface)",
-                    color: "var(--text)",
-                    fontWeight: 900,
-                    fontSize: 16,
-                    padding: "16px 36px",
-                    borderRadius: 100,
-                    border: "1px solid var(--border)",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-body)",
-                    WebkitTextFillColor: "var(--text)",
-                  }}
+                  onClick={() => { navigator.clipboard.writeText("https://www.bloxquiz.gg/quiz/" + slug); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }}
+                  style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 900, fontSize: 16, padding: "16px 36px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--text)" }}
                 >
                   {copiedLink ? "✅ Link Copied!" : "🔗 Copy Link"}
                 </button>
@@ -382,9 +386,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
             </div>
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
-              <button
-                onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }}
-                style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
                 {"🔄 Play Again"}
               </button>
               <a href="/quiz/random" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
@@ -406,7 +408,7 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
                   <span style={{ fontSize: 18 }}>🏆</span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Browse All Quizzes</span>
                 </a>
-                <a href="/#leaderboard" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+                <a href="/leaderboard" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 18 }}>👑</span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Leaderboard</span>
                 </a>
@@ -416,26 +418,26 @@ export default function QuizClient({ quiz, slug, faqs }: { quiz: any, slug: stri
         )}
       </div>
 
+      {/* FAQ */}
       <div style={{ marginTop: 32 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"❓ Frequently Asked Questions"}</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {faqs.map((faq, i) => (
-            <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", overflow: "hidden" }}>
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                style={{ width: "100%", padding: "16px 20px", background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: "var(--font-body)", fontSize: 14, fontWeight: 700, color: "var(--text)", textAlign: "left" }}>
+            <details key={i} open={openFaq === i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", overflow: "hidden" }}>
+              <summary
+                onClick={(e) => { e.preventDefault(); setOpenFaq(openFaq === i ? null : i); }}
+                style={{ padding: "16px 20px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: "var(--font-body)", fontSize: 14, fontWeight: 700, color: "var(--text)", listStyle: "none" }}>
                 {faq.question}
                 <span style={{ fontSize: 18, color: "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>{openFaq === i ? "−" : "+"}</span>
-              </button>
-              {openFaq === i && (
-                <div style={{ padding: "0 20px 16px", fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6 }}>
-                  {faq.answer}
-                </div>
-              )}
-            </div>
+              </summary>
+              <div style={{ padding: "0 20px 16px", fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6 }}>
+                {faq.answer}
+              </div>
+            </details>
           ))}
         </div>
       </div>
+
     </div>
   );
 }
