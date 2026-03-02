@@ -1,22 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function Hero() {
-  const [stats, setStats] = useState({
-    quizzesPlayed: 0,
-    players: 0,
-    totalQuizzes: 0,
-    gamesCovered: 6,
-  });
-  const [loaded, setLoaded] = useState(false);
+interface Stats {
+  quizzesPlayed: number;
+  players: number;
+  totalQuizzes: number;
+  gamesCovered: number;
+}
+
+export default function Hero({ initialStats }: { initialStats: Stats }) {
+  const [stats, setStats] = useState<Stats>(initialStats);
 
   useEffect(() => {
     fetch("/api/stats")
       .then(r => r.json())
-      .then(data => {
-        setStats(data);
-        setLoaded(true);
-      });
+      .then(data => setStats(data));
   }, []);
 
   function formatNumber(n: number) {
@@ -25,16 +23,11 @@ export default function Hero() {
     return n.toString();
   }
 
-  const statItems = loaded ? [
+  const statItems = [
     [formatNumber(stats.quizzesPlayed), "Quizzes Played"],
     [formatNumber(stats.players), "Players"],
     [stats.totalQuizzes.toString(), "Quizzes"],
     [stats.gamesCovered.toString(), "Games Covered"],
-  ] : [
-    ["—", "Quizzes Played"],
-    ["—", "Players"],
-    ["—", "Quizzes"],
-    ["—", "Games Covered"],
   ];
 
   return (
@@ -45,7 +38,7 @@ export default function Hero() {
       position: "relative", zIndex: 1
     }}>
       <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>● {loaded ? stats.totalQuizzes : "—"}+ Quizzes</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>{"● " + stats.totalQuizzes + "+ Quizzes"}</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,60,172,0.12)", color: "var(--neon-pink)" }}>● Daily Challenges</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,227,71,0.12)", color: "var(--neon-yellow)" }}>● Free Codes</span>
       </div>
@@ -70,14 +63,14 @@ export default function Hero() {
           padding: "16px 36px", borderRadius: 100,
           textDecoration: "none", WebkitTextFillColor: "var(--bg)",
           boxShadow: "0 4px 20px rgba(0,245,160,0.25)"
-        }}>⚡ Start Random Quiz</a>
+        }}>{"⚡ Start Random Quiz"}</a>
         <a href="/browse" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "var(--surface)", color: "var(--text)",
           fontWeight: 800, fontSize: 16,
           padding: "16px 36px", borderRadius: 100,
           textDecoration: "none", border: "1px solid var(--border)"
-        }}>🎮 Browse All Quizzes</a>
+        }}>{"🎮 Browse All Quizzes"}</a>
       </div>
       <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", justifyContent: "center", gap: 40, padding: "20px 0" }}>
         {statItems.map(([num, label]) => (
