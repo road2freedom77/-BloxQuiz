@@ -155,13 +155,13 @@ export async function GET(req: Request) {
 
   // Check daily limit (max 2 per day)
   const todayCount = await getTodayCount();
-  if (todayCount >= 50) {
+  if (todayCount >= 2) {
     return NextResponse.json({ skipped: true, reason: "Daily limit reached" });
   }
 
   // Random roll — 25% chance to generate on any given hour
   const roll = Math.random();
-  if (roll > 1) {
+  if (roll > 0.33) {
     return NextResponse.json({ skipped: true, reason: "Random skip", roll });
   }
 
