@@ -161,7 +161,7 @@ export async function GET(req: Request) {
 
   // Random roll — 25% chance to generate on any given hour
   const roll = Math.random();
-  if (roll > 0.25) {
+  if (roll > 1) {
     return NextResponse.json({ skipped: true, reason: "Random skip", roll });
   }
 
