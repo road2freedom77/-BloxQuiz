@@ -155,7 +155,7 @@ export async function GET(req: Request) {
 
   // Check daily limit (max 2 per day)
   const todayCount = await getTodayCount();
-  if (todayCount >= 2) {
+  if (todayCount >= 50) {
     return NextResponse.json({ skipped: true, reason: "Daily limit reached" });
   }
 
