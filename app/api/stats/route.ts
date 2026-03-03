@@ -12,14 +12,18 @@ export async function GET() {
     .from("users")
     .select("*", { count: "exact", head: true });
 
+  const { count: generatedCount } = await supabase
+    .from("quizzes")
+    .select("*", { count: "exact", head: true });
+
   const staticQuizzes = 4;
-  let dynamicQuizzes = 0;
+  let jsonQuizzes = 0;
   const gameSet = new Set<string>();
 
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
     const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json"));
-    dynamicQuizzes = files.length;
+    jsonQuizzes = files.length;
     for (const file of files) {
       try {
         const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
@@ -28,7 +32,7 @@ export async function GET() {
     }
   } catch (e) {}
 
-  const totalQuizzes = staticQuizzes + dynamicQuizzes;
+  const totalQuizzes = staticQuizzes + jsonQuizzes + (generatedCount || 0);
 
   return NextResponse.json({
     quizzesPlayed: quizzesPlayed || 0,
