@@ -4,7 +4,7 @@ import path from "path";
 import { supabase } from "../../lib/supabase";
 import QuizClient from "./QuizClient";
 
-function getQuiz(slug: string) {
+async function getQuiz(slug: string) {
   const staticQuizzes: Record<string, any> = {
     "blox-fruits-ultimate": {
       title: "Ultimate Blox Fruits Expert Quiz",
@@ -78,42 +78,73 @@ function getQuiz(slug: string) {
 
   if (staticQuizzes[slug]) return staticQuizzes[slug];
 
+  // Try JSON file
   try {
     const filePath = path.join(process.cwd(), `app/data/quizzes/${slug}.json`);
     const content = fs.readFileSync(filePath, "utf8");
     return JSON.parse(content);
-  } catch (e) {
-    return null;
-  }
+  } catch (e) {}
+
+  // Fall back to Supabase
+  try {
+    const { data } = await supabase
+      .from("quizzes")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+    if (data) return data;
+  } catch (e) {}
+
+  return null;
 }
 
-function getRelatedQuizzes(currentSlug: string, game: string) {
+async function getRelatedQuizzes(currentSlug: string, game: string) {
   const related: any[] = [];
+  const slugsSeen = new Set<string>();
+  slugsSeen.add(currentSlug);
+
+  // JSON files
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
     const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json"));
     for (const file of files) {
       const slug = file.replace(".json", "");
-      if (slug === currentSlug) continue;
+      if (slugsSeen.has(slug)) continue;
       const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
       if (content.game === game) {
-        related.push({
-          slug,
-          title: content.title,
-          game: content.game,
-          difficulty: content.difficulty,
-          questions: content.questions?.length || 10,
-        });
+        related.push({ slug, title: content.title, game: content.game, difficulty: content.difficulty, questions: content.questions?.length || 10 });
+        slugsSeen.add(slug);
       }
       if (related.length >= 6) break;
     }
   } catch (e) {}
-  return related;
+
+  // Supabase quizzes
+  if (related.length < 6) {
+    try {
+      const { data } = await supabase
+        .from("quizzes")
+        .select("slug, title, game, difficulty, questions")
+        .eq("game", game)
+        .neq("slug", currentSlug)
+        .limit(6 - related.length);
+      if (data) {
+        for (const q of data) {
+          if (!slugsSeen.has(q.slug)) {
+            related.push({ slug: q.slug, title: q.title, game: q.game, difficulty: q.difficulty, questions: Array.isArray(q.questions) ? q.questions.length : 10 });
+            slugsSeen.add(q.slug);
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  return related.slice(0, 6);
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const quiz = getQuiz(slug);
+  const quiz = await getQuiz(slug);
 
   if (!quiz) return {
     title: "Quiz Not Found | BloxQuiz",
@@ -145,7 +176,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function QuizPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const quiz = getQuiz(slug);
+  const quiz = await getQuiz(slug);
 
   if (!quiz) notFound();
 
@@ -165,7 +196,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
     }
   }
 
-  const relatedQuizzes = getRelatedQuizzes(slug, quiz.game);
+  const relatedQuizzes = await getRelatedQuizzes(slug, quiz.game);
   const article = quiz.difficulty === "Easy" ? "an" : "a";
   const firstQ = quiz.questions[0];
 
@@ -229,7 +260,6 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Clean SEO block — no question dump, no spoilers */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
         <p>{quiz.game + " — " + quiz.difficulty + " difficulty — " + quiz.questions.length + " multiple choice questions"}</p>
         <p>{"Free " + quiz.game + " trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard."}</p>
