@@ -24,6 +24,19 @@ function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+function getAngleDescription(angle: string) {
+  const descriptions: Record<string, string> = {
+    Beginner: "basic mechanics, starter items, fundamental gameplay for new players",
+    Expert: "advanced strategies, endgame content, rare items, expert-level knowledge",
+    Lore: "story, characters, world-building, lore and narrative elements",
+    Trading: "item values, trading strategies, rare items, economy and market knowledge",
+    Mechanics: "combat systems, abilities, game mechanics, technical gameplay",
+    Secrets: "hidden items, Easter eggs, secret locations, tricks and discoveries",
+    Updates: "recent additions, new content, latest features and changes",
+  };
+  return descriptions[angle] || angle;
+}
+
 async function getTodayCount() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -43,7 +56,6 @@ async function getExistingQuizzes() {
 }
 
 async function pickGameAndAngle(existing: any[]) {
-  // Count quizzes per game
   const gameCounts: Record<string, number> = {};
   const gameAngles: Record<string, string[]> = {};
 
@@ -59,9 +71,8 @@ async function pickGameAndAngle(existing: any[]) {
     }
   }
 
-  // Pick game with fewest quizzes
-  const sortedGames = GAMES.sort((a, b) => gameCounts[a] - gameCounts[b]);
-  
+  const sortedGames = [...GAMES].sort((a, b) => gameCounts[a] - gameCounts[b]);
+
   for (const game of sortedGames) {
     const usedAngles = gameAngles[game];
     const availableAngles = ANGLES.filter(a => !usedAngles.includes(a));
@@ -71,7 +82,6 @@ async function pickGameAndAngle(existing: any[]) {
     }
   }
 
-  // All angles used for all games — reset and pick randomly
   const game = GAMES[Math.floor(Math.random() * GAMES.length)];
   const angle = ANGLES[Math.floor(Math.random() * ANGLES.length)];
   return { game, angle };
@@ -136,19 +146,6 @@ Rules:
   return parsed;
 }
 
-function getAngleDescription(angle: string) {
-  const descriptions: Record<string, string> = {
-    Beginner: "basic mechanics, starter items, fundamental gameplay for new players",
-    Expert: "advanced strategies, endgame content, rare items, expert-level knowledge",
-    Lore: "story, characters, world-building, lore and narrative elements",
-    Trading: "item values, trading strategies, rare items, economy and market knowledge",
-    Mechanics: "combat systems, abilities, game mechanics, technical gameplay",
-    Secrets: "hidden items, Easter eggs, secret locations, tricks and discoveries",
-    Updates: "recent additions, new content, latest features and changes",
-  };
-  return descriptions[angle] || angle;
-}
-
 export async function GET(req: Request) {
   // Verify secret
   const authHeader = req.headers.get("authorization");
@@ -173,19 +170,17 @@ export async function GET(req: Request) {
   const { game, angle } = await pickGameAndAngle(existing);
 
   try {
-    // Generate quiz
     const quiz = await generateQuiz(game, angle);
 
-    // Create slug
+    // Create clean slug, only add suffix if duplicate
     const baseSlug = slugify(quiz.title);
-    const slug = `${baseSlug}-${Date.now()}`;
-
-    // Check for duplicate title
-    const { data: existing_slug } = await supabase
+    const { data: existingSlug } = await supabase
       .from("quizzes")
       .select("id")
       .eq("slug", baseSlug)
       .single();
+
+    const slug = existingSlug ? `${baseSlug}-2` : baseSlug;
 
     // Save to Supabase
     const { error } = await supabase.from("quizzes").insert({
@@ -213,7 +208,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ success: true, slug, game, angle });
 
   } catch (error: any) {
-    // Log failure
     await supabase.from("cron_logs").insert({
       status: "failed",
       game,
