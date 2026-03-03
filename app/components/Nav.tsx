@@ -2,15 +2,25 @@
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
+const ADMIN_USER_ID = "user_3ALlHJlXwNoezsy7eoC7qAp6yTO";
+
 export default function Nav() {
   const { isSignedIn, user } = useUser();
   const [streak, setStreak] = useState<number | null>(null);
+  const [flagCount, setFlagCount] = useState(0);
 
   useEffect(() => {
     if (!user?.id) { setStreak(null); return; }
     fetch(`/api/streak?userId=${user.id}`)
       .then(r => r.json())
       .then(data => setStreak(data.streak));
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id !== ADMIN_USER_ID) return;
+    fetch("/api/flags/count")
+      .then(r => r.json())
+      .then(data => setFlagCount(data.count || 0));
   }, [user?.id]);
 
   return (
@@ -46,6 +56,23 @@ export default function Nav() {
 
           {isSignedIn && (
             <a href="/profile" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>My Profile</a>
+          )}
+
+          {/* Admin link with flag badge */}
+          {isSignedIn && user?.id === ADMIN_USER_ID && (
+            <a href="/admin" style={{ position: "relative", textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>
+              🛡️ Admin
+              {flagCount > 0 && (
+                <span style={{
+                  position: "absolute", top: 2, right: 2,
+                  background: "var(--neon-pink)", color: "#fff",
+                  fontSize: 10, fontWeight: 900,
+                  width: 18, height: 18, borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  WebkitTextFillColor: "#fff",
+                }}>{flagCount}</span>
+              )}
+            </a>
           )}
 
           {isSignedIn && streak !== null && streak > 0 && (

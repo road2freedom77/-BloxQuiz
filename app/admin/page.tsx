@@ -35,9 +35,10 @@ async function getStats() {
     .from("users")
     .select("*", { count: "exact", head: true });
 
-  const { count: totalFlags } = await supabase
+    const { count: totalFlags } = await supabase
     .from("flags")
-    .select("*", { count: "exact", head: true });
+    .select("*", { count: "exact", head: true })
+    .eq("status", "open");
 
   return {
     totalPlays: totalPlays || 0,
@@ -47,13 +48,14 @@ async function getStats() {
 }
 
 async function getFlags() {
-  const { data } = await supabase
-    .from("flags")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(50);
-  return data || [];
-}
+    const { data } = await supabase
+      .from("flags")
+      .select("*")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return data || [];
+  }
 
 async function getTopQuizzes() {
   const { data } = await supabase
