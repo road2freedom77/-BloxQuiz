@@ -17,11 +17,15 @@ async function getInitialStats() {
     const { count: players } = await supabase
       .from("users")
       .select("*", { count: "exact", head: true });
+    const { count: generatedCount } = await supabase
+      .from("quizzes")
+      .select("*", { count: "exact", head: true });
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const totalQuizzes = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
-    return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 6 };
+    const jsonCount = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
+    const totalQuizzes = jsonCount + (generatedCount || 0);
+    return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 16 };
   } catch {
-    return { quizzesPlayed: 0, players: 0, totalQuizzes: 19, gamesCovered: 6 };
+    return { quizzesPlayed: 0, players: 0, totalQuizzes: 45, gamesCovered: 16 };
   }
 }
 
