@@ -18,6 +18,10 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
   const [gameFilter, setGameFilter] = useState("All");
   const [flags, setFlags] = useState(initialFlags);
   const [dismissing, setDismissing] = useState<string | null>(null);
+  const [editingFlag, setEditingFlag] = useState<string | null>(null);
+  const [editData, setEditData] = useState<{ question: string, answers: string[], correct: number } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
   const games = ["All", ...Array.from(new Set(quizzes.map(q => q.game)))];
 
@@ -28,17 +32,52 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
   });
 
   async function dismissFlag(id: string) {
-    console.log("Dismissing flag id:", id);
     setDismissing(id);
-    const res = await fetch("/api/flags/dismiss", {
+    await fetch("/api/flags/dismiss", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    const data = await res.json();
-    console.log("Response:", data);
     setFlags(prev => prev.filter(f => f.id !== id));
     setDismissing(null);
+    if (editingFlag === id) { setEditingFlag(null); setEditData(null); }
+  }
+
+  async function startEdit(f: any) {
+    if (editingFlag === f.id) { setEditingFlag(null); setEditData(null); return; }
+    try {
+      const res = await fetch(`/api/quiz/get?slug=${f.quiz_slug}`);
+      const data = await res.json();
+      const q = data.questions[f.question_index];
+      setEditData({ question: q.q, answers: [...q.a], correct: q.correct });
+      setEditingFlag(f.id);
+    } catch (e) {
+      alert("Could not load question data.");
+    }
+  }
+
+  async function saveEdit(f: any) {
+    if (!editData) return;
+    setSaving(true);
+    const res = await fetch("/api/quiz/edit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: f.quiz_slug,
+        questionIndex: f.question_index,
+        question: editData.question,
+        answers: editData.answers,
+        correct: editData.correct,
+      }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (data.success) {
+      setSaveSuccess(f.id);
+      setTimeout(() => setSaveSuccess(null), 2000);
+    } else {
+      alert("Save failed: " + data.error);
+    }
   }
 
   return (
@@ -164,31 +203,91 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
       )}
 
       {tab === "flags" && (
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {flags.length === 0 ? (
-            <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No open flags! 🎉</div>
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>
+              No open flags! 🎉
+            </div>
           ) : (
-            <>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 100px 90px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
-                <div>Quiz</div><div>Q#</div><div>Reason</div><div>Date</div><div>Action</div>
-              </div>
-              {flags.map((f, i) => (
-                <div key={f.id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 100px 90px", alignItems: "center", padding: "14px 20px", borderBottom: i < flags.length - 1 ? "1px solid var(--border)" : "none" }}>
+            flags.map((f, i) => (
+              <div key={f.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+                {/* Flag row */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 100px auto", alignItems: "center", padding: "14px 20px", gap: 12 }}>
                   <div>
                     <a href={"/quiz/" + f.quiz_slug} target="_blank" style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-blue)", textDecoration: "none" }}>{f.quiz_slug}</a>
                   </div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{"Q" + (f.question_index + 1)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{f.reason || "No reason given"}</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{new Date(f.created_at).toLocaleDateString()}</div>
-                  <div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={() => startEdit(f)}
+                      style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: editingFlag === f.id ? "rgba(255,227,71,0.15)" : "rgba(0,217,255,0.1)", color: editingFlag === f.id ? "var(--neon-yellow)" : "var(--neon-blue)", border: "none", cursor: "pointer" }}>
+                      {editingFlag === f.id ? "Close" : "✏️ Edit"}
+                    </button>
                     <button onClick={() => dismissFlag(f.id)} disabled={dismissing === f.id}
                       style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)", border: "none", cursor: "pointer" }}>
                       {dismissing === f.id ? "..." : "✅ Dismiss"}
                     </button>
                   </div>
                 </div>
-              ))}
-            </>
+
+                {/* Inline editor */}
+                {editingFlag === f.id && editData && (
+                  <div style={{ borderTop: "1px solid var(--border)", padding: 20, background: "var(--surface)" }}>
+                    <div style={{ fontSize: 12, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Edit Question</div>
+
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Question</label>
+                      <textarea
+                        value={editData.question}
+                        onChange={e => setEditData({ ...editData, question: e.target.value })}
+                        rows={2}
+                        style={{ width: "100%", padding: "10px 14px", background: "var(--bg-card)", border: "1.5px solid var(--border)", borderRadius: 10, color: "var(--text)", fontSize: 14, fontFamily: "var(--font-body)", fontWeight: 600, resize: "vertical", boxSizing: "border-box" }}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Answer Options</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {editData.answers.map((ans, j) => (
+                          <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <button onClick={() => setEditData({ ...editData, correct: j })}
+                              style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid " + (editData.correct === j ? "var(--neon-green)" : "var(--border)"), background: editData.correct === j ? "rgba(0,245,160,0.15)" : "var(--bg-card)", color: editData.correct === j ? "var(--neon-green)" : "var(--text-dim)", fontSize: 12, fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>
+                              {["A", "B", "C", "D"][j]}
+                            </button>
+                            <input
+                              value={ans}
+                              onChange={e => {
+                                const newAnswers = [...editData.answers];
+                                newAnswers[j] = e.target.value;
+                                setEditData({ ...editData, answers: newAnswers });
+                              }}
+                              style={{ flex: 1, padding: "8px 14px", background: "var(--bg-card)", border: "1.5px solid " + (editData.correct === j ? "var(--neon-green)" : "var(--border)"), borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 600 }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginTop: 8 }}>Click a letter to set the correct answer</p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => saveEdit(f)} disabled={saving}
+                        style={{ padding: "10px 24px", borderRadius: 100, border: "none", background: saveSuccess === f.id ? "rgba(0,245,160,0.2)" : "var(--gradient-main)", color: saveSuccess === f.id ? "var(--neon-green)" : "var(--bg)", fontWeight: 900, fontSize: 13, cursor: saving ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: saveSuccess === f.id ? "var(--neon-green)" : "var(--bg)" }}>
+                        {saving ? "Saving..." : saveSuccess === f.id ? "✅ Saved!" : "Save Changes"}
+                      </button>
+                      <button onClick={() => dismissFlag(f.id)} disabled={dismissing === f.id}
+                        style={{ padding: "10px 24px", borderRadius: 100, border: "none", background: "rgba(0,245,160,0.1)", color: "var(--neon-green)", fontWeight: 900, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                        Save & Dismiss
+                      </button>
+                      <button onClick={() => { setEditingFlag(null); setEditData(null); }}
+                        style={{ padding: "10px 24px", borderRadius: 100, border: "1px solid var(--border)", background: "none", color: "var(--text-muted)", fontWeight: 800, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       )}
