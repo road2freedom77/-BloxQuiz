@@ -29,7 +29,7 @@ function getTotalQuizCount(): number {
 export default function GameCategories() {
   const games = [
     { name: "Blox Fruits", icon: "⚔️", bg: "rgba(255,60,172,0.12)", badge: "🔥 Hot", badgeColor: "#FF3CAC", badgeBg: "rgba(255,60,172,0.15)", slug: "blox-fruits" },
-    { name: "Brookhaven RP", icon: "🏠", bg: "rgba(0,217,255,0.12)", badge: null, slug: "brookhaven" },
+    { name: "Brookhaven RP", icon: "🏠", bg: "rgba(0,217,255,0.12)", badge: null, slug: "brookhaven-rp" },
     { name: "Adopt Me!", icon: "🐾", bg: "rgba(255,227,71,0.12)", badge: "📈 Trending", badgeColor: "#B84CFF", badgeBg: "rgba(184,76,255,0.15)", slug: "adopt-me" },
     { name: "Tower of Hell", icon: "🗼", bg: "rgba(0,245,160,0.12)", badge: null, slug: "tower-of-hell" },
     { name: "Grow a Garden", icon: "🌱", bg: "rgba(184,76,255,0.12)", badge: "✨ New", badgeColor: "#00F5A0", badgeBg: "rgba(0,245,160,0.15)", slug: "grow-a-garden" },
