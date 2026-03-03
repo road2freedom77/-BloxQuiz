@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { supabase } from "../../lib/supabase";
 import fs from "fs";
 import path from "path";
 
@@ -16,6 +17,16 @@ const gameEmojis: Record<string, string> = {
   "Tower of Hell": "🗼",
   "Murder Mystery 2": "🔫",
   "Grow a Garden": "🌱",
+  "Royale High": "👑",
+  "Doors": "🚪",
+  "Arsenal": "🎯",
+  "Anime Fighting Simulator": "🥊",
+  "Berry Avenue": "🍓",
+  "Livetopia": "🏖️",
+  "Natural Disaster Survival": "🌪️",
+  "Anime Defenders": "🐉",
+  "Funky Friday": "🎵",
+  "Kick Off": "⚽",
 };
 
 const gameThumbs: Record<string, string> = {
@@ -25,39 +36,89 @@ const gameThumbs: Record<string, string> = {
   "Tower of Hell": "linear-gradient(135deg, #0a1a0a, #1a3a1a)",
   "Murder Mystery 2": "linear-gradient(135deg, #1a0a0a, #3a1a1a)",
   "Grow a Garden": "linear-gradient(135deg, #0a1a0a, #1a3a1a)",
+  "Royale High": "linear-gradient(135deg, #2a0a2e, #5c1a5c)",
+  "Doors": "linear-gradient(135deg, #1a1a0a, #3a3a1a)",
+  "Arsenal": "linear-gradient(135deg, #1a0a0a, #4a1a1a)",
+  "Anime Fighting Simulator": "linear-gradient(135deg, #0a0a2e, #1a1a5c)",
+  "Berry Avenue": "linear-gradient(135deg, #2a0a1a, #5c1a3a)",
+  "Livetopia": "linear-gradient(135deg, #0a1a2a, #1a3a5c)",
+  "Natural Disaster Survival": "linear-gradient(135deg, #1a1a0a, #4a3a0a)",
+  "Anime Defenders": "linear-gradient(135deg, #0a0a1a, #1a1a4a)",
+  "Funky Friday": "linear-gradient(135deg, #1a0a2a, #4a1a5c)",
+  "Kick Off": "linear-gradient(135deg, #0a1a0a, #1a4a1a)",
 };
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get("limit") || "8");
+  const limit = parseInt(searchParams.get("limit") || "200");
   const game = searchParams.get("game") || null;
 
-  // Load dynamic quizzes
-  const dynamicQuizzes: any[] = [];
+  const slugsSeen = new Set<string>();
+  const allQuizzes: any[] = [];
+
+  // Load JSON quizzes
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const files = fs.readdirSync(quizzesDir);
-    for (const file of files.reverse()) {
+    const files = fs.readdirSync(quizzesDir).reverse();
+    for (const file of files) {
       if (!file.endsWith(".json")) continue;
       const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
       const slug = file.replace(".json", "");
-      dynamicQuizzes.push({
-        slug,
-        title: content.title,
-        game: content.game,
-        difficulty: content.difficulty,
-        questions: content.questions?.length || 10,
-        emoji: gameEmojis[content.game] || "🎮",
-        thumb: gameThumbs[content.game] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)",
-      });
+      if (!slugsSeen.has(slug)) {
+        allQuizzes.push({
+          slug,
+          title: content.title,
+          game: content.game,
+          difficulty: content.difficulty,
+          questions: content.questions?.length || 10,
+          emoji: gameEmojis[content.game] || "🎮",
+          thumb: gameThumbs[content.game] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)",
+          source: "json",
+        });
+        slugsSeen.add(slug);
+      }
     }
   } catch (e) {}
 
-  let allQuizzes = [...dynamicQuizzes, ...staticQuizzes];
+  // Load Supabase quizzes
+  try {
+    const { data } = await supabase
+      .from("quizzes")
+      .select("slug, title, game, difficulty, questions, published_at")
+      .order("published_at", { ascending: false });
 
-  if (game) {
-    allQuizzes = allQuizzes.filter(q => q.game.toLowerCase().includes(game.toLowerCase()));
+    if (data) {
+      for (const q of data) {
+        if (!slugsSeen.has(q.slug)) {
+          allQuizzes.push({
+            slug: q.slug,
+            title: q.title,
+            game: q.game,
+            difficulty: q.difficulty,
+            questions: Array.isArray(q.questions) ? q.questions.length : 10,
+            emoji: gameEmojis[q.game] || "🎮",
+            thumb: gameThumbs[q.game] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)",
+            source: "generated",
+            published_at: q.published_at,
+          });
+          slugsSeen.add(q.slug);
+        }
+      }
+    }
+  } catch (e) {}
+
+  // Add static quizzes not already included
+  for (const q of staticQuizzes) {
+    if (!slugsSeen.has(q.slug)) {
+      allQuizzes.push({ ...q, source: "static" });
+      slugsSeen.add(q.slug);
+    }
   }
 
-  return NextResponse.json({ quizzes: allQuizzes.slice(0, limit) });
+  let result = allQuizzes;
+  if (game) {
+    result = result.filter(q => q.game.toLowerCase().includes(game.toLowerCase()));
+  }
+
+  return NextResponse.json({ quizzes: result.slice(0, limit) });
 }
