@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../../lib/supabase";
-import fs from "fs";
-import path from "path";
 
 export async function POST(req: Request) {
   const { slug, questionIndex, question, answers, correct } = await req.json();
@@ -10,21 +8,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  try {
-    const filePath = path.join(process.cwd(), `app/data/quizzes/${slug}.json`);
-    const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
-
-    content.questions[questionIndex] = {
-      ...content.questions[questionIndex],
-      q: question,
-      a: answers,
+  const { error } = await supabase
+    .from("question_edits")
+    .upsert({
+      quiz_slug: slug,
+      question_index: questionIndex,
+      question,
+      answers,
       correct,
-    };
+    }, { onConflict: "quiz_slug,question_index" });
 
-    fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ success: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
-  }
+  return NextResponse.json({ success: true });
 }

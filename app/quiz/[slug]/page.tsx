@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import fs from "fs";
 import path from "path";
+import { supabase } from "../../lib/supabase";
 import QuizClient from "./QuizClient";
 
 function getQuiz(slug: string) {
@@ -148,6 +149,22 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
 
   if (!quiz) notFound();
 
+  // Apply any admin edits from Supabase
+  const { data: edits } = await supabase
+    .from("question_edits")
+    .select("*")
+    .eq("quiz_slug", slug);
+
+  if (edits && edits.length > 0) {
+    for (const edit of edits) {
+      quiz.questions[edit.question_index] = {
+        q: edit.question,
+        a: edit.answers,
+        correct: edit.correct,
+      };
+    }
+  }
+
   const relatedQuizzes = getRelatedQuizzes(slug, quiz.game);
   const article = quiz.difficulty === "Easy" ? "an" : "a";
   const firstQ = quiz.questions[0];
@@ -212,7 +229,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* SSR-only semantic preview — hidden from users, visible to crawlers */}
+      {/* Clean SEO block — no question dump, no spoilers */}
       <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
         <p>{quiz.game + " — " + quiz.difficulty + " difficulty — " + quiz.questions.length + " multiple choice questions"}</p>
         <p>{"Free " + quiz.game + " trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard."}</p>
