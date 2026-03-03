@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
+import { supabase } from "./lib/supabase";
 import fs from "fs";
 import path from "path";
 
-function getAllQuizSlugs(): string[] {
+function getAllJsonQuizSlugs(): string[] {
   try {
     const dir = path.join(process.cwd(), "app/data/quizzes");
     return fs.readdirSync(dir)
@@ -13,7 +14,7 @@ function getAllQuizSlugs(): string[] {
   }
 }
 
-function getAllGameSlugs(): string[] {
+function getAllJsonGameSlugs(): string[] {
   try {
     const dir = path.join(process.cwd(), "app/data/quizzes");
     const files = fs.readdirSync(dir).filter(f => f.endsWith(".json"));
@@ -35,7 +36,7 @@ function getAllGameSlugs(): string[] {
   }
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://www.bloxquiz.gg";
   const now = new Date();
 
@@ -57,24 +58,41 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/quiz/which-roblox-game`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
 
-  const dynamicQuizzes: MetadataRoute.Sitemap = getAllQuizSlugs().map(slug => ({
+  const jsonQuizzes: MetadataRoute.Sitemap = getAllJsonQuizSlugs().map(slug => ({
     url: `${base}/quiz/${slug}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  const gamePages: MetadataRoute.Sitemap = getAllGameSlugs().map(slug => ({
+  const gamePages: MetadataRoute.Sitemap = getAllJsonGameSlugs().map(slug => ({
     url: `${base}/games/${slug}`,
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
+  // Supabase quizzes
+  let supabaseQuizzes: MetadataRoute.Sitemap = [];
+  try {
+    const { data } = await supabase
+      .from("quizzes")
+      .select("slug, published_at");
+    if (data) {
+      supabaseQuizzes = data.map(q => ({
+        url: `${base}/quiz/${q.slug}`,
+        lastModified: new Date(q.published_at),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }));
+    }
+  } catch (e) {}
+
   return [
     ...staticPages,
     ...staticQuizzes,
-    ...dynamicQuizzes,
+    ...jsonQuizzes,
+    ...supabaseQuizzes,
     ...gamePages,
   ];
 }
