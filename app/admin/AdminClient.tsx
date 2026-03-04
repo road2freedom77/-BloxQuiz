@@ -13,6 +13,34 @@ const logColors: Record<string, { color: string, bg: string }> = {
   failed: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
 };
 
+const GAME_SLUGS: Record<string, string> = {
+  "Blox Fruits": "blox-fruits",
+  "Brookhaven RP": "brookhaven-rp",
+  "Adopt Me!": "adopt-me",
+  "Tower of Hell": "tower-of-hell",
+  "Murder Mystery 2": "murder-mystery-2",
+  "Grow a Garden": "grow-a-garden",
+  "Royale High": "royale-high",
+  "Doors": "doors",
+  "Arsenal": "arsenal",
+  "Anime Fighting Simulator": "anime-fighting-simulator",
+  "Berry Avenue": "berry-avenue",
+  "Livetopia": "livetopia",
+  "Natural Disaster Survival": "natural-disaster-survival",
+  "Anime Defenders": "anime-defenders",
+  "Funky Friday": "funky-friday",
+  "Kick Off": "kick-off",
+};
+
+const ANGLES = ["Beginner", "Mechanics", "Expert", "Lore", "Trading", "Secrets", "Updates"];
+
+function siloStrength(count: number): { label: string, color: string, bg: string } {
+  if (count >= 15) return { label: "🏆 Strong", color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" };
+  if (count >= 8) return { label: "📈 Growing", color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" };
+  if (count >= 4) return { label: "⚠️ Weak", color: "#FF8A47", bg: "rgba(255,138,71,0.1)" };
+  return { label: "🔴 Thin", color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" };
+}
+
 export default function AdminClient({ quizzes, stats, flags: initialFlags, topQuizzes, cronLogs }: {
   quizzes: any[],
   stats: any,
@@ -20,7 +48,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
   topQuizzes: any[],
   cronLogs: any[],
 }) {
-  const [tab, setTab] = useState<"overview" | "quizzes" | "flags" | "logs">("overview");
+  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs">("overview");
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -41,6 +69,22 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
     if (search && !q.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  // Build silo data
+  const siloData = Object.keys(GAME_SLUGS).map(game => {
+    const gameQuizzes = quizList.filter(q => q.game === game);
+    const angleBreakdown: Record<string, number> = {};
+    for (const angle of ANGLES) {
+      angleBreakdown[angle] = gameQuizzes.filter(q => q.angle === angle).length;
+    }
+    const uncategorized = gameQuizzes.filter(q => !q.angle || !ANGLES.includes(q.angle)).length;
+    const strength = siloStrength(gameQuizzes.length);
+    return { game, slug: GAME_SLUGS[game], count: gameQuizzes.length, angleBreakdown, uncategorized, strength };
+  }).sort((a, b) => b.count - a.count);
+
+  const strongCount = siloData.filter(s => s.count >= 15).length;
+  const growingCount = siloData.filter(s => s.count >= 8 && s.count < 15).length;
+  const weakCount = siloData.filter(s => s.count < 8).length;
 
   async function dismissFlag(id: string) {
     setDismissing(id);
@@ -131,8 +175,8 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        {(["overview", "quizzes", "flags", "logs"] as const).map(t => (
+      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+        {(["overview", "silos", "quizzes", "flags", "logs"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
             {t === "flags" && flags.length > 0 ? `flags (${flags.length})` : t}
@@ -185,6 +229,77 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Silos Tab */}
+      {tab === "silos" && (
+        <div>
+          {/* Silo summary stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
+            {[
+              { label: "🏆 Strong Silos (15+)", value: strongCount, color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
+              { label: "📈 Growing Silos (8-14)", value: growingCount, color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" },
+              { label: "🔴 Weak Silos (<8)", value: weakCount, color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
+            ].map(({ label, value, color, bg }) => (
+              <div key={label} style={{ background: bg, border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 20, textAlign: "center" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 36, color, marginBottom: 4 }}>{value}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color, textTransform: "uppercase" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Per-game silo cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {siloData.map(silo => {
+              const pct = Math.min(100, Math.round((silo.count / 15) * 100));
+              return (
+                <div key={silo.game} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "18px 22px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <a href={"/games/" + silo.slug} target="_blank"
+                        style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", textDecoration: "none" }}>
+                        {silo.game}
+                      </a>
+                      <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: silo.strength.bg, color: silo.strength.color }}>
+                        {silo.strength.label}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text-muted)" }}>{silo.count} / 15 quizzes</span>
+                      <a href={"/games/" + silo.slug} target="_blank"
+                        style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>
+                        View Hub →
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div style={{ height: 6, background: "var(--surface)", borderRadius: 100, marginBottom: 12, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: pct + "%", background: silo.count >= 15 ? "var(--neon-green)" : silo.count >= 8 ? "var(--neon-yellow)" : "var(--neon-pink)", borderRadius: 100, transition: "width 0.3s" }} />
+                  </div>
+
+                  {/* Angle breakdown */}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {ANGLES.map(angle => {
+                      const count = silo.angleBreakdown[angle];
+                      const hasQuizzes = count > 0;
+                      return (
+                        <span key={angle} style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: hasQuizzes ? "rgba(184,76,255,0.15)" : "var(--surface)", color: hasQuizzes ? "#B84CFF" : "var(--text-dim)", border: "1px solid " + (hasQuizzes ? "rgba(184,76,255,0.3)" : "var(--border)") }}>
+                          {angle} {hasQuizzes ? "(" + count + ")" : "✗"}
+                        </span>
+                      );
+                    })}
+                    {silo.uncategorized > 0 && (
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", border: "1px solid rgba(0,217,255,0.2)" }}>
+                        {"Other (" + silo.uncategorized + ")"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
