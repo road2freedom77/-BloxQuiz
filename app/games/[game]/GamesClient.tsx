@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -77,7 +78,6 @@ function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: str
 
 function getStartQuiz(quizzes: any[]): string {
   if (quizzes.length === 0) return "/browse";
-  // P3: easiest first, then newest, then first
   const easy = quizzes.find(q => q.difficulty === "Easy");
   if (easy) return `/quiz/${easy.slug}`;
   return `/quiz/${quizzes[0].slug}`;
@@ -86,6 +86,14 @@ function getStartQuiz(quizzes: any[]): string {
 export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: any[], config: any, gameSlug: string }) {
   const thumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
   const startQuiz = getStartQuiz(quizzes);
+  const [randomSlug, setRandomSlug] = useState<string>("");
+
+  useEffect(() => {
+    if (quizzes.length > 0) {
+      const random = quizzes[Math.floor(Math.random() * quizzes.length)];
+      setRandomSlug(random.slug);
+    }
+  }, []);
 
   // Group quizzes by angle
   const grouped: Record<string, any[]> = { Uncategorized: [] };
@@ -127,8 +135,14 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
               style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
               ⚡ Start Easiest Quiz
             </a>
+            {randomSlug && (
+              <a href={`/quiz/${randomSlug}`}
+                style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}>
+                🎲 Random Quiz
+              </a>
+            )}
             <a href="/codes"
-              style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}>
+              style={{ background: "rgba(255,255,255,0.1)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>
               🎁 Free Roblox Codes
             </a>
           </div>
