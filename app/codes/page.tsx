@@ -1,7 +1,10 @@
 import { codesData } from "../data/codes";
+import CodesHubClient from "./CodesHubClient";
+
+const LAST_UPDATED = "March 4, 2026";
 
 export const metadata = {
-  title: "Roblox Codes 2026 — Active & Updated Daily | BloxQuiz",
+  title: `Roblox Codes 2026 — Active & Updated Daily | BloxQuiz`,
   description: "All active Roblox codes for 2026. Blox Fruits, Adopt Me, Murder Mystery 2, Doors, Anime Defenders and more. Updated daily — redeem before they expire!",
   alternates: { canonical: "https://www.bloxquiz.gg/codes" },
   openGraph: {
@@ -66,22 +69,25 @@ export default function CodesPage() {
         </nav>
 
         {/* Hero */}
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", marginBottom: 12 }}>
             {"🎁 Roblox Game Codes — Active & Updated Daily"}
           </h1>
-          <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 16, maxWidth: 600, margin: "0 auto 20px" }}>
+          <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 16, maxWidth: 600, margin: "0 auto 20px", lineHeight: 1.7 }}>
             Roblox codes give players free rewards such as coins, boosts, skins, and special items inside their favorite games. Many popular Roblox games release new codes during updates, events, or milestones. On this page you can find active Roblox codes for games like Blox Fruits, Adopt Me, Brookhaven RP, Doors, and many more. Codes often expire quickly — redeem them as soon as possible!
           </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 12 }}>
             <span style={{ background: "rgba(0,245,160,0.12)", color: "var(--neon-green)", fontWeight: 800, fontSize: 13, padding: "8px 20px", borderRadius: 100 }}>{"✅ " + totalActive + " Active Codes"}</span>
             <span style={{ background: "rgba(184,76,255,0.12)", color: "#B84CFF", fontWeight: 800, fontSize: 13, padding: "8px 20px", borderRadius: 100 }}>{"🎮 " + games.length + " Games Covered"}</span>
             <span style={{ background: "rgba(255,227,71,0.12)", color: "var(--neon-yellow)", fontWeight: 800, fontSize: 13, padding: "8px 20px", borderRadius: 100 }}>{"🔄 Updated Daily"}</span>
           </div>
+          <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
+            {"🕐 Last updated: " + LAST_UPDATED + " — codes verified and refreshed"}
+          </div>
         </div>
 
         {/* How to redeem */}
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 40 }}>
+        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 32 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"How To Redeem Roblox Codes"}</h2>
           <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 16 }}>
             Each Roblox game has its own code system, but the general process is the same. Follow these steps to redeem codes in most Roblox games:
@@ -102,46 +108,8 @@ export default function CodesPage() {
           </p>
         </div>
 
-        {/* Games grid */}
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 20 }}>{"🔥 Latest Roblox Codes by Game"}</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20, marginBottom: 48 }}>
-          {games.map(game => {
-            const activeCodes = game.codes.filter(c => c.active);
-            const expiringSoon = activeCodes.length > 0;
-            return (
-              <a key={game.slug} href={`/codes/${game.slug}`} style={{ textDecoration: "none" }}>
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24, cursor: "pointer", height: "100%", boxSizing: "border-box" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                    <span style={{ fontSize: 32 }}>{game.icon}</span>
-                    <div>
-                      <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, marginBottom: 2 }}>{game.game + " Codes"}</h3>
-                      <div style={{ fontSize: 12, color: activeCodes.length > 0 ? "var(--neon-green)" : "var(--text-dim)", fontWeight: 800 }}>
-                        {activeCodes.length > 0 ? "✅ " + activeCodes.length + " Active Codes" : "⚠️ No Active Codes"}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {activeCodes.slice(0, 3).map(c => (
-                      <div key={c.code} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", borderRadius: 8, padding: "8px 12px" }}>
-                        <span style={{ fontFamily: "var(--font-display)", fontSize: 12, color: "var(--neon-green)", letterSpacing: 0.5 }}>{c.code}</span>
-                        <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>{c.reward}</span>
-                      </div>
-                    ))}
-                    {activeCodes.length > 3 && (
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700, textAlign: "center", paddingTop: 4 }}>
-                        {"+" + (activeCodes.length - 3) + " more codes →"}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{"Updated " + game.updatedAt}</span>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: "var(--neon-blue)" }}>{"View All →"}</span>
-                  </div>
-                </div>
-              </a>
-            );
-          })}
-        </div>
+        {/* Client component — recent activity + games grid with copy buttons */}
+        <CodesHubClient games={games} />
 
         {/* FAQ */}
         <div style={{ marginBottom: 48 }}>
