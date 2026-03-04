@@ -3,6 +3,21 @@ import { useState, useRef } from "react";
 import { supabase } from "../../lib/supabase";
 import { useUser } from "@clerk/nextjs";
 
+const DIFFICULTY_MULTIPLIER: Record<string, number> = {
+  Easy: 1,
+  Medium: 1.5,
+  Hard: 2,
+};
+
+const STREAK_BONUSES: Record<number, number> = {
+  3: 25,
+  7: 100,
+  14: 200,
+  30: 500,
+};
+
+const DAILY_SCORE_CAP = 20;
+
 const gameSlugMap: Record<string, string> = {
   "Blox Fruits": "blox-fruits",
   "Brookhaven RP": "brookhaven-rp",
@@ -141,6 +156,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   const [sharing, setSharing] = useState(false);
   const [shared, setShared] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [earnedPoints, setEarnedPoints] = useState<{ weighted: number, streakBonus: number, newStreak: number, capped: boolean } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const q = quiz.questions[current];
@@ -148,8 +164,15 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   const pct = Math.round(score / quiz.questions.length * 100);
   const gameSlug = gameSlugMap[quiz.game] || "blox-fruits";
   const diff = diffColors[quiz.difficulty] || diffColors.Medium;
+  const multiplier = DIFFICULTY_MULTIPLIER[quiz.difficulty] || 1;
 
   async function saveScore(finalScore: number) {
+    const today = new Date().toISOString().split("T")[0];
+    const month = today.substring(0, 7);
+    const basePoints = finalScore * 10;
+    const weightedScore = Math.round(basePoints * multiplier);
+
+    // Save anonymous play
     await supabase.from("plays").insert({
       quiz_slug: slug,
       score: finalScore,
@@ -158,13 +181,24 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
 
     if (!user) return;
 
-    const today = new Date().toISOString().split("T")[0];
+    // Check daily cap
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const { count: todayCount } = await supabase
+      .from("scores")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("completed_at", todayStart.toISOString());
+    const capped = (todayCount || 0) >= DAILY_SCORE_CAP;
+
+    // Get user data
     const { data: userData } = await supabase
       .from("users")
-      .select("streak, last_played")
+      .select("streak, last_played, longest_streak, badges, monthly_score")
       .eq("id", user.id)
       .single();
 
+    // Calculate streak
     let newStreak = 1;
     if (userData?.last_played) {
       const yesterday = new Date();
@@ -180,23 +214,52 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       }
     }
 
+    // Streak bonus
+    const streakBonus = (!capped && STREAK_BONUSES[newStreak]) ? STREAK_BONUSES[newStreak] : 0;
+
+    // Longest streak
+    const longestStreak = Math.max(newStreak, userData?.longest_streak || 0);
+
+    // Badges
+    const currentBadges: string[] = userData?.badges || [];
+    const newBadges = [...currentBadges];
+    if (newStreak >= 3 && !newBadges.includes("streak_3")) newBadges.push("streak_3");
+    if (newStreak >= 7 && !newBadges.includes("streak_7")) newBadges.push("streak_7");
+    if (newStreak >= 14 && !newBadges.includes("streak_14")) newBadges.push("streak_14");
+    if (newStreak >= 30 && !newBadges.includes("streak_30")) newBadges.push("streak_30");
+
+    const monthlyAdd = capped ? 0 : weightedScore + streakBonus;
+    const xpGained = capped ? 0 : finalScore * 10;
+
+    // Save score record
+    await supabase.from("scores").insert({
+      user_id: user.id,
+      quiz_slug: slug,
+      score: finalScore,
+      total_questions: quiz.questions.length,
+      weighted_score: capped ? 0 : weightedScore,
+      difficulty: quiz.difficulty,
+      month,
+      completed_at: new Date().toISOString(),
+    });
+
+    // Update user
     await supabase.from("users").upsert({
       id: user.id,
       username: user.username || user.firstName || "Anonymous",
       email: user.emailAddresses[0]?.emailAddress,
       streak: newStreak,
       last_played: today,
+      longest_streak: longestStreak,
+      badges: newBadges,
+      monthly_score: (userData?.monthly_score || 0) + monthlyAdd,
     }, { onConflict: "id" });
 
-    await supabase.from("scores").insert({
-      user_id: user.id,
-      quiz_slug: slug,
-      score: finalScore,
-      total_questions: quiz.questions.length,
-    });
+    if (xpGained > 0) {
+      await supabase.rpc("increment_xp", { user_id: user.id, amount: xpGained });
+    }
 
-    const xpGained = finalScore * 10;
-    await supabase.rpc("increment_xp", { user_id: user.id, amount: xpGained });
+    setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped });
   }
 
   function selectAnswer(idx: number) {
@@ -271,7 +334,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
 
     ctx.fillStyle = "#FFE347";
     ctx.font = "bold 36px Arial";
-    ctx.fillText("+" + (score * 10) + " XP earned", 540, 730);
+    ctx.fillText("+" + Math.round(score * 10 * multiplier) + " pts earned", 540, 730);
 
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.lineWidth = 2;
@@ -344,6 +407,9 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)" }}>{quiz.game}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{quiz.questions.length + " Questions"}</span>
+            {multiplier > 1 && (
+              <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(184,76,255,0.15)", color: "#B84CFF" }}>{multiplier + "x Points"}</span>
+            )}
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 8 }}>{quiz.title}</h1>
           <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto 8px" }}>
@@ -395,10 +461,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
                 }
                 return (
                   <li key={i}>
-                    <button
-                      onClick={() => selectAnswer(i)}
-                      aria-label={"Option " + letters[i] + ": " + ans}
-                      aria-pressed={selected === i}
+                    <button onClick={() => selectAnswer(i)} aria-label={"Option " + letters[i] + ": " + ans} aria-pressed={selected === i}
                       style={{ width: "100%", background: bg, border: `2px solid ${borderColor}`, borderRadius: "var(--radius-sm)", padding: "18px 20px", fontSize: 15, fontWeight: 700, cursor: answered ? "default" : "pointer", fontFamily: "var(--font-body)", color, textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
                       <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 8, background: "var(--bg-card)", fontSize: 13, fontWeight: 900, color: "var(--text-dim)", flexShrink: 0 }}>{letters[i]}</span>
                       {ans}
@@ -407,17 +470,59 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
                 );
               })}
             </ul>
-
-            {/* Report button */}
             <ReportButton quizSlug={slug} questionIndex={current} />
           </>
         ) : (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 72, marginBottom: 16 }}>{getResultLabel().emoji}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score + "/" + quiz.questions.length}</div>
-            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{getResultLabel().label}</div>
-            <div style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 28 }}>
-              {user ? "+" + (score * 10) + " XP earned!" : "Sign in to save your score and earn XP!"}
+            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>{getResultLabel().label}</div>
+
+            {/* Points breakdown */}
+            <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              {!user ? (
+                <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14 }}>
+                  Sign in to earn leaderboard points and track your streak!
+                </div>
+              ) : earnedPoints?.capped ? (
+                <div style={{ background: "rgba(255,227,71,0.1)", border: "1px solid rgba(255,227,71,0.2)", borderRadius: 12, padding: "10px 20px" }}>
+                  <div style={{ color: "var(--neon-yellow)", fontWeight: 800, fontSize: 13 }}>⚠️ Daily cap reached — no leaderboard points today</div>
+                  <div style={{ color: "var(--text-dim)", fontWeight: 600, fontSize: 12, marginTop: 4 }}>You can still play for fun! Points reset at midnight.</div>
+                </div>
+              ) : earnedPoints ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--neon-green)" }}>{"+" + earnedPoints.weighted}</span>
+                    <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>leaderboard points</span>
+                    {multiplier > 1 && (
+                      <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(184,76,255,0.15)", color: "#B84CFF" }}>{quiz.difficulty + " " + multiplier + "x"}</span>
+                    )}
+                  </div>
+                  {earnedPoints.streakBonus > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-yellow)" }}>{"+" + earnedPoints.streakBonus}</span>
+                      <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{"🔥 " + earnedPoints.newStreak + "-day streak bonus!"}</span>
+                    </div>
+                  )}
+                  {earnedPoints.newStreak > 0 && (
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
+                      {"🔥 Current streak: " + earnedPoints.newStreak + " day" + (earnedPoints.newStreak !== 1 ? "s" : "")}
+                      {earnedPoints.newStreak < 3 && " — reach day 3 for +25 bonus!"}
+                      {earnedPoints.newStreak >= 3 && earnedPoints.newStreak < 7 && " — reach day 7 for +100 bonus!"}
+                      {earnedPoints.newStreak >= 7 && earnedPoints.newStreak < 14 && " — reach day 14 for +200 bonus!"}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14 }}>Saving your score...</div>
+              )}
+            </div>
+
+            {/* Season 1 hype banner */}
+            <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: 12, padding: "14px 20px", marginBottom: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Coming Soon</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players will win Robux gift cards. Keep playing to climb the leaderboard!</div>
+              <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none", display: "inline-block", marginTop: 6 }}>View Leaderboard →</a>
             </div>
 
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
@@ -435,7 +540,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             </div>
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
-              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); }}
+              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); setEarnedPoints(null); }}
                 style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
                 {"🔄 Play Again"}
               </button>
