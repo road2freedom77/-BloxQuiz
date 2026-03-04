@@ -48,8 +48,8 @@ const ANGLE_ORDER = ["Beginner", "Mechanics", "Expert", "Lore", "Trading", "Secr
 const ANGLE_LABELS: Record<string, string> = {
   Beginner: "🟢 Beginner",
   Mechanics: "⚙️ Mechanics",
-  Expert: "🔴 Expert",
-  Lore: "📖 Lore",
+  Expert: "🧠 Expert",
+  Lore: "📜 Lore",
   Trading: "💰 Trading",
   Secrets: "🔍 Secrets",
   Updates: "🆕 Updates",
@@ -75,8 +75,17 @@ function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: str
   );
 }
 
+function getStartQuiz(quizzes: any[]): string {
+  if (quizzes.length === 0) return "/browse";
+  // P3: easiest first, then newest, then first
+  const easy = quizzes.find(q => q.difficulty === "Easy");
+  if (easy) return `/quiz/${easy.slug}`;
+  return `/quiz/${quizzes[0].slug}`;
+}
+
 export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: any[], config: any, gameSlug: string }) {
   const thumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
+  const startQuiz = getStartQuiz(quizzes);
 
   // Group quizzes by angle
   const grouped: Record<string, any[]> = { Uncategorized: [] };
@@ -114,9 +123,9 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
             {quizzes.length} quizzes available — test your {config.displayName} knowledge across all difficulty levels!
           </p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <a href={quizzes[0] ? `/quiz/${quizzes[0].slug}` : "/browse"}
+            <a href={startQuiz}
               style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
-              ⚡ Start First Quiz
+              ⚡ Start Easiest Quiz
             </a>
             <a href="/codes"
               style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}>
@@ -143,11 +152,11 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 12 }}>{"What Do " + config.displayName + " Quizzes Test?"}</h2>
           <p style={{ fontSize: 15, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, marginBottom: 16 }}>{config.whatTests}</p>
           {config.topics && config.topics.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
               {config.topics.map((topic: string) => (
-                <span key={topic} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{"✓ " + topic}</span>
+                <li key={topic} style={{ fontSize: 14, fontWeight: 700, color: "var(--text-muted)", lineHeight: 1.6 }}>{topic}</li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       )}
@@ -181,7 +190,7 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
           <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
             {ANGLE_ORDER.filter(a => grouped[a].length > 0).map(angle => (
               <div key={angle}>
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{ANGLE_LABELS[angle]} Quizzes</h3>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{ANGLE_LABELS[angle] + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
                   {grouped[angle].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={thumb} emoji={config.emoji} />)}
                 </div>
