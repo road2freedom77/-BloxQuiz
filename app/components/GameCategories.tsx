@@ -35,7 +35,7 @@ async function getTotalQuizCount(): Promise<number> {
     const { count: generatedCount } = await supabase
       .from("quizzes")
       .select("*", { count: "exact", head: true });
-    return jsonCount + (generatedCount || 0) + 4;
+    return jsonCount + (generatedCount || 0);
   } catch {
     return 0;
   }
