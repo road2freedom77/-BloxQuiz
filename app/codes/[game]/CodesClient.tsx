@@ -1,6 +1,25 @@
 "use client";
 import { useState } from "react";
 
+const gameTips: Record<string, string> = {
+  "blox-fruits": "Most Blox Fruits codes provide double experience boosts or stat resets. Players typically redeem XP boost codes while grinding levels or completing sea quests to maximize efficiency. Because codes expire quickly — often within days of release — it's best to redeem them immediately after they are announced on the developer's Twitter or Discord.",
+  "adopt-me": "Adopt Me codes typically reward free Bucks, which can be spent on eggs and pets. Redeem codes as soon as they are released since they often expire during or shortly after the event they were created for. Follow the Adopt Me Twitter account for the fastest code announcements.",
+  "murder-mystery-2": "Murder Mystery 2 codes typically reward free knives and cosmetic items. Codes are released during seasonal events, collaborations, and game milestones. Because MM2 codes expire fast, redeem them immediately when announced on the developer's social media.",
+  "grow-a-garden": "Grow a Garden codes give players seeds, fertilizer, and tools to accelerate garden growth. Codes are typically released with major updates and seasonal events. Redeem them quickly as they often have limited use counts.",
+  "brookhaven-rp": "Brookhaven RP codes give players free items and vehicles for roleplay. New codes are released during updates and special events. Follow the Brookhaven Twitter account to catch codes before they expire.",
+  "tower-of-hell": "Tower of Hell codes reward modifiers and rings that change how the tower plays. Codes drop during special events and community milestones. Redeem them quickly as they often expire within days.",
+  "royale-high": "Royale High codes give players free diamonds to spend on accessories and seasonal items. Codes are typically tied to seasonal events and collaborations. Follow Royale High's social media for the fastest announcements.",
+  "doors": "Doors codes reward free Knobs used in the in-game shop. New codes typically drop alongside major floor and entity updates. Redeem them fast — Doors codes often expire within a week of release.",
+  "arsenal": "Arsenal codes give players free skins and Bucks for cosmetic customization. Codes are released during seasonal events and collaborations. Redeem them quickly as Arsenal codes often expire without warning.",
+  "anime-fighting-simulator": "Anime Fighting Simulator codes give players Chikara Shards and Yen to power up their character faster. Codes release alongside major content updates. Redeem immediately as they often expire within days.",
+  "berry-avenue": "Berry Avenue codes give players free cash and items for roleplay. New codes drop during updates and events. Follow Berry Avenue's social media to catch codes before they expire.",
+  "livetopia": "Livetopia codes reward coins and items for your virtual world experience. Codes are released with updates and seasonal events. Redeem them quickly as availability is often limited.",
+  "natural-disaster-survival": "Natural Disaster Survival codes reward badges and special items. Codes are released during game milestones and special events. Redeem them fast as they often have a limited redemption window.",
+  "anime-defenders": "Anime Defenders codes give players free gems for summons and upgrades. New codes release alongside major unit updates and milestones. Because gems are valuable for progression, redeem codes as soon as they are announced.",
+  "funky-friday": "Funky Friday codes reward free points to unlock songs and cosmetics. Codes drop during collaborations and community milestones. Redeem them quickly as Funky Friday codes often expire within a few days.",
+  "kick-off": "Kick Off codes give players free coins and skins for customization. Codes are released during tournaments and updates. Follow Kick Off's social channels to catch new codes as soon as they drop.",
+};
+
 const gameSlugMap: Record<string, string> = {
   "blox-fruits": "blox-fruits",
   "adopt-me": "adopt-me",
@@ -28,14 +47,15 @@ export default function CodesClient({ data, game, description, activeCodes, expi
   expiredCodes: any[],
 }) {
   const [copied, setCopied] = useState<string | null>(null);
+  const tips = gameTips[game] || "";
+  const quizSlug = gameSlugMap[game] || game;
+  const newestCode = activeCodes[0] || null;
 
   function copyCode(code: string) {
     navigator.clipboard.writeText(code);
     setCopied(code);
     setTimeout(() => setCopied(null), 2000);
   }
-
-  const quizSlug = gameSlugMap[game] || game;
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
@@ -52,7 +72,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
       </nav>
 
       {/* Hero */}
-      <div style={{ marginBottom: 32 }}>
+      <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 56, marginBottom: 12 }}>{data.icon}</div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 5vw, 42px)", marginBottom: 12 }}>
           {data.game + " Codes 2026 — All Active & Working"}
@@ -60,14 +80,35 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 15, lineHeight: 1.7, marginBottom: 16, maxWidth: 600 }}>
           {description}
         </p>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
           <span style={{ background: "rgba(0,245,160,0.12)", color: "var(--neon-green)", fontWeight: 800, fontSize: 12, padding: "6px 16px", borderRadius: 100 }}>{"✅ " + activeCodes.length + " Active Codes"}</span>
           <span style={{ background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", fontWeight: 800, fontSize: 12, padding: "6px 16px", borderRadius: 100 }}>{"❌ " + expiredCodes.length + " Expired"}</span>
           <span style={{ background: "rgba(255,227,71,0.1)", color: "var(--neon-yellow)", fontWeight: 800, fontSize: 12, padding: "6px 16px", borderRadius: 100 }}>{"🔄 Updated " + data.updatedAt}</span>
         </div>
+        {/* Freshness signal */}
+        <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
+          {"🕐 Last updated: " + data.updatedAt + " — bookmark this page for daily code updates"}
+        </div>
       </div>
 
-      {/* How to redeem — game specific */}
+      {/* Latest code highlight */}
+      {newestCode && (
+        <div style={{ background: "linear-gradient(135deg, rgba(0,245,160,0.08), rgba(184,76,255,0.08))", border: "1px solid rgba(0,245,160,0.25)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 28 }}>
+          <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-green)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>{"🔥 Latest " + data.game + " Code"}</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--neon-green)", letterSpacing: 2, marginBottom: 4 }}>{newestCode.code}</div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{"Reward: " + newestCode.reward}</div>
+            </div>
+            <button onClick={() => copyCode(newestCode.code)}
+              style={{ background: copied === newestCode.code ? "rgba(0,245,160,0.2)" : "var(--gradient-main)", color: copied === newestCode.code ? "var(--neon-green)" : "var(--bg)", border: copied === newestCode.code ? "1px solid var(--neon-green)" : "none", borderRadius: 100, padding: "10px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: copied === newestCode.code ? "var(--neon-green)" : "var(--bg)" }}>
+              {copied === newestCode.code ? "✅ Copied!" : "📋 Copy Code"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* How to redeem */}
       <div style={{ background: "rgba(0,245,160,0.05)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: "var(--radius)", padding: "22px 24px", marginBottom: 32 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--neon-green)", marginBottom: 12 }}>
           {"How To Redeem " + data.game + " Codes"}
@@ -88,16 +129,16 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </p>
       </div>
 
-      {/* Active codes */}
+      {/* Active codes — year targeted H2 */}
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>
-        {"🟢 Active " + data.game + " Codes"}
+        {"🟢 " + data.game + " Codes 2026 — Active & Working"}
       </h2>
       {activeCodes.length === 0 ? (
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 24, textAlign: "center", color: "var(--text-muted)", fontWeight: 700, marginBottom: 40 }}>
           No active codes right now — check back soon! New codes are added regularly.
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 40 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
           {activeCodes.map((c: any) => (
             <div key={c.code} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -122,10 +163,20 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
+      {/* Code tips section */}
+      {tips && (
+        <div style={{ marginBottom: 40 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>
+            {"Tips for Using " + data.game + " Codes"}
+          </h2>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8 }}>{tips}</p>
+        </div>
+      )}
+
       {/* Expired codes */}
       {expiredCodes.length > 0 && (
         <div style={{ marginBottom: 48 }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16, color: "var(--text-muted)" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8, color: "var(--text-muted)" }}>
             {"🔴 Expired " + data.game + " Codes"}
           </h2>
           <p style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, marginBottom: 12 }}>These codes no longer work but are kept for reference.</p>
@@ -148,9 +199,10 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"Frequently Asked Questions"}</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[
-            { q: `How many active ${data.game} codes are there?`, a: `There are currently ${activeCodes.length} active ${data.game} codes listed on this page. We update regularly as new codes are released.` },
-            { q: `Why isn't my ${data.game} code working?`, a: `Codes are case sensitive — make sure you type them exactly as shown. The code may also have expired or already been redeemed on your account.` },
-            { q: `How do I get new ${data.game} codes?`, a: `New ${data.game} codes are announced on the game's official Twitter/X account, Discord server, and YouTube channel. Bookmark this page for daily updates.` },
+            { q: `How many active ${data.game} codes are there in 2026?`, a: `There are currently ${activeCodes.length} active ${data.game} codes listed on this page. We update regularly as new codes are released by the developers.` },
+            { q: `Why isn't my ${data.game} code working?`, a: `Codes are case sensitive — type them exactly as shown. The code may also have expired or already been redeemed on your account. Check the active/expired status above.` },
+            { q: `How often are new ${data.game} codes released?`, a: `New ${data.game} codes are typically released during major updates, milestones, and seasonal events. Follow the game's official Twitter/X and Discord for the fastest announcements. Bookmark this page for daily updates.` },
+            { q: `Can I reuse a ${data.game} code?`, a: `No — each code can only be redeemed once per account. Attempting to use a code you've already redeemed will show an error message.` },
           ].map((faq, i) => (
             <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px 20px" }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{faq.q}</div>
