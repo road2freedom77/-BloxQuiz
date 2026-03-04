@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 
 const gameSlugMap: Record<string, string> = {
   "Blox Fruits": "blox-fruits",
-  "Brookhaven RP": "brookhaven",
+  "Brookhaven RP": "brookhaven-rp",
   "Adopt Me!": "adopt-me",
   "Tower of Hell": "tower-of-hell",
   "Murder Mystery 2": "murder-mystery-2",
