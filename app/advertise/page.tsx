@@ -8,7 +8,7 @@ export const metadata = {
       { num: "380M+", label: "Roblox Monthly Players" },
       { num: "13-24", label: "Core Age Demographic" },
       { num: "Daily", label: "New Quizzes Added" },
-      { num: "6", label: "Top Games Covered" },
+      { num: "16", label: "Top Games Covered" },
     ];
   
     const options = [
