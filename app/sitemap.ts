@@ -45,6 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/browse`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/leaderboard`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
     { url: `${base}/codes`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/roblox-username-ideas`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/champions`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/rules`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
@@ -86,7 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Deduplicate — supabase slugs take priority over static
   const allQuizUrls = new Map<string, MetadataRoute.Sitemap[0]>();
   for (const q of jsonQuizzes) allQuizUrls.set(q.url, q);
-  for (const q of supabaseQuizzes) allQuizUrls.set(q.url, q); // overwrites dupes
+  for (const q of supabaseQuizzes) allQuizUrls.set(q.url, q);
 
   return [
     ...staticPages,
