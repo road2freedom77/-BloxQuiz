@@ -1,6 +1,8 @@
 import { supabase } from "../lib/supabase";
 import LeaderboardClient from "./LeaderboardClient";
 
+export const revalidate = 0;
+
 export const metadata = {
   title: "Leaderboard — Top Roblox Quiz Players | BloxQuiz",
   description: "See the top Roblox quiz players on BloxQuiz. Compete for Robux gift cards, climb the ranks and earn badges. Season 1 coming soon!",
@@ -28,7 +30,6 @@ async function getAllTimeLeaderboard() {
 async function getSeasonLeaderboard() {
   const currentMonth = new Date().toISOString().substring(0, 7);
 
-  // Get monthly scores from scores table — first attempts only
   const { data } = await supabase
     .from("scores")
     .select("user_id, weighted_score, score, total_questions, month")
@@ -37,7 +38,6 @@ async function getSeasonLeaderboard() {
 
   if (!data || data.length === 0) return [];
 
-  // Aggregate per user
   const userMap: Record<string, {
     total_score: number,
     quizzes: number,
@@ -55,7 +55,6 @@ async function getSeasonLeaderboard() {
     userMap[row.user_id].total_questions += row.total_questions || 0;
   }
 
-  // Get usernames
   const userIds = Object.keys(userMap);
   const { data: users } = await supabase
     .from("users")
@@ -65,7 +64,6 @@ async function getSeasonLeaderboard() {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  // Build ranked list
   const ranked = userIds
     .map(uid => ({
       user_id: uid,
