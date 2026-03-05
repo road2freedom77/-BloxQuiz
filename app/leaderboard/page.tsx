@@ -3,14 +3,14 @@ import LeaderboardClient from "./LeaderboardClient";
 
 export const metadata = {
   title: "Leaderboard — Top Roblox Quiz Players | BloxQuiz",
-  description: "See the top Roblox quiz players on BloxQuiz. Compete for XP, climb the ranks and earn badges. Updated live!",
+  description: "See the top Roblox quiz players on BloxQuiz. Compete for Robux gift cards, climb the ranks and earn badges. Season 1 coming soon!",
   alternates: { canonical: "https://www.bloxquiz.gg/leaderboard" }
 };
 
-async function getLeaderboard() {
+async function getAllTimeLeaderboard() {
   const { data } = await supabase
     .from("users")
-    .select("id, username, xp, streak")
+    .select("id, username, xp, streak, monthly_score, badges")
     .order("xp", { ascending: false })
     .limit(50);
 
@@ -20,10 +20,76 @@ async function getLeaderboard() {
     username: u.username,
     xp: u.xp || 0,
     streak: u.streak || 0,
+    monthly_score: u.monthly_score || 0,
+    badges: u.badges || [],
   }));
 }
 
+async function getSeasonLeaderboard() {
+  const currentMonth = new Date().toISOString().substring(0, 7);
+
+  // Get monthly scores from scores table — first attempts only
+  const { data } = await supabase
+    .from("scores")
+    .select("user_id, weighted_score, score, total_questions, month")
+    .eq("month", currentMonth)
+    .eq("is_first_attempt", true);
+
+  if (!data || data.length === 0) return [];
+
+  // Aggregate per user
+  const userMap: Record<string, {
+    total_score: number,
+    quizzes: number,
+    correct: number,
+    total_questions: number,
+  }> = {};
+
+  for (const row of data) {
+    if (!userMap[row.user_id]) {
+      userMap[row.user_id] = { total_score: 0, quizzes: 0, correct: 0, total_questions: 0 };
+    }
+    userMap[row.user_id].total_score += row.weighted_score || 0;
+    userMap[row.user_id].quizzes += 1;
+    userMap[row.user_id].correct += row.score || 0;
+    userMap[row.user_id].total_questions += row.total_questions || 0;
+  }
+
+  // Get usernames
+  const userIds = Object.keys(userMap);
+  const { data: users } = await supabase
+    .from("users")
+    .select("id, username, streak, is_flagged")
+    .in("id", userIds);
+
+  const usersById: Record<string, any> = {};
+  for (const u of users || []) usersById[u.id] = u;
+
+  // Build ranked list
+  const ranked = userIds
+    .map(uid => ({
+      user_id: uid,
+      username: usersById[uid]?.username || "Unknown",
+      streak: usersById[uid]?.streak || 0,
+      is_flagged: usersById[uid]?.is_flagged || false,
+      monthly_score: userMap[uid].total_score,
+      quizzes_completed: userMap[uid].quizzes,
+      avg_accuracy: userMap[uid].total_questions > 0
+        ? Math.round((userMap[uid].correct / userMap[uid].total_questions) * 100)
+        : 0,
+      qualifies: userMap[uid].quizzes >= 10,
+    }))
+    .sort((a, b) => b.monthly_score - a.monthly_score)
+    .map((p, i) => ({ ...p, rank: i + 1 }));
+
+  return ranked;
+}
+
 export default async function LeaderboardPage() {
-  const initialLeaderboard = await getLeaderboard();
-  return <LeaderboardClient initialLeaderboard={initialLeaderboard} />;
+  const [allTime, season] = await Promise.all([
+    getAllTimeLeaderboard(),
+    getSeasonLeaderboard(),
+  ]);
+
+  return <LeaderboardClient allTimeLeaderboard={allTime} seasonLeaderboard={season} />;
 }
