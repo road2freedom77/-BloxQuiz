@@ -5,7 +5,7 @@ export const revalidate = 0;
 
 export const metadata = {
   title: "Leaderboard — Top Roblox Quiz Players | BloxQuiz",
-  description: "See the top Roblox quiz players on BloxQuiz. Compete for Robux gift cards, climb the ranks and earn badges. Season 1 coming soon!",
+  description: "See the top Roblox quiz players on BloxQuiz.gg. Compete for Roblox gift cards up to $20. Season 1 active now — top 3 players win real prizes!",
   alternates: { canonical: "https://www.bloxquiz.gg/leaderboard" }
 };
 
@@ -64,7 +64,7 @@ async function getSeasonLeaderboard() {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  const ranked = userIds
+  return userIds
     .map(uid => ({
       user_id: uid,
       username: usersById[uid]?.username || "Unknown",
@@ -79,8 +79,6 @@ async function getSeasonLeaderboard() {
     }))
     .sort((a, b) => b.monthly_score - a.monthly_score)
     .map((p, i) => ({ ...p, rank: i + 1 }));
-
-  return ranked;
 }
 
 export default async function LeaderboardPage() {
