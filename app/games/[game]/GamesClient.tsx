@@ -70,11 +70,11 @@ function inferAngle(quiz: any): string | null {
 
   if (text.includes("mechanic") || text.includes("combat") || text.includes("system") ||
       text.includes("ability") || text.includes("skill") || text.includes("technique") ||
-      text.includes("move") || text.includes("build")) return "Mechanics";
+      text.includes("move") || text.includes("build") || text.includes("awakening")) return "Mechanics";
 
   if (text.includes("expert") || text.includes("advanced") || text.includes("mastery") ||
       text.includes("ultimate") || text.includes("master") || text.includes("pro") ||
-      text.includes("endgame")) return "Expert";
+      text.includes("endgame") || text.includes("intermediate") || text.includes("knowledge")) return "Expert";
 
   if (text.includes("lore") || text.includes("story") || text.includes("history") ||
       text.includes("character") || text.includes("world") || text.includes("legend") ||
