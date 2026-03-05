@@ -43,19 +43,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: base, lastModified: now, changeFrequency: "daily", priority: 1.0 },
     { url: `${base}/browse`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/leaderboard`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
-    { url: `${base}/codes`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/leaderboard`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${base}/codes`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/champions`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/rules`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-  ];
-
-  const staticQuizzes: MetadataRoute.Sitemap = [
-    { url: `${base}/quiz/blox-fruits-ultimate`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/quiz/brookhaven-secrets`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/quiz/adopt-me-pets`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/quiz/which-roblox-game`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
 
   const jsonQuizzes: MetadataRoute.Sitemap = getAllJsonQuizSlugs().map(slug => ({
@@ -72,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Supabase quizzes
+  // Supabase generated quizzes
   let supabaseQuizzes: MetadataRoute.Sitemap = [];
   try {
     const { data } = await supabase
@@ -88,11 +83,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (e) {}
 
+  // Deduplicate — supabase slugs take priority over static
+  const allQuizUrls = new Map<string, MetadataRoute.Sitemap[0]>();
+  for (const q of jsonQuizzes) allQuizUrls.set(q.url, q);
+  for (const q of supabaseQuizzes) allQuizUrls.set(q.url, q); // overwrites dupes
+
   return [
     ...staticPages,
-    ...staticQuizzes,
-    ...jsonQuizzes,
-    ...supabaseQuizzes,
+    ...Array.from(allQuizUrls.values()),
     ...gamePages,
   ];
 }
