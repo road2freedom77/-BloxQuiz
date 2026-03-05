@@ -254,7 +254,7 @@ export default function LeaderboardClient({
       <div style={{ marginTop: 32, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32, textAlign: "center" }}>
         <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>{"🏆 Want to win Robux?"}</div>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
-          Play quizzes, earn points and finish in the top 10 this month to win Roblox gift cards!
+          Play quizzes, earn points and finish in the top 3 this month to win Roblox gift cards!
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 15, padding: "14px 32px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>🎮 Start Playing</a>
