@@ -124,18 +124,98 @@ async function getCronLogs() {
   return data || [];
 }
 
+async function getSeasonStandings() {
+  const currentMonth = new Date().toISOString().substring(0, 7);
+
+  const { data: scores } = await supabase
+    .from("scores")
+    .select("user_id, weighted_score, score, total_questions")
+    .eq("month", currentMonth)
+    .eq("is_first_attempt", true);
+
+  if (!scores || scores.length === 0) return [];
+
+  const userMap: Record<string, any> = {};
+  for (const row of scores) {
+    if (!userMap[row.user_id]) {
+      userMap[row.user_id] = { total_score: 0, quizzes: 0, correct: 0, total_questions: 0 };
+    }
+    userMap[row.user_id].total_score += row.weighted_score || 0;
+    userMap[row.user_id].quizzes += 1;
+    userMap[row.user_id].correct += row.score || 0;
+    userMap[row.user_id].total_questions += row.total_questions || 0;
+  }
+
+  const userIds = Object.keys(userMap);
+  const { data: users } = await supabase
+    .from("users")
+    .select("id, username, streak, is_flagged, disqualified")
+    .in("id", userIds);
+
+  const usersById: Record<string, any> = {};
+  for (const u of users || []) usersById[u.id] = u;
+
+  return userIds
+    .map(uid => ({
+      user_id: uid,
+      username: usersById[uid]?.username || "Unknown",
+      streak: usersById[uid]?.streak || 0,
+      is_flagged: usersById[uid]?.is_flagged || false,
+      disqualified: usersById[uid]?.disqualified || false,
+      monthly_score: userMap[uid].total_score,
+      quizzes_completed: userMap[uid].quizzes,
+      avg_accuracy: userMap[uid].total_questions > 0
+        ? Math.round((userMap[uid].correct / userMap[uid].total_questions) * 100)
+        : 0,
+      qualifies: userMap[uid].quizzes >= 10,
+      reward_status: "pending",
+    }))
+    .sort((a, b) => b.monthly_score - a.monthly_score)
+    .map((p, i) => ({ ...p, rank: i + 1 }));
+}
+
+async function getFlaggedUsers() {
+  const { data } = await supabase
+    .from("users")
+    .select("id, username, xp, streak, is_flagged, flag_reason")
+    .eq("is_flagged", true);
+  return data || [];
+}
+
+async function getCurrentSeason() {
+  const { data } = await supabase
+    .from("seasons")
+    .select("*")
+    .eq("status", "active")
+    .single();
+  return data;
+}
+
 export default async function AdminPage() {
   const { userId } = await auth();
-
   if (!userId || !ADMIN_USER_IDS.includes(userId)) redirect("/");
 
-  const [quizzes, stats, flags, topQuizzes, cronLogs] = await Promise.all([
+  const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, season] = await Promise.all([
     getAllQuizzes(),
     getStats(),
     getFlags(),
     getTopQuizzes(),
     getCronLogs(),
+    getSeasonStandings(),
+    getFlaggedUsers(),
+    getCurrentSeason(),
   ]);
 
-  return <AdminClient quizzes={quizzes} stats={stats} flags={flags} topQuizzes={topQuizzes} cronLogs={cronLogs} />;
+  return (
+    <AdminClient
+      quizzes={quizzes}
+      stats={stats}
+      flags={flags}
+      topQuizzes={topQuizzes}
+      cronLogs={cronLogs}
+      seasonStandings={seasonStandings}
+      flaggedUsers={flaggedUsers}
+      season={season}
+    />
+  );
 }

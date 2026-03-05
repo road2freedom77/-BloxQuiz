@@ -13,6 +13,14 @@ const logColors: Record<string, { color: string, bg: string }> = {
   failed: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
 };
 
+const rewardStatusColors: Record<string, { color: string, bg: string }> = {
+  pending: { color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" },
+  claimed: { color: "var(--neon-blue)", bg: "rgba(0,217,255,0.1)" },
+  sent: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
+  expired: { color: "var(--text-dim)", bg: "var(--surface)" },
+  disqualified: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
+};
+
 const GAME_SLUGS: Record<string, string> = {
   "Blox Fruits": "blox-fruits",
   "Brookhaven RP": "brookhaven-rp",
@@ -34,6 +42,14 @@ const GAME_SLUGS: Record<string, string> = {
 
 const ANGLES = ["Beginner", "Mechanics", "Expert", "Lore", "Trading", "Secrets", "Updates"];
 
+const DISQUALIFY_REASONS = [
+  "Bot activity",
+  "Multiple accounts",
+  "Impossible speed",
+  "Manual review",
+  "Other",
+];
+
 function siloStrength(count: number): { label: string, color: string, bg: string } {
   if (count >= 15) return { label: "🏆 Strong", color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" };
   if (count >= 8) return { label: "📈 Growing", color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" };
@@ -41,14 +57,26 @@ function siloStrength(count: number): { label: string, color: string, bg: string
   return { label: "🔴 Thin", color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" };
 }
 
-export default function AdminClient({ quizzes, stats, flags: initialFlags, topQuizzes, cronLogs }: {
+export default function AdminClient({
+  quizzes,
+  stats,
+  flags: initialFlags,
+  topQuizzes,
+  cronLogs,
+  seasonStandings,
+  flaggedUsers,
+  season,
+}: {
   quizzes: any[],
   stats: any,
   flags: any[],
   topQuizzes: any[],
   cronLogs: any[],
+  seasonStandings: any[],
+  flaggedUsers: any[],
+  season: any,
 }) {
-  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs">("overview");
+  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons">("overview");
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -60,6 +88,13 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
   const [editData, setEditData] = useState<{ question: string, answers: string[], correct: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [standings, setStandings] = useState(seasonStandings || []);
+  const [seasonTab, setSeasonTab] = useState<"standings" | "flagged" | "close">("standings");
+  const [disqualifying, setDisqualifying] = useState<string | null>(null);
+  const [disqualifyReason, setDisqualifyReason] = useState<Record<string, string>>({});
+  const [closingSeason, setClosingSeason] = useState(false);
+  const [seasonClosed, setSeasonClosed] = useState(false);
+  const [updatingReward, setUpdatingReward] = useState<string | null>(null);
 
   const games = ["All", ...Array.from(new Set(quizList.map(q => q.game)))];
 
@@ -70,7 +105,6 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
     return true;
   });
 
-  // Build silo data
   const siloData = Object.keys(GAME_SLUGS).map(game => {
     const gameQuizzes = quizList.filter(q => q.game === game);
     const angleBreakdown: Record<string, number> = {};
@@ -85,6 +119,9 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
   const strongCount = siloData.filter(s => s.count >= 15).length;
   const growingCount = siloData.filter(s => s.count >= 8 && s.count < 15).length;
   const weakCount = siloData.filter(s => s.count < 8).length;
+  const generatedCount = quizList.filter(q => q.source === "generated").length;
+  const staticCount = quizList.filter(q => q.source === "static").length;
+  const qualifiedStandings = standings.filter((p: any) => p.quizzes_completed >= 10 && !p.disqualified);
 
   async function dismissFlag(id: string) {
     setDismissing(id);
@@ -93,7 +130,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    setFlags(prev => prev.filter(f => f.id !== id));
+    setFlags((prev: any[]) => prev.filter(f => f.id !== id));
     setDismissing(null);
     if (editingFlag === id) { setEditingFlag(null); setEditData(null); }
   }
@@ -106,7 +143,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug }),
     });
-    setQuizList(prev => prev.filter(q => q.slug !== slug));
+    setQuizList((prev: any[]) => prev.filter(q => q.slug !== slug));
     setDeleting(null);
   }
 
@@ -147,8 +184,46 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
     }
   }
 
-  const generatedCount = quizList.filter(q => q.source === "generated").length;
-  const staticCount = quizList.filter(q => q.source === "static").length;
+  async function disqualifyUser(userId: string) {
+    const reason = disqualifyReason[userId];
+    if (!reason) { alert("Select a reason first."); return; }
+    if (!confirm("Disqualify this user for: " + reason + "?")) return;
+    setDisqualifying(userId);
+    await fetch("/api/season/disqualify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, reason, seasonId: season?.id }),
+    });
+    setStandings((prev: any[]) => prev.map(p =>
+      p.user_id === userId ? { ...p, is_flagged: true, disqualified: true } : p
+    ));
+    setDisqualifying(null);
+  }
+
+  async function updateRewardStatus(userId: string, status: string) {
+    setUpdatingReward(userId);
+    await fetch("/api/season/reward", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, status, seasonId: season?.id }),
+    });
+    setStandings((prev: any[]) => prev.map(p =>
+      p.user_id === userId ? { ...p, reward_status: status } : p
+    ));
+    setUpdatingReward(null);
+  }
+
+  async function closeSeason() {
+    if (!confirm("Close Season 1 and snapshot final results? This cannot be undone.")) return;
+    setClosingSeason(true);
+    await fetch("/api/season/close", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seasonId: season?.id }),
+    });
+    setClosingSeason(false);
+    setSeasonClosed(true);
+  }
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
@@ -176,10 +251,10 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        {(["overview", "silos", "quizzes", "flags", "logs"] as const).map(t => (
+        {(["overview", "seasons", "silos", "quizzes", "flags", "logs"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-            {t === "flags" && flags.length > 0 ? `flags (${flags.length})` : t}
+            {t === "flags" && flags.length > 0 ? `flags (${flags.length})` : t === "seasons" ? "🏆 Seasons" : t}
           </button>
         ))}
       </div>
@@ -214,7 +289,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
               <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>No open flags! 🎉</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {flags.slice(0, 8).map((f) => (
+                {flags.slice(0, 8).map((f: any) => (
                   <div key={f.id} style={{ padding: "10px 14px", background: "var(--surface)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>{f.quiz_slug}</div>
@@ -233,10 +308,167 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
         </div>
       )}
 
+      {/* Seasons Tab */}
+      {tab === "seasons" && (
+        <div>
+          <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Current Season</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 4 }}>{season?.name || "Season 1"}</div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{season?.start_date + " → " + season?.end_date}</div>
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <span style={{ fontSize: 12, fontWeight: 800, padding: "6px 16px", borderRadius: 100, background: seasonClosed ? "rgba(255,60,172,0.1)" : "rgba(0,245,160,0.1)", color: seasonClosed ? "var(--neon-pink)" : "var(--neon-green)" }}>
+                {seasonClosed ? "⛔ Closed" : "🟢 Active"}
+              </span>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>
+                {standings.length + " players • " + qualifiedStandings.length + " qualifying"}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            {(["standings", "flagged", "close"] as const).map(t => (
+              <button key={t} onClick={() => setSeasonTab(t)}
+                style={{ padding: "8px 18px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: seasonTab === t ? "#B84CFF" : "var(--surface)", color: seasonTab === t ? "#fff" : "var(--text-muted)", WebkitTextFillColor: seasonTab === t ? "#fff" : "var(--text-muted)", textTransform: "capitalize" }}>
+                {t === "flagged" ? "⚠️ Flagged (" + flaggedUsers.length + ")" : t === "close" ? "⛔ Close Season" : "🏆 Standings"}
+              </button>
+            ))}
+          </div>
+
+          {seasonTab === "standings" && (
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "50px 1fr 100px 80px 80px 120px 140px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+                <div>Rank</div><div>Player</div><div>Score</div><div>Quizzes</div><div>Accuracy</div><div>Prize</div><div>Actions</div>
+              </div>
+              {standings.length === 0 ? (
+                <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No season scores yet.</div>
+              ) : (
+                standings.map((player: any, i: number) => {
+                  const rs = rewardStatusColors[player.reward_status || "pending"];
+                  const isTop10 = player.rank <= 10 && player.quizzes_completed >= 10 && !player.disqualified;
+                  return (
+                    <div key={player.user_id} style={{ display: "grid", gridTemplateColumns: "50px 1fr 100px 80px 80px 120px 140px", alignItems: "center", padding: "14px 20px", borderBottom: i < standings.length - 1 ? "1px solid var(--border)" : "none", background: player.disqualified ? "rgba(255,60,172,0.03)" : "transparent" }}>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: player.rank <= 3 ? (["var(--neon-yellow)", "#C0C0C0", "#CD7F32"] as string[])[player.rank - 1] : "var(--text-dim)" }}>
+                        {player.rank}
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontWeight: 800, fontSize: 14, color: player.disqualified ? "var(--text-dim)" : "var(--text)" }}>{player.username}</span>
+                          {player.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
+                          {player.disqualified && <span style={{ fontSize: 10, color: "var(--neon-pink)", fontWeight: 800 }}>❌ DQ</span>}
+                        </div>
+                        {!player.qualifies && !player.disqualified && (
+                          <div style={{ fontSize: 10, color: "var(--neon-yellow)", fontWeight: 700 }}>Need 10 quizzes</div>
+                        )}
+                      </div>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--neon-green)" }}>{(player.monthly_score || 0).toLocaleString()}</div>
+                      <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{player.quizzes_completed}</div>
+                      <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{player.avg_accuracy + "%"}</div>
+                      <div>
+                        {isTop10 ? (
+                          <select value={player.reward_status || "pending"} onChange={e => updateRewardStatus(player.user_id, e.target.value)} disabled={updatingReward === player.user_id}
+                            style={{ fontSize: 11, fontWeight: 800, padding: "4px 8px", borderRadius: 8, background: rs.bg, color: rs.color, border: "1px solid " + rs.color + "40", cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                            {["pending", "claimed", "sent", "expired", "disqualified"].map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>—</span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        {!player.disqualified && (
+                          <>
+                            <select value={disqualifyReason[player.user_id] || ""} onChange={e => setDisqualifyReason(prev => ({ ...prev, [player.user_id]: e.target.value }))}
+                              style={{ fontSize: 10, padding: "3px 6px", borderRadius: 6, background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border)", fontFamily: "var(--font-body)" }}>
+                              <option value="">Reason</option>
+                              {DISQUALIFY_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
+                            <button onClick={() => disqualifyUser(player.user_id)} disabled={disqualifying === player.user_id}
+                              style={{ fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", border: "none", cursor: "pointer" }}>
+                              {disqualifying === player.user_id ? "..." : "DQ"}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {seasonTab === "flagged" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {flaggedUsers.length === 0 ? (
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No flagged accounts! 🎉</div>
+              ) : (
+                flaggedUsers.map((u: any) => (
+                  <div key={u.id} style={{ background: "var(--bg-card)", border: "1px solid rgba(255,60,172,0.2)", borderRadius: "var(--radius)", padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontWeight: 800, fontSize: 15, color: "var(--text)" }}>{u.username}</span>
+                        <span style={{ fontSize: 10, fontWeight: 900, padding: "2px 8px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)" }}>⚠️ Flagged</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{"Reason: " + (u.flag_reason || "Unknown")}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginTop: 2 }}>{"XP: " + u.xp + " • Streak: " + u.streak + " days"}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <select value={disqualifyReason[u.id] || ""} onChange={e => setDisqualifyReason(prev => ({ ...prev, [u.id]: e.target.value }))}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 8, background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border)", fontFamily: "var(--font-body)" }}>
+                        <option value="">Select reason</option>
+                        {DISQUALIFY_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                      <button onClick={() => disqualifyUser(u.id)} disabled={disqualifying === u.id}
+                        style={{ fontSize: 12, fontWeight: 800, padding: "8px 16px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", border: "none", cursor: "pointer" }}>
+                        {disqualifying === u.id ? "..." : "Disqualify"}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {seasonTab === "close" && (
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32 }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>⛔ Close Season 1</h2>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>
+                Closing the season will snapshot the final standings, freeze scores, and mark the top 10 qualifying players as prize winners. This action cannot be undone.
+              </p>
+              <div style={{ background: "var(--surface)", borderRadius: "var(--radius-sm)", padding: 20, marginBottom: 24 }}>
+                <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Season 1 Summary</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[
+                    { label: "Total players", value: standings.length },
+                    { label: "Qualifying players (10+ quizzes)", value: qualifiedStandings.length },
+                    { label: "Prize winners (top 10)", value: Math.min(10, qualifiedStandings.length) },
+                    { label: "Flagged accounts", value: flaggedUsers.length },
+                  ].map(({ label, value }) => (
+                    <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700 }}>
+                      <span style={{ color: "var(--text-muted)" }}>{label}</span>
+                      <span style={{ color: "var(--text)" }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {seasonClosed ? (
+                <div style={{ padding: "16px 24px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.3)", borderRadius: 12, fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textAlign: "center" }}>
+                  ✅ Season 1 closed successfully! Results snapshot saved.
+                </div>
+              ) : (
+                <button onClick={closeSeason} disabled={closingSeason}
+                  style={{ padding: "14px 32px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", fontWeight: 900, fontSize: 14, cursor: closingSeason ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
+                  {closingSeason ? "⏳ Closing Season..." : "⛔ Close Season 1 & Snapshot Results"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Silos Tab */}
       {tab === "silos" && (
         <div>
-          {/* Silo summary stats */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
             {[
               { label: "🏆 Strong Silos (15+)", value: strongCount, color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -249,8 +481,6 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
               </div>
             ))}
           </div>
-
-          {/* Per-game silo cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {siloData.map(silo => {
               const pct = Math.min(100, Math.round((silo.count / 15) * 100));
@@ -258,43 +488,28 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
                 <div key={silo.game} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "18px 22px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <a href={"/games/" + silo.slug} target="_blank"
-                        style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", textDecoration: "none" }}>
-                        {silo.game}
-                      </a>
-                      <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: silo.strength.bg, color: silo.strength.color }}>
-                        {silo.strength.label}
-                      </span>
+                      <a href={"/games/" + silo.slug} target="_blank" style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", textDecoration: "none" }}>{silo.game}</a>
+                      <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: silo.strength.bg, color: silo.strength.color }}>{silo.strength.label}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text-muted)" }}>{silo.count} / 15 quizzes</span>
-                      <a href={"/games/" + silo.slug} target="_blank"
-                        style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>
-                        View Hub →
-                      </a>
+                      <a href={"/games/" + silo.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View Hub →</a>
                     </div>
                   </div>
-
-                  {/* Progress bar */}
                   <div style={{ height: 6, background: "var(--surface)", borderRadius: 100, marginBottom: 12, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: pct + "%", background: silo.count >= 15 ? "var(--neon-green)" : silo.count >= 8 ? "var(--neon-yellow)" : "var(--neon-pink)", borderRadius: 100, transition: "width 0.3s" }} />
+                    <div style={{ height: "100%", width: pct + "%", background: silo.count >= 15 ? "var(--neon-green)" : silo.count >= 8 ? "var(--neon-yellow)" : "var(--neon-pink)", borderRadius: 100 }} />
                   </div>
-
-                  {/* Angle breakdown */}
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {ANGLES.map(angle => {
                       const count = silo.angleBreakdown[angle];
-                      const hasQuizzes = count > 0;
                       return (
-                        <span key={angle} style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: hasQuizzes ? "rgba(184,76,255,0.15)" : "var(--surface)", color: hasQuizzes ? "#B84CFF" : "var(--text-dim)", border: "1px solid " + (hasQuizzes ? "rgba(184,76,255,0.3)" : "var(--border)") }}>
-                          {angle} {hasQuizzes ? "(" + count + ")" : "✗"}
+                        <span key={angle} style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: count > 0 ? "rgba(184,76,255,0.15)" : "var(--surface)", color: count > 0 ? "#B84CFF" : "var(--text-dim)", border: "1px solid " + (count > 0 ? "rgba(184,76,255,0.3)" : "var(--border)") }}>
+                          {angle} {count > 0 ? "(" + count + ")" : "✗"}
                         </span>
                       );
                     })}
                     {silo.uncategorized > 0 && (
-                      <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", border: "1px solid rgba(0,217,255,0.2)" }}>
-                        {"Other (" + silo.uncategorized + ")"}
-                      </span>
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", border: "1px solid rgba(0,217,255,0.2)" }}>{"Other (" + silo.uncategorized + ")"}</span>
                     )}
                   </div>
                 </div>
@@ -349,10 +564,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <a href={"/quiz/" + quiz.slug} target="_blank"
-                      style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>
-                      View
-                    </a>
+                    <a href={"/quiz/" + quiz.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View</a>
                     {quiz.source === "generated" && (
                       <button onClick={() => deleteQuiz(quiz.slug)} disabled={deleting === quiz.slug}
                         style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", border: "none", cursor: "pointer" }}>
@@ -372,16 +584,12 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
       {tab === "flags" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {flags.length === 0 ? (
-            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>
-              No open flags! 🎉
-            </div>
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No open flags! 🎉</div>
           ) : (
-            flags.map((f) => (
+            flags.map((f: any) => (
               <div key={f.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 100px auto", alignItems: "center", padding: "14px 20px", gap: 12 }}>
-                  <div>
-                    <a href={"/quiz/" + f.quiz_slug} target="_blank" style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-blue)", textDecoration: "none" }}>{f.quiz_slug}</a>
-                  </div>
+                  <div><a href={"/quiz/" + f.quiz_slug} target="_blank" style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-blue)", textDecoration: "none" }}>{f.quiz_slug}</a></div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{"Q" + (f.question_index + 1)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{f.reason || "No reason given"}</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{new Date(f.created_at).toLocaleDateString()}</div>
@@ -396,7 +604,6 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
                     </button>
                   </div>
                 </div>
-
                 {editingFlag === f.id && editData && (
                   <div style={{ borderTop: "1px solid var(--border)", padding: 20, background: "var(--surface)" }}>
                     <div style={{ fontSize: 12, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Edit Question</div>
@@ -414,7 +621,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
                               style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid " + (editData.correct === j ? "var(--neon-green)" : "var(--border)"), background: editData.correct === j ? "rgba(0,245,160,0.15)" : "var(--bg-card)", color: editData.correct === j ? "var(--neon-green)" : "var(--text-dim)", fontSize: 12, fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>
                               {["A", "B", "C", "D"][j]}
                             </button>
-                            <input value={ans} onChange={e => { const a = [...editData.answers]; a[j] = e.target.value; setEditData({ ...editData, answers: a }); }}
+                            <input value={ans} onChange={e => { const a = [...editData!.answers]; a[j] = e.target.value; setEditData({ ...editData!, answers: a }); }}
                               style={{ flex: 1, padding: "8px 14px", background: "var(--bg-card)", border: "1.5px solid " + (editData.correct === j ? "var(--neon-green)" : "var(--border)"), borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 600 }} />
                           </div>
                         ))}
@@ -447,7 +654,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
       {tab === "logs" && (
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
           {cronLogs.length === 0 ? (
-            <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No cron logs yet — set up cron-job.org to start generating!</div>
+            <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No cron logs yet.</div>
           ) : (
             <>
               <div style={{ display: "grid", gridTemplateColumns: "80px 120px 100px 1fr 140px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
@@ -457,9 +664,7 @@ export default function AdminClient({ quizzes, stats, flags: initialFlags, topQu
                 const lc = logColors[log.status] || logColors.skipped;
                 return (
                   <div key={log.id} style={{ display: "grid", gridTemplateColumns: "80px 120px 100px 1fr 140px", alignItems: "center", padding: "12px 20px", borderBottom: i < cronLogs.length - 1 ? "1px solid var(--border)" : "none" }}>
-                    <div>
-                      <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: lc.bg, color: lc.color, textTransform: "uppercase" }}>{log.status}</span>
-                    </div>
+                    <div><span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: lc.bg, color: lc.color, textTransform: "uppercase" }}>{log.status}</span></div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{log.game || "—"}</div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{log.angle || "—"}</div>
                     <div style={{ fontSize: 12, color: log.error ? "var(--neon-pink)" : "var(--text-muted)", fontWeight: 600 }}>
