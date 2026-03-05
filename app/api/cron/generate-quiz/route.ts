@@ -37,6 +37,18 @@ function getAngleDescription(angle: string) {
   return descriptions[angle] || angle;
 }
 
+// How many to publish this run based on weighted random
+function getBatchSize(): number {
+  const roll = Math.random();
+  if (roll < 0.10) return 0;       // 10% — skip this run
+  if (roll < 0.35) return 1;       // 25% — publish 1
+  if (roll < 0.65) return 2;       // 30% — publish 2 (most common)
+  if (roll < 0.85) return 3;       // 20% — publish 3
+  if (roll < 0.95) return 4;       // 10% — publish 4
+  return 5;                         // 5%  — publish 5 (rare burst)
+  // Average: ~2.3/hour = ~55/day, naturally varied
+}
+
 async function getTodayCount() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -146,75 +158,99 @@ Rules:
   return parsed;
 }
 
+async function publishOneQuiz(existing: any[]) {
+  const { game, angle } = await pickGameAndAngle(existing);
+
+  const quiz = await generateQuiz(game, angle);
+
+  const baseSlug = slugify(quiz.title);
+  const { data: existingSlug } = await supabase
+    .from("quizzes")
+    .select("id")
+    .eq("slug", baseSlug)
+    .single();
+
+  const slug = existingSlug ? `${baseSlug}-${Date.now()}` : baseSlug;
+
+  const { error } = await supabase.from("quizzes").insert({
+    slug,
+    title: quiz.title,
+    game: quiz.game,
+    difficulty: quiz.difficulty,
+    angle: quiz.angle,
+    questions: quiz.questions,
+    published_at: new Date().toISOString(),
+  });
+
+  if (error) throw new Error(error.message);
+
+  await supabase.from("cron_logs").insert({
+    status: "success",
+    game,
+    angle,
+    quiz_slug: slug,
+  });
+
+  // Add to existing so next quiz in same batch avoids same game/angle
+  existing.push({ game, angle, slug });
+
+  return { slug, game, angle };
+}
+
 export async function GET(req: Request) {
-  // Verify secret
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check daily limit (max 2 per day)
+  // Check daily cap
   const todayCount = await getTodayCount();
-  if (todayCount >= 50) {
-    return NextResponse.json({ skipped: true, reason: "Daily limit reached" });
+  const DAILY_CAP = 50;
+
+  if (todayCount >= DAILY_CAP) {
+    return NextResponse.json({ skipped: true, reason: "Daily cap reached", todayCount });
   }
 
-  // Random roll — 25% chance to generate on any given hour
-  const roll = Math.random();
-  if (roll > 1.0) {
-    return NextResponse.json({ skipped: true, reason: "Random skip", roll });
+  // Get randomized batch size for this run
+  let batchSize = getBatchSize();
+
+  // Cap batch so we don't exceed daily limit
+  batchSize = Math.min(batchSize, DAILY_CAP - todayCount);
+
+  if (batchSize === 0) {
+    return NextResponse.json({ skipped: true, reason: "Random skip this run", todayCount });
   }
 
-  // Pick game and angle
   const existing = await getExistingQuizzes();
-  const { game, angle } = await pickGameAndAngle(existing);
+  const published: any[] = [];
+  const failed: any[] = [];
 
-  try {
-    const quiz = await generateQuiz(game, angle);
-
-    // Create clean slug, only add suffix if duplicate
-    const baseSlug = slugify(quiz.title);
-    const { data: existingSlug } = await supabase
-      .from("quizzes")
-      .select("id")
-      .eq("slug", baseSlug)
-      .single();
-
-    const slug = existingSlug ? `${baseSlug}-2` : baseSlug;
-
-    // Save to Supabase
-    const { error } = await supabase.from("quizzes").insert({
-      slug,
-      title: quiz.title,
-      game: quiz.game,
-      difficulty: quiz.difficulty,
-      angle: quiz.angle,
-      questions: quiz.questions,
-    });
-
-    if (error) throw new Error(error.message);
-
-    // Log success
-    await supabase.from("cron_logs").insert({
-      status: "success",
-      game,
-      angle,
-      quiz_slug: slug,
-    });
-
-    // Ping Google sitemap
-    await fetch("https://www.google.com/ping?sitemap=https://www.bloxquiz.gg/sitemap.xml");
-
-    return NextResponse.json({ success: true, slug, game, angle });
-
-  } catch (error: any) {
-    await supabase.from("cron_logs").insert({
-      status: "failed",
-      game,
-      angle,
-      error: error.message,
-    });
-
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  for (let i = 0; i < batchSize; i++) {
+    try {
+      const result = await publishOneQuiz(existing);
+      published.push(result);
+    } catch (error: any) {
+      const { game, angle } = await pickGameAndAngle(existing);
+      await supabase.from("cron_logs").insert({
+        status: "failed",
+        game,
+        angle,
+        error: error.message,
+      });
+      failed.push({ error: error.message });
+    }
   }
+
+  // Ping Google sitemap once after batch
+  if (published.length > 0) {
+    await fetch("https://www.google.com/ping?sitemap=https://www.bloxquiz.gg/sitemap.xml");
+  }
+
+  return NextResponse.json({
+    success: true,
+    published: published.length,
+    failed: failed.length,
+    todayTotal: todayCount + published.length,
+    quizzes: published,
+  });
 }
