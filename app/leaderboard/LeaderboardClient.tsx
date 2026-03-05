@@ -16,10 +16,9 @@ const medals = ["👑", "🥈", "🥉"];
 const rankColors = ["var(--neon-yellow)", "#C0C0C0", "#CD7F32"];
 
 const PRIZE_TIERS = [
-  { rank: "1st", prize: "$10 Roblox Gift Card", color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)", medal: "👑" },
-  { rank: "2nd", prize: "$5 Roblox Gift Card", color: "#C0C0C0", bg: "rgba(192,192,192,0.1)", medal: "🥈" },
-  { rank: "3rd", prize: "$5 Roblox Gift Card", color: "#CD7F32", bg: "rgba(205,127,50,0.1)", medal: "🥉" },
-  { rank: "4th–10th", prize: "$1 Roblox Gift Card", color: "#B84CFF", bg: "rgba(184,76,255,0.1)", medal: "🎖️" },
+  { rank: "1st", prize: "$20 Roblox Gift Card", color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)", medal: "👑" },
+  { rank: "2nd", prize: "$15 Roblox Gift Card", color: "#C0C0C0", bg: "rgba(192,192,192,0.1)", medal: "🥈" },
+  { rank: "3rd", prize: "$10 Roblox Gift Card", color: "#CD7F32", bg: "rgba(205,127,50,0.1)", medal: "🥉" },
 ];
 
 function getDaysUntilReset() {
@@ -79,8 +78,8 @@ export default function LeaderboardClient({
           ))}
         </div>
         <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginTop: 10 }}>
-          * Top 10 must complete 10+ quizzes to qualify. <a href="/rules" style={{ color: "#B84CFF", textDecoration: "none" }}>Full rules →</a>
-        </div>
+  * Top 3 must complete 10+ quizzes to qualify. <a href="/rules" style={{ color: "#B84CFF", textDecoration: "none" }}>Full rules →</a>
+</div>
       </div>
 
       {/* Header */}
