@@ -21,6 +21,14 @@ const rewardStatusColors: Record<string, { color: string, bg: string }> = {
   disqualified: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
 };
 
+const claimStatusColors: Record<string, { color: string, bg: string }> = {
+  pending: { color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" },
+  sent: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
+  rejected: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
+};
+
+const PRIZE_AMOUNTS: Record<number, string> = { 1: "$20", 2: "$15", 3: "$10" };
+
 const GAME_SLUGS: Record<string, string> = {
   "Blox Fruits": "blox-fruits",
   "Brookhaven RP": "brookhaven-rp",
@@ -66,6 +74,7 @@ export default function AdminClient({
   seasonStandings,
   flaggedUsers,
   season,
+  prizeClaims: initialClaims,
 }: {
   quizzes: any[],
   stats: any,
@@ -75,6 +84,7 @@ export default function AdminClient({
   seasonStandings: any[],
   flaggedUsers: any[],
   season: any,
+  prizeClaims: any[],
 }) {
   const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons">("overview");
   const [search, setSearch] = useState("");
@@ -89,15 +99,17 @@ export default function AdminClient({
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [standings, setStandings] = useState(seasonStandings || []);
-  const [seasonTab, setSeasonTab] = useState<"standings" | "flagged" | "close">("standings");
+  const [seasonTab, setSeasonTab] = useState<"standings" | "flagged" | "claims" | "close">("standings");
   const [disqualifying, setDisqualifying] = useState<string | null>(null);
   const [disqualifyReason, setDisqualifyReason] = useState<Record<string, string>>({});
   const [closingSeason, setClosingSeason] = useState(false);
   const [seasonClosed, setSeasonClosed] = useState(false);
   const [updatingReward, setUpdatingReward] = useState<string | null>(null);
+  const [claims, setClaims] = useState(initialClaims || []);
+  const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
   const games = ["All", ...Array.from(new Set(quizList.map(q => q.game)))];
-
   const filtered = quizList.filter(q => {
     if (gameFilter !== "All" && q.game !== gameFilter) return false;
     if (sourceFilter !== "All" && q.source !== sourceFilter) return false;
@@ -108,9 +120,7 @@ export default function AdminClient({
   const siloData = Object.keys(GAME_SLUGS).map(game => {
     const gameQuizzes = quizList.filter(q => q.game === game);
     const angleBreakdown: Record<string, number> = {};
-    for (const angle of ANGLES) {
-      angleBreakdown[angle] = gameQuizzes.filter(q => q.angle === angle).length;
-    }
+    for (const angle of ANGLES) angleBreakdown[angle] = gameQuizzes.filter(q => q.angle === angle).length;
     const uncategorized = gameQuizzes.filter(q => !q.angle || !ANGLES.includes(q.angle)).length;
     const strength = siloStrength(gameQuizzes.length);
     return { game, slug: GAME_SLUGS[game], count: gameQuizzes.length, angleBreakdown, uncategorized, strength };
@@ -122,14 +132,11 @@ export default function AdminClient({
   const generatedCount = quizList.filter(q => q.source === "generated").length;
   const staticCount = quizList.filter(q => q.source === "static").length;
   const qualifiedStandings = standings.filter((p: any) => p.quizzes_completed >= 10 && !p.disqualified);
+  const pendingClaims = claims.filter((c: any) => c.status === "pending").length;
 
   async function dismissFlag(id: string) {
     setDismissing(id);
-    await fetch("/api/flags/dismiss", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    await fetch("/api/flags/dismiss", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     setFlags((prev: any[]) => prev.filter(f => f.id !== id));
     setDismissing(null);
     if (editingFlag === id) { setEditingFlag(null); setEditData(null); }
@@ -138,11 +145,7 @@ export default function AdminClient({
   async function deleteQuiz(slug: string) {
     if (!confirm("Delete quiz: " + slug + "?\nThis cannot be undone.")) return;
     setDeleting(slug);
-    await fetch("/api/quiz/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug }),
-    });
+    await fetch("/api/quiz/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug }) });
     setQuizList((prev: any[]) => prev.filter(q => q.slug !== slug));
     setDeleting(null);
   }
@@ -155,33 +158,17 @@ export default function AdminClient({
       const q = data.questions[f.question_index];
       setEditData({ question: q.q, answers: [...q.a], correct: q.correct });
       setEditingFlag(f.id);
-    } catch (e) {
-      alert("Could not load question data.");
-    }
+    } catch (e) { alert("Could not load question data."); }
   }
 
   async function saveEdit(f: any) {
     if (!editData) return;
     setSaving(true);
-    const res = await fetch("/api/quiz/edit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        slug: f.quiz_slug,
-        questionIndex: f.question_index,
-        question: editData.question,
-        answers: editData.answers,
-        correct: editData.correct,
-      }),
-    });
+    const res = await fetch("/api/quiz/edit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: f.quiz_slug, questionIndex: f.question_index, question: editData.question, answers: editData.answers, correct: editData.correct }) });
     const data = await res.json();
     setSaving(false);
-    if (data.success) {
-      setSaveSuccess(f.id);
-      setTimeout(() => setSaveSuccess(null), 2000);
-    } else {
-      alert("Save failed: " + data.error);
-    }
+    if (data.success) { setSaveSuccess(f.id); setTimeout(() => setSaveSuccess(null), 2000); }
+    else alert("Save failed: " + data.error);
   }
 
   async function disqualifyUser(userId: string) {
@@ -189,47 +176,44 @@ export default function AdminClient({
     if (!reason) { alert("Select a reason first."); return; }
     if (!confirm("Disqualify this user for: " + reason + "?")) return;
     setDisqualifying(userId);
-    await fetch("/api/season/disqualify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, reason, seasonId: season?.id }),
-    });
-    setStandings((prev: any[]) => prev.map(p =>
-      p.user_id === userId ? { ...p, is_flagged: true, disqualified: true } : p
-    ));
+    await fetch("/api/season/disqualify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, reason, seasonId: season?.id }) });
+    setStandings((prev: any[]) => prev.map(p => p.user_id === userId ? { ...p, is_flagged: true, disqualified: true } : p));
     setDisqualifying(null);
   }
 
   async function updateRewardStatus(userId: string, status: string) {
     setUpdatingReward(userId);
-    await fetch("/api/season/reward", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, status, seasonId: season?.id }),
-    });
-    setStandings((prev: any[]) => prev.map(p =>
-      p.user_id === userId ? { ...p, reward_status: status } : p
-    ));
+    await fetch("/api/season/reward", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, status, seasonId: season?.id }) });
+    setStandings((prev: any[]) => prev.map(p => p.user_id === userId ? { ...p, reward_status: status } : p));
     setUpdatingReward(null);
+  }
+
+  async function updateClaimStatus(claimId: string, status: string) {
+    setUpdatingClaim(claimId);
+    await fetch("/api/rewards/update-claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId, status }) });
+    setClaims((prev: any[]) => prev.map(c => c.id === claimId ? { ...c, status } : c));
+    setUpdatingClaim(null);
   }
 
   async function closeSeason() {
     if (!confirm("Close Season 1 and snapshot final results? This cannot be undone.")) return;
     setClosingSeason(true);
-    await fetch("/api/season/close", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ seasonId: season?.id }),
-    });
+    await fetch("/api/season/close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: season?.id }) });
     setClosingSeason(false);
     setSeasonClosed(true);
+  }
+
+  function copyToClipboard(text: string, id: string) {
+    navigator.clipboard.writeText(text);
+    setCopiedEmail(id);
+    setTimeout(() => setCopiedEmail(null), 2000);
   }
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, marginBottom: 8 }}>{"🛡️ Admin Panel"}</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, marginBottom: 8 }}>🛡️ Admin Panel</h1>
         <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>BloxQuiz.gg — Content Management</p>
       </div>
 
@@ -263,18 +247,14 @@ export default function AdminClient({
       {tab === "overview" && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24 }}>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{"🔥 Most Played Quizzes"}</h2>
-            {topQuizzes.length === 0 ? (
-              <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>No play data yet.</p>
-            ) : (
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>🔥 Most Played Quizzes</h2>
+            {topQuizzes.length === 0 ? <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>No play data yet.</p> : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {topQuizzes.map((q, i) => (
                   <div key={q.slug} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: "var(--surface)", borderRadius: "var(--radius-sm)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontFamily: "var(--font-display)", fontSize: 18, color: i === 0 ? "var(--neon-yellow)" : "var(--text-dim)", minWidth: 24 }}>{i + 1}</span>
-                      <a href={"/quiz/" + q.slug} target="_blank" style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", textDecoration: "none" }}>
-                        {q.slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()).substring(0, 40)}
-                      </a>
+                      <a href={"/quiz/" + q.slug} target="_blank" style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", textDecoration: "none" }}>{q.slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()).substring(0, 40)}</a>
                     </div>
                     <span style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)" }}>{q.plays + " plays"}</span>
                   </div>
@@ -282,12 +262,9 @@ export default function AdminClient({
               </div>
             )}
           </div>
-
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24 }}>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{"🚩 Recent Flags"}</h2>
-            {flags.length === 0 ? (
-              <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>No open flags! 🎉</p>
-            ) : (
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>🚩 Recent Flags</h2>
+            {flags.length === 0 ? <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>No open flags! 🎉</p> : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {flags.slice(0, 8).map((f: any) => (
                   <div key={f.id} style={{ padding: "10px 14px", background: "var(--surface)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -328,14 +305,18 @@ export default function AdminClient({
           </div>
 
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            {(["standings", "flagged", "close"] as const).map(t => (
+            {(["standings", "flagged", "claims", "close"] as const).map(t => (
               <button key={t} onClick={() => setSeasonTab(t)}
                 style={{ padding: "8px 18px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: seasonTab === t ? "#B84CFF" : "var(--surface)", color: seasonTab === t ? "#fff" : "var(--text-muted)", WebkitTextFillColor: seasonTab === t ? "#fff" : "var(--text-muted)", textTransform: "capitalize" }}>
-                {t === "flagged" ? "⚠️ Flagged (" + flaggedUsers.length + ")" : t === "close" ? "⛔ Close Season" : "🏆 Standings"}
+                {t === "flagged" ? "⚠️ Flagged (" + flaggedUsers.length + ")"
+                  : t === "close" ? "⛔ Close Season"
+                  : t === "claims" ? "🎁 Claims" + (pendingClaims > 0 ? " (" + pendingClaims + ")" : "")
+                  : "🏆 Standings"}
               </button>
             ))}
           </div>
 
+          {/* Standings */}
           {seasonTab === "standings" && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
               <div style={{ display: "grid", gridTemplateColumns: "50px 1fr 100px 80px 80px 120px 140px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
@@ -346,34 +327,28 @@ export default function AdminClient({
               ) : (
                 standings.map((player: any, i: number) => {
                   const rs = rewardStatusColors[player.reward_status || "pending"];
-                  const isTop10 = player.rank <= 10 && player.quizzes_completed >= 10 && !player.disqualified;
+                  const isTop3 = player.rank <= 3 && player.quizzes_completed >= 10 && !player.disqualified;
                   return (
                     <div key={player.user_id} style={{ display: "grid", gridTemplateColumns: "50px 1fr 100px 80px 80px 120px 140px", alignItems: "center", padding: "14px 20px", borderBottom: i < standings.length - 1 ? "1px solid var(--border)" : "none", background: player.disqualified ? "rgba(255,60,172,0.03)" : "transparent" }}>
-                      <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: player.rank <= 3 ? (["var(--neon-yellow)", "#C0C0C0", "#CD7F32"] as string[])[player.rank - 1] : "var(--text-dim)" }}>
-                        {player.rank}
-                      </div>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: player.rank <= 3 ? (["var(--neon-yellow)", "#C0C0C0", "#CD7F32"] as string[])[player.rank - 1] : "var(--text-dim)" }}>{player.rank}</div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontWeight: 800, fontSize: 14, color: player.disqualified ? "var(--text-dim)" : "var(--text)" }}>{player.username}</span>
+                          <a href={"/profile/" + player.username} target="_blank" style={{ fontWeight: 800, fontSize: 14, color: player.disqualified ? "var(--text-dim)" : "var(--text)", textDecoration: "none" }}>{player.username}</a>
                           {player.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
                           {player.disqualified && <span style={{ fontSize: 10, color: "var(--neon-pink)", fontWeight: 800 }}>❌ DQ</span>}
                         </div>
-                        {!player.qualifies && !player.disqualified && (
-                          <div style={{ fontSize: 10, color: "var(--neon-yellow)", fontWeight: 700 }}>Need 10 quizzes</div>
-                        )}
+                        {!player.qualifies && !player.disqualified && <div style={{ fontSize: 10, color: "var(--neon-yellow)", fontWeight: 700 }}>Need 10 quizzes</div>}
                       </div>
                       <div style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--neon-green)" }}>{(player.monthly_score || 0).toLocaleString()}</div>
                       <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{player.quizzes_completed}</div>
                       <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{player.avg_accuracy + "%"}</div>
                       <div>
-                        {isTop10 ? (
+                        {isTop3 ? (
                           <select value={player.reward_status || "pending"} onChange={e => updateRewardStatus(player.user_id, e.target.value)} disabled={updatingReward === player.user_id}
                             style={{ fontSize: 11, fontWeight: 800, padding: "4px 8px", borderRadius: 8, background: rs.bg, color: rs.color, border: "1px solid " + rs.color + "40", cursor: "pointer", fontFamily: "var(--font-body)" }}>
                             {["pending", "claimed", "sent", "expired", "disqualified"].map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
-                        ) : (
-                          <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>—</span>
-                        )}
+                        ) : <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>—</span>}
                       </div>
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                         {!player.disqualified && (
@@ -397,6 +372,7 @@ export default function AdminClient({
             </div>
           )}
 
+          {/* Flagged */}
           {seasonTab === "flagged" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {flaggedUsers.length === 0 ? (
@@ -429,11 +405,100 @@ export default function AdminClient({
             </div>
           )}
 
+          {/* Claims */}
+          {seasonTab === "claims" && (
+            <div>
+              {claims.length === 0 ? (
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 48, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>
+                  No prize claims submitted yet.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {claims.map((claim: any) => {
+                    const cs = claimStatusColors[claim.status] || claimStatusColors.pending;
+                    const prizeAmount = PRIZE_AMOUNTS[claim.rank] || "Unknown";
+                    return (
+                      <div key={claim.id} style={{ background: "var(--bg-card)", border: "1px solid " + (claim.status === "pending" ? "rgba(255,227,71,0.2)" : claim.status === "sent" ? "rgba(0,245,160,0.2)" : "var(--border)"), borderRadius: "var(--radius)", padding: "20px 24px" }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                              <span style={{ fontFamily: "var(--font-display)", fontSize: 18, color: claim.rank === 1 ? "var(--neon-yellow)" : claim.rank === 2 ? "#C0C0C0" : "#CD7F32" }}>
+                                {claim.rank === 1 ? "👑" : claim.rank === 2 ? "🥈" : "🥉"} #{claim.rank}
+                              </span>
+                              <a href={"/profile/" + claim.username} target="_blank" style={{ fontWeight: 800, fontSize: 16, color: "var(--text)", textDecoration: "none" }}>{claim.username}</a>
+                              <span style={{ fontSize: 11, fontWeight: 900, padding: "3px 12px", borderRadius: 100, background: "rgba(255,227,71,0.1)", color: "var(--neon-yellow)" }}>{prizeAmount} Gift Card</span>
+                              <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: cs.bg, color: cs.color, textTransform: "uppercase" }}>{claim.status}</span>
+                            </div>
+
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginTop: 4 }}>
+                              <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
+                                <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Roblox Username</div>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--neon-green)" }}>{claim.roblox_username}</span>
+                                  <button onClick={() => copyToClipboard(claim.roblox_username, claim.id + "-roblox")}
+                                    style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 6, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)", border: "none", cursor: "pointer" }}>
+                                    {copiedEmail === claim.id + "-roblox" ? "✓" : "Copy"}
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
+                                <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Email</div>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{claim.email}</span>
+                                  <button onClick={() => copyToClipboard(claim.email, claim.id + "-email")}
+                                    style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 6, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", border: "none", cursor: "pointer" }}>
+                                    {copiedEmail === claim.id + "-email" ? "✓" : "Copy"}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {claim.discord && (
+                                <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
+                                  <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Discord</div>
+                                  <span style={{ fontSize: 13, fontWeight: 700, color: "#B84CFF" }}>{claim.discord}</span>
+                                </div>
+                              )}
+
+                              <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
+                                <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Submitted</div>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{new Date(claim.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+                            {claim.status === "pending" && (
+                              <button onClick={() => updateClaimStatus(claim.id, "sent")} disabled={updatingClaim === claim.id}
+                                style={{ padding: "10px 20px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+                                {updatingClaim === claim.id ? "⏳ Updating..." : "✅ Mark as Sent"}
+                              </button>
+                            )}
+                            {claim.status === "pending" && (
+                              <button onClick={() => updateClaimStatus(claim.id, "rejected")} disabled={updatingClaim === claim.id}
+                                style={{ padding: "10px 20px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", fontWeight: 800, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                                ❌ Reject
+                              </button>
+                            )}
+                            {claim.status === "sent" && (
+                              <span style={{ fontSize: 12, fontWeight: 800, padding: "8px 16px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)", textAlign: "center" }}>✓ Gift Card Sent</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Close Season */}
           {seasonTab === "close" && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32 }}>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>⛔ Close Season 1</h2>
               <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>
-                Closing the season will snapshot the final standings, freeze scores, and mark the top 10 qualifying players as prize winners. This action cannot be undone.
+                Closing the season will snapshot the final standings, freeze scores, and mark the top 3 qualifying players as prize winners. This action cannot be undone.
               </p>
               <div style={{ background: "var(--surface)", borderRadius: "var(--radius-sm)", padding: 20, marginBottom: 24 }}>
                 <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Season 1 Summary</div>
@@ -441,8 +506,9 @@ export default function AdminClient({
                   {[
                     { label: "Total players", value: standings.length },
                     { label: "Qualifying players (10+ quizzes)", value: qualifiedStandings.length },
-                    { label: "Prize winners (top 10)", value: Math.min(10, qualifiedStandings.length) },
+                    { label: "Prize winners (top 3)", value: Math.min(3, qualifiedStandings.length) },
                     { label: "Flagged accounts", value: flaggedUsers.length },
+                    { label: "Prize claims submitted", value: claims.length },
                   ].map(({ label, value }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700 }}>
                       <span style={{ color: "var(--text-muted)" }}>{label}</span>
@@ -668,9 +734,7 @@ export default function AdminClient({
                     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{log.game || "—"}</div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{log.angle || "—"}</div>
                     <div style={{ fontSize: 12, color: log.error ? "var(--neon-pink)" : "var(--text-muted)", fontWeight: 600 }}>
-                      {log.quiz_slug ? (
-                        <a href={"/quiz/" + log.quiz_slug} target="_blank" style={{ color: "var(--neon-blue)", textDecoration: "none", fontWeight: 700 }}>{log.quiz_slug}</a>
-                      ) : log.error || "—"}
+                      {log.quiz_slug ? <a href={"/quiz/" + log.quiz_slug} target="_blank" style={{ color: "var(--neon-blue)", textDecoration: "none", fontWeight: 700 }}>{log.quiz_slug}</a> : log.error || "—"}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{new Date(log.created_at).toLocaleString()}</div>
                   </div>
