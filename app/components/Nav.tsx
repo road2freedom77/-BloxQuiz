@@ -20,6 +20,24 @@ const TICKER_ITEMS = [
   "⚔️ Blox Fruits · Adopt Me · Doors · MM2 · and More",
 ];
 
+const clerkAppearance = {
+  variables: {
+    colorBackground: "#0B0E17",
+    colorText: "#ffffff",
+    colorTextSecondary: "#8892a4",
+    colorInputBackground: "#161b27",
+    colorInputText: "#ffffff",
+    colorPrimary: "#00F5A0",
+  },
+  elements: {
+    card: { background: "#0B0E17", border: "1px solid #1e2433" },
+    userButtonPopoverCard: { background: "#0B0E17", border: "1px solid #1e2433" },
+    userButtonPopoverActionButton: { color: "#8892a4" },
+    userButtonPopoverActionButtonText: { color: "#8892a4" },
+    userButtonPopoverFooter: { background: "#0B0E17" },
+  }
+};
+
 export default function Nav() {
   const { isSignedIn, user } = useUser();
   const [streak, setStreak] = useState<number | null>(null);
@@ -124,7 +142,9 @@ export default function Nav() {
             )}
 
             {isSignedIn ? (
-              <UserButton appearance={{ elements: { avatarBox: { width: 36, height: 36 } } }} />
+              <UserButton
+                appearance={{ ...clerkAppearance, elements: { ...clerkAppearance.elements, avatarBox: { width: 36, height: 36 } } }}
+              />
             ) : (
               <>
                 <SignInButton mode="modal">
@@ -140,7 +160,9 @@ export default function Nav() {
           {/* Mobile right side */}
           <div className="mobile-nav" style={{ display: "none", alignItems: "center", gap: 10 }}>
             {isSignedIn ? (
-              <UserButton appearance={{ elements: { avatarBox: { width: 32, height: 32 } } }} />
+              <UserButton
+                appearance={{ ...clerkAppearance, elements: { ...clerkAppearance.elements, avatarBox: { width: 32, height: 32 } } }}
+              />
             ) : (
               <>
                 <SignInButton mode="modal">
