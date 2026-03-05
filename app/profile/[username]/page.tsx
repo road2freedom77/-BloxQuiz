@@ -25,21 +25,60 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     .from("scores")
     .select("*")
     .eq("user_id", userData.id)
-    .order("played_at", { ascending: false })
+    .order("completed_at", { ascending: false })
     .limit(10);
 
+  // All-time rank
   const { data: allUsers } = await supabase
     .from("users")
     .select("id, xp")
     .order("xp", { ascending: false });
-
   const rank = allUsers ? allUsers.findIndex(u => u.id === userData.id) + 1 : null;
+
+  // Season rank + score
+  const currentMonth = new Date().toISOString().substring(0, 7);
+  const { data: monthlyScores } = await supabase
+    .from("scores")
+    .select("user_id, weighted_score")
+    .eq("month", currentMonth)
+    .eq("is_first_attempt", true);
+
+  let seasonRank: number | null = null;
+  let seasonScore = 0;
+  let seasonQuizzes = 0;
+
+  if (monthlyScores) {
+    const userTotals: Record<string, { score: number, quizzes: number }> = {};
+    for (const row of monthlyScores) {
+      if (!userTotals[row.user_id]) userTotals[row.user_id] = { score: 0, quizzes: 0 };
+      userTotals[row.user_id].score += row.weighted_score || 0;
+      userTotals[row.user_id].quizzes += 1;
+    }
+    seasonScore = userTotals[userData.id]?.score || 0;
+    seasonQuizzes = userTotals[userData.id]?.quizzes || 0;
+    const sorted = Object.entries(userTotals).sort((a, b) => b[1].score - a[1].score);
+    const idx = sorted.findIndex(([uid]) => uid === userData.id);
+    seasonRank = idx >= 0 ? idx + 1 : null;
+  }
+
+  // Prize claim status
+  const { data: prizeData } = await supabase
+    .from("season_results")
+    .select("rank, reward_status")
+    .eq("user_id", userData.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   return (
     <PublicProfileClient
       userData={userData}
       scores={scores || []}
       rank={rank}
+      seasonRank={seasonRank}
+      seasonScore={seasonScore}
+      seasonQuizzes={seasonQuizzes}
+      prizeData={prizeData || null}
     />
   );
 }

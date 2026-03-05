@@ -20,14 +20,29 @@ function getXPForNextLevel(xp: number) {
   return { next: 10000, pct: 100 };
 }
 
-export default function PublicProfileClient({ userData, scores, rank }: {
+const PRIZE_AMOUNTS: Record<number, string> = { 1: "$20", 2: "$15", 3: "$10" };
+
+export default function PublicProfileClient({
+  userData,
+  scores,
+  rank,
+  seasonRank,
+  seasonScore,
+  seasonQuizzes,
+  prizeData,
+}: {
   userData: any,
   scores: any[],
-  rank: number | null
+  rank: number | null,
+  seasonRank: number | null,
+  seasonScore: number,
+  seasonQuizzes: number,
+  prizeData: any | null,
 }) {
   const [copied, setCopied] = useState(false);
   const xp = userData?.xp || 0;
   const streak = userData?.streak || 0;
+  const longestStreak = userData?.longest_streak || streak;
   const { level, title } = getLevel(xp);
   const { next, pct } = getXPForNextLevel(xp);
 
@@ -39,6 +54,9 @@ export default function PublicProfileClient({ userData, scores, rank }: {
 
   const badges = getBadges({ rank, streak, xp, totalQuizzes, perfectScores });
 
+  const isPrizeWinner = prizeData && prizeData.rank <= 3 && prizeData.reward_status === "pending";
+  const qualifiesThisSeason = seasonQuizzes >= 10;
+
   function copyProfileLink() {
     navigator.clipboard.writeText("https://www.bloxquiz.gg/profile/" + userData.username);
     setCopied(true);
@@ -47,6 +65,22 @@ export default function PublicProfileClient({ userData, scores, rank }: {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
+
+      {/* Prize Winner Inbox */}
+      {isPrizeWinner && (
+        <div style={{ background: "linear-gradient(135deg, rgba(255,227,71,0.12), rgba(184,76,255,0.08))", border: "2px solid rgba(255,227,71,0.4)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>🎉 You Won a Prize!</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 4 }}>
+              {"Season 1 — Rank #" + prizeData.rank + " — " + (PRIZE_AMOUNTS[prizeData.rank] || "") + " Roblox Gift Card"}
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Claim your prize before the end of the month!</div>
+          </div>
+          <a href="/rewards/claim" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", flexShrink: 0 }}>
+            🎁 Claim Prize
+          </a>
+        </div>
+      )}
 
       {/* Profile Header */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32, marginBottom: 20, position: "relative", overflow: "hidden" }}>
@@ -78,10 +112,8 @@ export default function PublicProfileClient({ userData, scores, rank }: {
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button
-              onClick={copyProfileLink}
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "10px 20px", fontSize: 13, fontWeight: 800, cursor: "pointer", color: "var(--text)", fontFamily: "var(--font-body)" }}
-            >
+            <button onClick={copyProfileLink}
+              style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "10px 20px", fontSize: 13, fontWeight: 800, cursor: "pointer", color: "var(--text)", fontFamily: "var(--font-body)" }}>
               {copied ? "✅ Copied!" : "🔗 Share Profile"}
             </button>
             <a href="/browse" style={{ background: "var(--gradient-main)", borderRadius: 100, padding: "10px 20px", fontSize: 13, fontWeight: 800, color: "var(--bg)", textDecoration: "none", WebkitTextFillColor: "var(--bg)", display: "inline-flex", alignItems: "center" }}>
@@ -96,9 +128,7 @@ export default function PublicProfileClient({ userData, scores, rank }: {
             <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--neon-yellow)" }}>{xp.toLocaleString()}</span>
             <span style={{ fontSize: 12, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", marginLeft: 8 }}>XP</span>
           </div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-dim)" }}>
-            {"Next level: " + next.toLocaleString() + " XP"}
-          </div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-dim)" }}>{"Next level: " + next.toLocaleString() + " XP"}</div>
         </div>
         <div style={{ background: "var(--surface)", height: 10, borderRadius: 100, overflow: "hidden", marginBottom: 20 }}>
           <div style={{ height: "100%", width: pct + "%", background: "var(--gradient-main)", borderRadius: 100 }} />
@@ -125,14 +155,59 @@ export default function PublicProfileClient({ userData, scores, rank }: {
         {[
           { label: "Quizzes Played", value: totalQuizzes, color: "var(--neon-blue)" },
           { label: "Avg Score", value: avgScore + "%", color: "var(--neon-green)" },
-          { label: "Perfect Scores", value: perfectScores, color: "var(--neon-yellow)" },
-          { label: "Leaderboard Rank", value: rank ? "#" + rank : "—", color: "#B84CFF" },
+          { label: "Best Streak", value: longestStreak + " days", color: "var(--neon-yellow)" },
+          { label: "Perfect Scores", value: perfectScores, color: "#B84CFF" },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 16, textAlign: "center" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 28, color, marginBottom: 4 }}>{value}</div>
             <div style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase" }}>{label}</div>
           </div>
         ))}
+      </div>
+
+      {/* Season 1 Block */}
+      <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.1), rgba(255,60,172,0.06))", border: "1px solid rgba(184,76,255,0.25)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>🏆 Season 1 — March 2026</div>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 8 }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--neon-green)" }}>
+                  {seasonScore > 0 ? seasonScore.toLocaleString() : "—"}
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase" }}>Season Points</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "#B84CFF" }}>
+                  {seasonRank ? "#" + seasonRank : "—"}
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase" }}>Season Rank</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: seasonQuizzes >= 10 ? "var(--neon-green)" : "var(--neon-yellow)" }}>
+                  {seasonQuizzes + "/10"}
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase" }}>Quizzes to Qualify</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+            {qualifiesThisSeason && seasonRank && seasonRank <= 3 ? (
+              <span style={{ fontSize: 12, fontWeight: 900, padding: "6px 16px", borderRadius: 100, background: "rgba(255,227,71,0.15)", color: "var(--neon-yellow)", border: "1px solid rgba(255,227,71,0.3)" }}>
+                {"🏆 Prize Eligible — Rank #" + seasonRank}
+              </span>
+            ) : qualifiesThisSeason ? (
+              <span style={{ fontSize: 12, fontWeight: 800, padding: "6px 16px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)" }}>
+                ✓ Qualifies for prizes
+              </span>
+            ) : (
+              <span style={{ fontSize: 12, fontWeight: 800, padding: "6px 16px", borderRadius: 100, background: "rgba(255,227,71,0.1)", color: "var(--neon-yellow)" }}>
+                {"Need " + Math.max(0, 10 - seasonQuizzes) + " more quizzes to qualify"}
+              </span>
+            )}
+            <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "#B84CFF", textDecoration: "none" }}>View Leaderboard →</a>
+          </div>
+        </div>
       </div>
 
       {/* Recent Scores */}
@@ -153,7 +228,7 @@ export default function PublicProfileClient({ userData, scores, rank }: {
                       {s.quiz_slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>
-                      {new Date(s.played_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {new Date(s.completed_at || s.played_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -163,6 +238,11 @@ export default function PublicProfileClient({ userData, scores, rank }: {
                     <div style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: pct >= 70 ? "rgba(0,245,160,0.1)" : "rgba(255,60,172,0.1)", color: pct >= 70 ? "var(--neon-green)" : "var(--neon-pink)" }}>
                       {pct + "%"}
                     </div>
+                    {s.weighted_score > 0 && (
+                      <div style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: "rgba(184,76,255,0.1)", color: "#B84CFF" }}>
+                        {"+" + s.weighted_score + " pts"}
+                      </div>
+                    )}
                   </div>
                 </a>
               );
