@@ -56,8 +56,44 @@ const ANGLE_LABELS: Record<string, string> = {
   Updates: "🆕 Updates",
 };
 
+function inferAngle(quiz: any): string | null {
+  if (quiz.angle) return quiz.angle;
+
+  const text = (quiz.title + " " + quiz.slug).toLowerCase();
+
+  if (text.includes("beginner") || text.includes("basics") || text.includes("starter") ||
+      text.includes("essentials") || text.includes("introduction") || text.includes("intro") ||
+      text.includes("new player") || text.includes("getting started")) return "Beginner";
+
+  if (text.includes("trading") || text.includes("trade") || text.includes("market") ||
+      text.includes("value") || text.includes("economy") || text.includes("price")) return "Trading";
+
+  if (text.includes("mechanic") || text.includes("combat") || text.includes("system") ||
+      text.includes("ability") || text.includes("skill") || text.includes("technique") ||
+      text.includes("move") || text.includes("build")) return "Mechanics";
+
+  if (text.includes("expert") || text.includes("advanced") || text.includes("mastery") ||
+      text.includes("ultimate") || text.includes("master") || text.includes("pro") ||
+      text.includes("endgame")) return "Expert";
+
+  if (text.includes("lore") || text.includes("story") || text.includes("history") ||
+      text.includes("character") || text.includes("world") || text.includes("legend") ||
+      text.includes("myth") || text.includes("origin")) return "Lore";
+
+  if (text.includes("secret") || text.includes("hidden") || text.includes("easter egg") ||
+      text.includes("mystery") || text.includes("unknown") || text.includes("rare") ||
+      text.includes("discovery")) return "Secrets";
+
+  if (text.includes("update") || text.includes("new content") || text.includes("latest") ||
+      text.includes("recent") || text.includes("patch") || text.includes("season") ||
+      text.includes("event")) return "Updates";
+
+  return null;
+}
+
 function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: string }) {
   const diff = diffColors[quiz.difficulty] || diffColors.Medium;
+  const displayAngle = inferAngle(quiz);
   return (
     <a href={`/quiz/${quiz.slug}`} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
       <div style={{ height: 100, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, background: thumb, position: "relative" }}>
@@ -68,7 +104,9 @@ function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: str
         <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
           <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
           <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{quiz.questions} Q's</span>
-          {quiz.angle && <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, textTransform: "uppercase", background: "rgba(184,76,255,0.1)", color: "#B84CFF" }}>{quiz.angle}</span>}
+          {displayAngle && (
+            <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100, textTransform: "uppercase", background: "rgba(184,76,255,0.1)", color: "#B84CFF" }}>{displayAngle}</span>
+          )}
         </div>
         <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: 0 }}>{quiz.title}</h3>
       </div>
@@ -95,11 +133,11 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
     }
   }, []);
 
-  // Group quizzes by angle
+  // Group quizzes by inferred angle
   const grouped: Record<string, any[]> = { Uncategorized: [] };
   for (const angle of ANGLE_ORDER) grouped[angle] = [];
   for (const quiz of quizzes) {
-    const angle = quiz.angle;
+    const angle = inferAngle(quiz);
     if (angle && grouped[angle] !== undefined) grouped[angle].push(quiz);
     else grouped["Uncategorized"].push(quiz);
   }
