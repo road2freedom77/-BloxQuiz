@@ -2,7 +2,10 @@
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
-const ADMIN_USER_ID = "user_3ALlHJlXwNoezsy7eoC7qAp6yTO";
+const ADMIN_USER_IDS = [
+  "user_3ALlHJlXwNoezsy7eoC7qAp6yTO", // Marcin
+  "user_3AM3VzXy7LGvyivPbtHeNak7BDT", // Aiden
+];
 
 const TICKER_ITEMS = [
   "🏆 Season 1 Coming Soon — Win Robux Gift Cards",
@@ -22,6 +25,7 @@ export default function Nav() {
   const [streak, setStreak] = useState<number | null>(null);
   const [flagCount, setFlagCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isAdmin = ADMIN_USER_IDS.includes(user?.id || "");
 
   useEffect(() => {
     if (!user?.id) { setStreak(null); return; }
@@ -31,13 +35,11 @@ export default function Nav() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (user?.id !== ADMIN_USER_ID) return;
+    if (!isAdmin) return;
     fetch("/api/flags/count")
       .then(r => r.json())
       .then(data => setFlagCount(data.count || 0));
-  }, [user?.id]);
-
-  const tickerContent = TICKER_ITEMS.join("   •   ");
+  }, [isAdmin]);
 
   return (
     <>
@@ -55,17 +57,9 @@ export default function Nav() {
           display: "flex",
           whiteSpace: "nowrap",
           animation: "ticker 40s linear infinite",
-          gap: 0,
         }}>
-          {/* Duplicate for seamless loop */}
           {[0, 1].map(n => (
-            <span key={n} style={{
-              fontSize: 12,
-              fontWeight: 800,
-              color: "#B84CFF",
-              paddingRight: 80,
-              letterSpacing: 0.3,
-            }}>
+            <span key={n} style={{ fontSize: 12, fontWeight: 800, color: "#B84CFF", paddingRight: 80, letterSpacing: 0.3 }}>
               {TICKER_ITEMS.map((item, i) => (
                 <span key={i}>
                   <span style={{ color: "#B84CFF" }}>{item}</span>
@@ -116,7 +110,7 @@ export default function Nav() {
               <a href="/profile" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>My Profile</a>
             )}
 
-            {isSignedIn && user?.id === ADMIN_USER_ID && (
+            {isSignedIn && isAdmin && (
               <a href="/admin" style={{ position: "relative", textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>
                 🛡️ Admin
                 {flagCount > 0 && (
@@ -177,7 +171,7 @@ export default function Nav() {
             {isSignedIn && (
               <a href="/profile" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>👤 My Profile</a>
             )}
-            {isSignedIn && user?.id === ADMIN_USER_ID && (
+            {isSignedIn && isAdmin && (
               <a href="/admin" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🛡️ Admin</a>
             )}
             {isSignedIn && streak !== null && streak > 0 && (

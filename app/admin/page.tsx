@@ -5,13 +5,15 @@ import fs from "fs";
 import path from "path";
 import AdminClient from "./AdminClient";
 
-const ADMIN_USER_ID = "user_3ALlHJlXwNoezsy7eoC7qAp6yTO";
+const ADMIN_USER_IDS = [
+  "user_3ALlHJlXwNoezsy7eoC7qAp6yTO", // Marcin
+  "user_3AM3VzXy7LGvyivPbtHeNak7BDT", // Aiden
+];
 
 async function getAllQuizzes() {
   const quizzes: any[] = [];
   const slugsSeen = new Set<string>();
 
-  // JSON quizzes
   try {
     const dir = path.join(process.cwd(), "app/data/quizzes");
     const files = fs.readdirSync(dir).filter(f => f.endsWith(".json"));
@@ -30,7 +32,6 @@ async function getAllQuizzes() {
     }
   } catch (e) {}
 
-  // Supabase quizzes
   try {
     const { data } = await supabase
       .from("quizzes")
@@ -126,7 +127,7 @@ async function getCronLogs() {
 export default async function AdminPage() {
   const { userId } = await auth();
 
-  if (userId !== ADMIN_USER_ID) redirect("/");
+  if (!userId || !ADMIN_USER_IDS.includes(userId)) redirect("/");
 
   const [quizzes, stats, flags, topQuizzes, cronLogs] = await Promise.all([
     getAllQuizzes(),
