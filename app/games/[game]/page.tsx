@@ -263,6 +263,26 @@ const gameSlugMap: Record<string, string> = {
   "Kick Off": "kick-off",
 };
 
+function inferAngleServer(title: string, slug: string): string | null {
+  const text = (title + " " + slug).toLowerCase();
+  if (text.includes("beginner") || text.includes("basics") || text.includes("starter") ||
+      text.includes("essentials") || text.includes("introduction") || text.includes("intro")) return "Beginner";
+  if (text.includes("trading") || text.includes("trade") || text.includes("market") ||
+      text.includes("value") || text.includes("economy") || text.includes("price")) return "Trading";
+  if (text.includes("mechanic") || text.includes("combat") || text.includes("system") ||
+      text.includes("ability") || text.includes("skill") || text.includes("awakening")) return "Mechanics";
+  if (text.includes("expert") || text.includes("advanced") || text.includes("mastery") ||
+      text.includes("ultimate") || text.includes("master") || text.includes("intermediate") ||
+      text.includes("knowledge")) return "Expert";
+  if (text.includes("lore") || text.includes("story") || text.includes("history") ||
+      text.includes("character") || text.includes("world") || text.includes("legend")) return "Lore";
+  if (text.includes("secret") || text.includes("hidden") || text.includes("easter egg") ||
+      text.includes("mystery") || text.includes("unknown") || text.includes("discovery")) return "Secrets";
+  if (text.includes("update") || text.includes("new content") || text.includes("latest") ||
+      text.includes("recent") || text.includes("patch") || text.includes("season")) return "Updates";
+  return null;
+}
+
 function slugToGame(): Record<string, any> {
   const result: Record<string, any> = {};
   for (const [gameName, slug] of Object.entries(gameSlugMap)) {
@@ -338,7 +358,11 @@ async function getQuizzesForGame(displayName: string) {
     }
   } catch (e) {}
 
-  return quizzes;
+  // Apply server-side angle inference for quizzes missing one
+  return quizzes.map(q => ({
+    ...q,
+    angle: q.angle || inferAngleServer(q.title, q.slug),
+  }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
