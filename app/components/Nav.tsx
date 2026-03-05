@@ -86,8 +86,6 @@ export default function Nav() {
             <a href="/browse" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Quizzes</a>
             <a href="/codes" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Codes</a>
             <a href="/leaderboard" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Leaderboard</a>
-            <a href="/rules" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Rules</a>
-            <a href="/champions" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Champions</a>
 
             {isSignedIn && (
               <a href="/profile" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>My Profile</a>
@@ -163,8 +161,6 @@ export default function Nav() {
             <a href="/browse" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🎮 Quizzes</a>
             <a href="/codes" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🎁 Codes</a>
             <a href="/leaderboard" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🏆 Leaderboard</a>
-            <a href="/rules" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>📋 Rules</a>
-            <a href="/champions" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🏅 Champions</a>
             {isSignedIn && (
               <a href="/profile" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>👤 My Profile</a>
             )}
