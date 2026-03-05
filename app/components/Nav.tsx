@@ -4,6 +4,19 @@ import { useEffect, useState } from "react";
 
 const ADMIN_USER_ID = "user_3ALlHJlXwNoezsy7eoC7qAp6yTO";
 
+const TICKER_ITEMS = [
+  "🏆 Season 1 Coming Soon — Win Robux Gift Cards",
+  "🔥 Top Players Earn Real Prizes",
+  "🎮 Play Quizzes → Climb the Leaderboard",
+  "💰 Robux Gift Cards Up for Grabs",
+  "⚡ Free to Play — No Download Required",
+  "🎯 Hard Quizzes = 2x Leaderboard Points",
+  "🔥 Daily Streaks = Bonus Points",
+  "👑 Season 1 Launches Soon — Start Grinding Now",
+  "🎁 Free Roblox Codes Updated Daily",
+  "⚔️ Blox Fruits · Adopt Me · Doors · MM2 · and More",
+];
+
 export default function Nav() {
   const { isSignedIn, user } = useUser();
   const [streak, setStreak] = useState<number | null>(null);
@@ -24,10 +37,50 @@ export default function Nav() {
       .then(data => setFlagCount(data.count || 0));
   }, [user?.id]);
 
+  const tickerContent = TICKER_ITEMS.join("   •   ");
+
   return (
     <>
+      {/* Scrolling ticker banner */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 101,
+        background: "linear-gradient(90deg, #0d0118, #1a0030, #0d0118)",
+        borderBottom: "1px solid rgba(184,76,255,0.3)",
+        overflow: "hidden",
+        height: 34,
+        display: "flex",
+        alignItems: "center",
+      }}>
+        <div style={{
+          display: "flex",
+          whiteSpace: "nowrap",
+          animation: "ticker 40s linear infinite",
+          gap: 0,
+        }}>
+          {/* Duplicate for seamless loop */}
+          {[0, 1].map(n => (
+            <span key={n} style={{
+              fontSize: 12,
+              fontWeight: 800,
+              color: "#B84CFF",
+              paddingRight: 80,
+              letterSpacing: 0.3,
+            }}>
+              {TICKER_ITEMS.map((item, i) => (
+                <span key={i}>
+                  <span style={{ color: "#B84CFF" }}>{item}</span>
+                  {i < TICKER_ITEMS.length - 1 && (
+                    <span style={{ color: "rgba(255,60,172,0.5)", margin: "0 20px" }}>•</span>
+                  )}
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <nav style={{
-        position: "sticky", top: 0, zIndex: 100,
+        position: "sticky", top: 34, zIndex: 100,
         background: "rgba(11,14,23,0.85)",
         backdropFilter: "blur(24px)",
         borderBottom: "1px solid var(--border)",
@@ -104,14 +157,13 @@ export default function Nav() {
                 </SignUpButton>
               </>
             )}
-            {/* Hamburger */}
             <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "var(--text)", fontSize: 20 }}>
               {menuOpen ? "✕" : "☰"}
             </button>
           </div>
         </div>
 
-        {/* Mobile dropdown menu */}
+        {/* Mobile dropdown */}
         {menuOpen && (
           <div className="mobile-nav" style={{
             display: "flex", flexDirection: "column", gap: 4,
@@ -136,6 +188,10 @@ export default function Nav() {
       </nav>
 
       <style>{`
+        @keyframes ticker {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .mobile-nav { display: flex !important; }
