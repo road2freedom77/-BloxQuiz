@@ -32,9 +32,12 @@ const clerkAppearance = {
   elements: {
     card: { background: "#0B0E17", border: "1px solid #1e2433" },
     userButtonPopoverCard: { background: "#0B0E17", border: "1px solid #1e2433" },
-    userButtonPopoverActionButton: { color: "#8892a4" },
+    userButtonPopoverActionButton: { color: "#8892a4", "&:hover": { background: "#161b27", color: "#ffffff" } },
     userButtonPopoverActionButtonText: { color: "#8892a4" },
+    userButtonPopoverActionButtonIcon: { color: "#8892a4" },
     userButtonPopoverFooter: { background: "#0B0E17" },
+    userPreviewMainIdentifier: { color: "#ffffff" },
+    userPreviewSecondaryIdentifier: { color: "#8892a4" },
   }
 };
 
