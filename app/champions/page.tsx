@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   description: "BloxQuiz.gg Hall of Fame — past season winners and leaderboard champions.",
 };
 
+async function getCurrentSeason() {
+  const { data } = await supabase
+    .from("seasons")
+    .select("*")
+    .order("start_date", { ascending: false })
+    .limit(1)
+    .single();
+  return data;
+}
+
 async function getPastSeasons() {
   const { data: seasons } = await supabase
     .from("seasons")
@@ -54,12 +64,12 @@ const MEDALS = ["👑", "🥈", "🥉"];
 const RANK_COLORS = ["var(--neon-yellow)", "#C0C0C0", "#CD7F32"];
 
 export default async function ChampionsPage() {
-  const pastSeasons = await getPastSeasons();
+  const [pastSeasons, currentSeason] = await Promise.all([getPastSeasons(), getCurrentSeason()]);
+  const seasonClosed = currentSeason?.status === "closed";
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 48 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Hall of Fame</div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 48, marginBottom: 12 }}>🏆 Champions</h1>
@@ -68,43 +78,60 @@ export default async function ChampionsPage() {
         </p>
       </div>
 
-      {/* Active Season Teaser */}
-      <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Season 1 — In Progress</div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 6 }}>Your name could be here</div>
-          <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, lineHeight: 1.6 }}>
-            Top 3 players win Roblox gift cards up to $20. Season ends March 31, 2026.
-          </p>
+      {seasonClosed ? (
+        <div style={{ background: "linear-gradient(135deg, rgba(255,60,172,0.1), rgba(184,76,255,0.08))", border: "1px solid rgba(255,60,172,0.3)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-pink)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>⛔ Season 1 — Ended</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 6 }}>Season 1 is officially over!</div>
+            <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, lineHeight: 1.6 }}>
+              Final standings are locked. Winners have been notified. Season 2 coming soon — stay tuned!
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+            <a href="/leaderboard" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
+              Final Standings
+            </a>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
-          <a href="/leaderboard" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
-            View Leaderboard
-          </a>
-          <a href="/browse" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", border: "1px solid var(--border)" }}>
-            Play Now
-          </a>
+      ) : (
+        <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
+              {currentSeason?.name || "Season 1"} — In Progress
+            </div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 6 }}>Your name could be here</div>
+            <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, lineHeight: 1.6 }}>
+              Top 3 players win Roblox gift cards up to $20. Season ends {currentSeason?.end_date || "March 31, 2026"}.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+            <a href="/leaderboard" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
+              View Leaderboard
+            </a>
+            <a href="/browse" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", border: "1px solid var(--border)" }}>
+              Play Now
+            </a>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Past Seasons */}
       {pastSeasons.length === 0 ? (
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "60px 32px", textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🎮</div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 10 }}>No Champions Yet</div>
           <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 24, maxWidth: 400, margin: "0 auto 24px" }}>
-            Season 1 is still running! The first champions will be crowned on April 1, 2026.
+            {seasonClosed
+              ? "Season 1 just ended! Champions will appear here once prizes are sent."
+              : "Season 1 is still running! The first champions will be crowned on April 1, 2026."}
           </p>
           <a href="/leaderboard" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
-            🏆 See Current Standings
+            🏆 {seasonClosed ? "View Final Standings" : "See Current Standings"}
           </a>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
           {pastSeasons.map(({ season, winners }) => (
             <div key={season.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-
-              {/* Season header */}
               <div style={{ background: "linear-gradient(90deg, rgba(184,76,255,0.1), rgba(255,60,172,0.06))", borderBottom: "1px solid var(--border)", padding: "18px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
                 <div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 2 }}>{season.name}</div>
@@ -114,8 +141,6 @@ export default async function ChampionsPage() {
                   ✓ Completed
                 </span>
               </div>
-
-              {/* Winners podium */}
               <div style={{ padding: "28px 28px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                   {winners.map(w => (
@@ -142,11 +167,14 @@ export default async function ChampionsPage() {
         </div>
       )}
 
-      {/* Bottom CTA */}
       <div style={{ marginTop: 40, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>Ready to become a champion?</div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>
+          {seasonClosed ? "Season 2 is coming." : "Ready to become a champion?"}
+        </div>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
-          Play quizzes, climb the leaderboard, and win real Roblox gift cards every month.
+          {seasonClosed
+            ? "Keep playing to get ahead before the next season kicks off."
+            : "Play quizzes, climb the leaderboard, and win real Roblox gift cards every month."}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
