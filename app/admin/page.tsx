@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabase } from "../lib/supabase";
@@ -88,7 +90,6 @@ async function getSeasonStandings() {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  // Also fetch reward statuses from season_results
   const { data: results } = await supabase.from("season_results").select("user_id, reward_status").in("user_id", userIds);
   const rewardByUser: Record<string, string> = {};
   for (const r of results || []) rewardByUser[r.user_id] = r.reward_status;
@@ -116,7 +117,9 @@ async function getFlaggedUsers() {
 }
 
 async function getCurrentSeason() {
-  const { data } = await supabase.from("seasons").select("*").eq("status", "active").single();
+  const { data, error } = await supabase.from("seasons").select("*").eq("status", "active").single();
+  if (error) console.error("[admin] getCurrentSeason error:", error);
+  console.log("[admin] season fetched:", data);
   return data;
 }
 
@@ -133,7 +136,6 @@ async function getPrizeClaims() {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  // Get ranks from season_results
   const { data: results } = await supabase.from("season_results").select("user_id, rank").in("user_id", userIds);
   const rankByUser: Record<string, number> = {};
   for (const r of results || []) rankByUser[r.user_id] = r.rank;
