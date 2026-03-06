@@ -117,10 +117,13 @@ async function getFlaggedUsers() {
 }
 
 async function getCurrentSeason() {
-  const { data, error } = await supabase.from("seasons").select("*").eq("status", "active").single();
-  if (error) console.error("[admin] getCurrentSeason error:", error);
-  console.log("[admin] season fetched:", data);
-  return data;
+  const { data } = await supabase
+    .from("seasons")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+  return data || null;
 }
 
 async function getPrizeClaims() {
