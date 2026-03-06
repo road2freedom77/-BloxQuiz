@@ -305,6 +305,87 @@ export default function AdminClient({
             </div>
           </div>
 
+          {/* Winners Podium — only when season is closed */}
+          {seasonClosed && qualifiedStandings.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>🏆 Final Winners</div>
+
+              {/* Top 3 podium */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 12 }}>
+                {[0, 1, 2].map(i => {
+                  const player = qualifiedStandings[i];
+                  const medals = ["👑", "🥈", "🥉"];
+                  const colors = ["var(--neon-yellow)", "#C0C0C0", "#CD7F32"];
+                  const prizes = ["$20", "$15", "$10"];
+                  const borders = ["rgba(255,227,71,0.3)", "rgba(192,192,192,0.3)", "rgba(205,127,50,0.3)"];
+                  const bgs = ["rgba(255,227,71,0.06)", "rgba(192,192,192,0.06)", "rgba(205,127,50,0.06)"];
+                  if (!player) return (
+                    <div key={i} style={{ background: "var(--surface)", border: "1px dashed var(--border)", borderRadius: "var(--radius)", padding: "20px", textAlign: "center" }}>
+                      <div style={{ fontSize: 28, marginBottom: 6 }}>{medals[i]}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>No qualifying player</div>
+                    </div>
+                  );
+                  const rs = rewardStatusColors[player.reward_status || "pending"];
+                  return (
+                    <div key={player.user_id} style={{ background: bgs[i], border: "1px solid " + borders[i], borderRadius: "var(--radius)", padding: "20px 22px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                        <span style={{ fontSize: 28 }}>{medals[i]}</span>
+                        <div>
+                          <div style={{ fontFamily: "var(--font-display)", fontSize: 13, color: colors[i], marginBottom: 1 }}>{"#" + (i + 1) + " Place"}</div>
+                          <a href={"/profile/" + player.username} target="_blank" style={{ fontWeight: 900, fontSize: 16, color: "var(--text)", textDecoration: "none" }}>{player.username}</a>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700 }}>
+                          <span style={{ color: "var(--text-dim)" }}>Score</span>
+                          <span style={{ color: "var(--neon-green)", fontFamily: "var(--font-display)" }}>{(player.monthly_score || 0).toLocaleString()}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700 }}>
+                          <span style={{ color: "var(--text-dim)" }}>Quizzes</span>
+                          <span style={{ color: "var(--text-muted)" }}>{player.quizzes_completed}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700 }}>
+                          <span style={{ color: "var(--text-dim)" }}>Accuracy</span>
+                          <span style={{ color: "var(--text-muted)" }}>{player.avg_accuracy}%</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, fontWeight: 700, marginTop: 4, paddingTop: 8, borderTop: "1px solid var(--border)" }}>
+                          <span style={{ color: colors[i], fontWeight: 900 }}>{prizes[i]} Gift Card</span>
+                          <select value={player.reward_status || "pending"} onChange={e => updateRewardStatus(player.user_id, e.target.value)} disabled={updatingReward === player.user_id}
+                            style={{ fontSize: 10, fontWeight: 800, padding: "3px 6px", borderRadius: 6, background: rs.bg, color: rs.color, border: "1px solid " + rs.color + "40", cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                            {["pending", "claimed", "sent", "expired", "disqualified"].map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Runners up — ranks 4–10 */}
+              {qualifiedStandings.length > 3 && (
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+                  <div style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+                    Runners Up
+                  </div>
+                  {qualifiedStandings.slice(3, 10).map((player: any, i: number) => (
+                    <div key={player.user_id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px", borderBottom: i < Math.min(qualifiedStandings.length - 4, 6) ? "1px solid var(--border)" : "none", gap: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text-dim)", minWidth: 24 }}>{"#" + (i + 4)}</span>
+                        <a href={"/profile/" + player.username} target="_blank" style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", textDecoration: "none" }}>{player.username}</a>
+                        {player.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
+                      </div>
+                      <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+                        <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>{player.quizzes_completed} quizzes</span>
+                        <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>{player.avg_accuracy}% acc</span>
+                        <span style={{ fontFamily: "var(--font-display)", fontSize: 14, color: "var(--neon-green)" }}>{(player.monthly_score || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
             {(["standings", "flagged", "claims", "close"] as const).map(t => (
               <button key={t} onClick={() => setSeasonTab(t)}
