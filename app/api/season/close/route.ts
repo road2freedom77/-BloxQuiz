@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../../lib/supabase";
 
+const FALLBACK_SEASON_ID = "2214424b-d4c8-4d6e-8b01-b4ff719822b9";
+
 export async function POST(req: Request) {
   try {
-    const { seasonId } = await req.json();
-    console.log("[close-season] seasonId received:", seasonId);
-
-    if (!seasonId) {
-      return NextResponse.json({ success: false, error: "No seasonId provided" });
-    }
+    const { seasonId: rawSeasonId } = await req.json();
+    const seasonId = rawSeasonId || FALLBACK_SEASON_ID;
+    console.log("[close-season] seasonId received:", rawSeasonId, "using:", seasonId);
 
     const currentMonth = new Date().toISOString().substring(0, 7);
     console.log("[close-season] currentMonth:", currentMonth);
