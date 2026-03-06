@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "../../../lib/supabase";
+import { supabaseAdmin as supabase } from "../../../lib/supabase";
 
 const FALLBACK_SEASON_ID = "2214424b-d4c8-4d6e-8b01-b4ff719822b9";
 
