@@ -42,9 +42,13 @@ function getDaysUntilReset() {
 export default function LeaderboardClient({
   allTimeLeaderboard,
   seasonLeaderboard,
+  seasonClosed = false,
+  seasonName = "Season 1",
 }: {
-  allTimeLeaderboard: any[],
-  seasonLeaderboard: any[],
+  allTimeLeaderboard: any[];
+  seasonLeaderboard: any[];
+  seasonClosed?: boolean;
+  seasonName?: string;
 }) {
   const { isSignedIn, user } = useUser();
   const [tab, setTab] = useState<"season" | "alltime">("season");
@@ -52,7 +56,6 @@ export default function LeaderboardClient({
   const [mySeasonData, setMySeasonData] = useState<any | null>(null);
   const daysLeft = getDaysUntilReset();
 
-  // Fetch current user's season rank
   useEffect(() => {
     if (!user?.id) return;
     const found = seasonLeaderboard.find(p => p.user_id === user.id);
@@ -71,25 +74,39 @@ export default function LeaderboardClient({
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
-      {/* Season 1 hype banner */}
-      <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.15), rgba(255,60,172,0.1))", border: "1px solid rgba(184,76,255,0.4)", borderRadius: "var(--radius)", padding: "24px 28px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>🏆 Season 1 — Active Now</div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 6 }}>Win Roblox Gift Cards</div>
-          <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Top players win real prizes. Play quizzes, earn points, claim your reward.</div>
+      {/* Season banner — dynamic */}
+      {seasonClosed ? (
+        <div style={{ background: "linear-gradient(135deg, rgba(255,60,172,0.1), rgba(184,76,255,0.08))", border: "1px solid rgba(255,60,172,0.3)", borderRadius: "var(--radius)", padding: "24px 28px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-pink)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>⛔ {seasonName} — Ended</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 6 }}>Final Standings</div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Season is over. Scores are locked. Season 2 coming soon!</div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+            <a href="/champions" style={{ fontSize: 13, fontWeight: 900, padding: "10px 22px", borderRadius: 100, background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", border: "1px solid rgba(255,60,172,0.3)", textDecoration: "none" }}>🏆 View Champions →</a>
+            <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "#B84CFF", textDecoration: "none" }}>View Rules →</a>
+          </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--neon-pink)" }}>{daysLeft + " days"}</div>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>until season reset</div>
-          <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "#B84CFF", textDecoration: "none" }}>View Rules →</a>
+      ) : (
+        <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.15), rgba(255,60,172,0.1))", border: "1px solid rgba(184,76,255,0.4)", borderRadius: "var(--radius)", padding: "24px 28px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>🏆 {seasonName} — Active Now</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 6 }}>Win Roblox Gift Cards</div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Top players win real prizes. Play quizzes, earn points, claim your reward.</div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--neon-pink)" }}>{daysLeft + " days"}</div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>until season reset</div>
+            <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "#B84CFF", textDecoration: "none" }}>View Rules →</a>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Your Rank module */}
       {isSignedIn ? (
         mySeasonData ? (
           <div style={{ background: "var(--bg-card)", border: "1px solid rgba(0,245,160,0.25)", borderRadius: "var(--radius)", padding: "18px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-green)", textTransform: "uppercase", letterSpacing: 1 }}>📊 Your Season 1 Rank</div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-green)", textTransform: "uppercase", letterSpacing: 1 }}>📊 Your {seasonName} Rank</div>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: mySeasonData.rank <= 3 ? rankColors[mySeasonData.rank - 1] : "var(--text)" }}>{"#" + mySeasonData.rank}</div>
@@ -121,7 +138,7 @@ export default function LeaderboardClient({
         ) : (
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "18px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>📊 Your Season 1 Rank</div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>📊 Your {seasonName} Rank</div>
               <div style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600 }}>You haven't played any quizzes this season yet!</div>
             </div>
             <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, padding: "10px 22px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", flexShrink: 0 }}>🎮 Start Playing</a>
@@ -136,7 +153,7 @@ export default function LeaderboardClient({
 
       {/* Prize tiers */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>🎁 Season 1 Prize Tiers</div>
+        <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>🎁 {seasonName} Prize Tiers</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
           {PRIZE_TIERS.map((tier, i) => (
             <div key={i} style={{ background: tier.bg, border: "1px solid " + tier.color + "40", borderRadius: "var(--radius-sm)", padding: "14px 16px", textAlign: "center" }}>
@@ -171,14 +188,16 @@ export default function LeaderboardClient({
       <div style={{ textAlign: "center", marginBottom: 28 }}>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 48px)", marginBottom: 12 }}>{"👑 Leaderboard"}</h1>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 15, maxWidth: 480, margin: "0 auto" }}>
-          Compete for Roblox gift cards every month. Hard quizzes = 2x points. Daily streaks = bonus points.
+          {seasonClosed
+            ? "Season 1 is over. These are the final standings."
+            : "Compete for Roblox gift cards every month. Hard quizzes = 2x points. Daily streaks = bonus points."}
         </p>
       </div>
 
       {/* Tab switcher */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, background: "var(--surface)", padding: 6, borderRadius: 100, width: "fit-content" }}>
         {[
-          { key: "season", label: "🏆 Season 1" },
+          { key: "season", label: "🏆 " + seasonName },
           { key: "alltime", label: "⭐ All Time XP" },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key as any)}
@@ -200,9 +219,15 @@ export default function LeaderboardClient({
           {seasonLeaderboard.length === 0 ? (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 48, textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🏆</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>Season 1 Just Started!</div>
-              <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>No scores yet this month. Be the first to climb the leaderboard!</div>
-              <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>🎮 Start Playing</a>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>
+                {seasonClosed ? "Season Ended" : seasonName + " Just Started!"}
+              </div>
+              <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
+                {seasonClosed ? "No scores were recorded this season." : "No scores yet this month. Be the first to climb the leaderboard!"}
+              </div>
+              {!seasonClosed && (
+                <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>🎮 Start Playing</a>
+              )}
             </div>
           ) : (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
@@ -287,7 +312,6 @@ export default function LeaderboardClient({
               })}
             </div>
           )}
-
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
             <div style={{ display: "grid", gridTemplateColumns: "60px 1fr 120px 100px", padding: "10px 24px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
               <div>Rank</div><div>Player</div><div>Level</div><div>XP</div>
@@ -341,9 +365,13 @@ export default function LeaderboardClient({
 
       {/* CTA */}
       <div style={{ marginTop: 32, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32, textAlign: "center" }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>{"🏆 Want to win Robux?"}</div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>
+          {seasonClosed ? "Season 2 is coming." : "🏆 Want to win Robux?"}
+        </div>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
-          Play quizzes, earn points and finish in the top 3 this month to win Roblox gift cards!
+          {seasonClosed
+            ? "Keep playing to get ahead before the next season kicks off."
+            : "Play quizzes, earn points and finish in the top 3 this month to win Roblox gift cards!"}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 15, padding: "14px 32px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>🎮 Start Playing</a>

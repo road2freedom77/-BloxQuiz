@@ -9,6 +9,16 @@ export const metadata = {
   alternates: { canonical: "https://www.bloxquiz.gg/leaderboard" }
 };
 
+async function getCurrentSeason() {
+  const { data } = await supabase
+    .from("seasons")
+    .select("*")
+    .order("start_date", { ascending: false })
+    .limit(1)
+    .single();
+  return data;
+}
+
 async function getAllTimeLeaderboard() {
   const { data } = await supabase
     .from("users")
@@ -82,10 +92,18 @@ async function getSeasonLeaderboard() {
 }
 
 export default async function LeaderboardPage() {
-  const [allTime, season] = await Promise.all([
+  const [allTime, season, currentSeason] = await Promise.all([
     getAllTimeLeaderboard(),
     getSeasonLeaderboard(),
+    getCurrentSeason(),
   ]);
 
-  return <LeaderboardClient allTimeLeaderboard={allTime} seasonLeaderboard={season} />;
+  return (
+    <LeaderboardClient
+      allTimeLeaderboard={allTime}
+      seasonLeaderboard={season}
+      seasonClosed={currentSeason?.status === "closed"}
+      seasonName={currentSeason?.name || "Season 1"}
+    />
+  );
 }
