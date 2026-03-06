@@ -1,7 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function Leaderboard({ initialLeaderboard }: { initialLeaderboard: any[] }) {
+export default function Leaderboard({
+  initialLeaderboard,
+  seasonClosed,
+}: {
+  initialLeaderboard: any[];
+  seasonClosed?: boolean;
+}) {
   const [leaderboard, setLeaderboard] = useState<any[]>(initialLeaderboard);
   const [period, setPeriod] = useState("weekly");
   const [loading, setLoading] = useState(false);
@@ -21,6 +27,38 @@ export default function Leaderboard({ initialLeaderboard }: { initialLeaderboard
 
   return (
     <div id="leaderboard" style={{ position: "relative", zIndex: 1 }}>
+
+      {/* Season 1 closed banner */}
+      {seasonClosed && (
+        <div style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          marginBottom: 0,
+        }}>
+          <div style={{
+            background: "linear-gradient(135deg, rgba(184,76,255,0.15), rgba(255,60,172,0.1))",
+            border: "1px solid rgba(184,76,255,0.35)",
+            borderRadius: "var(--radius)",
+            padding: "14px 22px",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 0,
+          }}>
+            <span style={{ fontSize: 22 }}>🏆</span>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "#B84CFF", marginBottom: 2 }}>
+                Season 1 has ended!
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>
+                Final standings are locked. Season 2 coming soon — stay tuned!
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>{"👑 Top Players This Week"}</h2>
         <div style={{ display: "flex", gap: 8 }}>

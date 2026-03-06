@@ -103,7 +103,8 @@ export default function AdminClient({
   const [disqualifying, setDisqualifying] = useState<string | null>(null);
   const [disqualifyReason, setDisqualifyReason] = useState<Record<string, string>>({});
   const [closingSeason, setClosingSeason] = useState(false);
-  const [seasonClosed, setSeasonClosed] = useState(false);
+  // ✅ FIX: initialize from DB prop instead of hardcoded false
+  const [seasonClosed, setSeasonClosed] = useState(season?.status === "closed");
   const [updatingReward, setUpdatingReward] = useState<string | null>(null);
   const [claims, setClaims] = useState(initialClaims || []);
   const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
