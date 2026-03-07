@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { supabase } from "../../lib/supabase";
 import PublicProfileClient from "./PublicProfileClient";
 
@@ -12,6 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
+  const { userId } = await auth();
 
   const { data: userData } = await supabase
     .from("users")
@@ -20,6 +22,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     .single();
 
   if (!userData) notFound();
+
+  // Only show prize banner if the logged-in user is viewing their own profile
+  const isOwner = !!userId && userId === userData.id;
 
   const { data: scores } = await supabase
     .from("scores")
@@ -61,14 +66,18 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     seasonRank = idx >= 0 ? idx + 1 : null;
   }
 
-  // Prize claim status
-  const { data: prizeData } = await supabase
-    .from("season_results")
-    .select("rank, reward_status")
-    .eq("user_id", userData.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Only fetch prize data if this is the owner
+  let prizeData = null;
+  if (isOwner) {
+    const { data } = await supabase
+      .from("season_results")
+      .select("rank, reward_status")
+      .eq("user_id", userData.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    prizeData = data || null;
+  }
 
   return (
     <PublicProfileClient
@@ -78,7 +87,8 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       seasonRank={seasonRank}
       seasonScore={seasonScore}
       seasonQuizzes={seasonQuizzes}
-      prizeData={prizeData || null}
+      prizeData={prizeData}
+      isOwner={isOwner}
     />
   );
 }
