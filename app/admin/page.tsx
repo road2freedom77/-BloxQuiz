@@ -1,8 +1,9 @@
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { supabase } from "../lib/supabase";
+import { supabase, supabaseAdmin } from "../lib/supabase";
 import fs from "fs";
 import path from "path";
 import AdminClient from "./AdminClient";
@@ -127,7 +128,7 @@ async function getCurrentSeason() {
 }
 
 async function getPrizeClaims() {
-  const { data: claims } = await supabase
+  const { data: claims } = await supabaseAdmin
     .from("prize_claims")
     .select("id, user_id, season_id, roblox_username, email, discord, status, submitted_at")
     .order("submitted_at", { ascending: false });
@@ -135,11 +136,11 @@ async function getPrizeClaims() {
   if (!claims || claims.length === 0) return [];
 
   const userIds = claims.map(c => c.user_id);
-  const { data: users } = await supabase.from("users").select("id, username").in("id", userIds);
+  const { data: users } = await supabaseAdmin.from("users").select("id, username").in("id", userIds);
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  const { data: results } = await supabase.from("season_results").select("user_id, rank").in("user_id", userIds);
+  const { data: results } = await supabaseAdmin.from("season_results").select("user_id, rank").in("user_id", userIds);
   const rankByUser: Record<string, number> = {};
   for (const r of results || []) rankByUser[r.user_id] = r.rank;
 

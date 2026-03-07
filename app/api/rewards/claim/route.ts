@@ -49,8 +49,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Prize already claimed." }, { status: 409 });
   }
 
-  // Insert claim
-  await supabase.from("prize_claims").insert({
+  // Insert claim FIRST
+  const { error: insertError } = await supabase.from("prize_claims").insert({
     user_id: userId,
     season_id: seasonId,
     roblox_username: robloxUsername,
@@ -60,7 +60,12 @@ export async function POST(req: Request) {
     status: "pending",
   });
 
-  // Update season_results to claimed
+  // Only flip to claimed if insert succeeded
+  if (insertError) {
+    return NextResponse.json({ error: "Failed to save claim." }, { status: 500 });
+  }
+
+  // THEN update season_results
   await supabase
     .from("season_results")
     .update({ reward_status: "claimed" })
