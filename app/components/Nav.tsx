@@ -52,7 +52,8 @@ export default function Nav() {
 
   return (
     <>
-      <TickerBanner />
+
+       {/* <TickerBanner /> */}
 
       <nav style={{
         position: "sticky", top: 34, zIndex: 100,
