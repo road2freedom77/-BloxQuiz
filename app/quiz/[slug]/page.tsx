@@ -198,7 +198,6 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
 
   const relatedQuizzes = await getRelatedQuizzes(slug, quiz.game);
   const article = quiz.difficulty === "Easy" ? "an" : "a";
-  const firstQ = quiz.questions[0];
 
   const faqs = [
     {
@@ -253,6 +252,8 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
     ]
   };
 
+  const letters = ["A", "B", "C", "D"];
+
   return (
     <>
       <script
@@ -260,19 +261,69 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
-        <p>{quiz.game + " — " + quiz.difficulty + " difficulty — " + quiz.questions.length + " multiple choice questions"}</p>
-        <p>{"Free " + quiz.game + " trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard."}</p>
-        <p>{"Sample question (1 of " + quiz.questions.length + "):"}</p>
-        <p>{firstQ.q}</p>
-        <ul>
-          {firstQ.a.map((answer: string, j: number) => (
-            <li key={j}>
-              <button type="button">{["A", "B", "C", "D"][j] + ". " + answer}</button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* 
+        Server-rendered quiz content for SEO.
+        All 10 questions are in the HTML source so Google can index them.
+        This section is hidden once the interactive QuizClient hydrates.
+      */}
+      <noscript>
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px" }}>
+          <h1>{quiz.title}</h1>
+          <p>
+            {quiz.game} — {quiz.difficulty} difficulty — {quiz.questions.length} multiple choice questions.
+            Free {quiz.game} trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard.
+          </p>
+          <ol>
+            {quiz.questions.map((question: any, i: number) => (
+              <li key={i} style={{ marginBottom: 16 }}>
+                <p><strong>Question {i + 1}:</strong> {question.q}</p>
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {question.a.map((answer: string, j: number) => (
+                    <li key={j}>{letters[j]}. {answer}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </noscript>
+
+      {/* 
+        Additional SEO content rendered server-side and visible to crawlers.
+        Uses sr-only pattern (screen-reader accessible, not visually hidden via opacity/display tricks).
+        This gives Google the full question text without affecting the visual UI.
+      */}
+      <section
+        aria-label={`${quiz.title} - All Questions`}
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: "hidden",
+          clip: "rect(0, 0, 0, 0)",
+          whiteSpace: "nowrap",
+          borderWidth: 0,
+        }}
+      >
+        <h2>{quiz.title}</h2>
+        <p>
+          {quiz.game} {quiz.difficulty} quiz with {quiz.questions.length} questions.
+          Topics covered include {quiz.game} gameplay, strategies, items, and mechanics.
+          Play free on BloxQuiz.gg and compete on the leaderboard.
+        </p>
+        {quiz.questions.map((question: any, i: number) => (
+          <div key={i}>
+            <h3>Question {i + 1}: {question.q}</h3>
+            <ul>
+              {question.a.map((answer: string, j: number) => (
+                <li key={j}>{letters[j]}. {answer}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
 
       <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} />
     </>
