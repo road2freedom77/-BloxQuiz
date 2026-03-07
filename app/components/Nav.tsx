@@ -1,11 +1,10 @@
 "use client";
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import TickerBanner from "./TickerBanner";
 
 const ADMIN_USER_IDS = [
-  "user_3ALlHJlXwNoezsy7eoC7qAp6yTO", // Marcin
-  "user_3AM3VzXy7LGvyivPbtHeNak7BDT", // Aiden
+  "user_3ALlHJlXwNoezsy7eoC7qAp6yTO",
+  "user_3AM3VzXy7LGvyivPbtHeNak7BDT",
 ];
 
 const clerkAppearance = {
@@ -52,11 +51,8 @@ export default function Nav() {
 
   return (
     <>
-
-       {/* <TickerBanner /> */}
-
       <nav style={{
-        position: "sticky", top: 34, zIndex: 100,
+        position: "sticky", top: 0, zIndex: 100,
         background: "rgba(11,14,23,0.85)",
         backdropFilter: "blur(24px)",
         borderBottom: "1px solid var(--border)",
