@@ -30,6 +30,7 @@ export default function PublicProfileClient({
   seasonScore,
   seasonQuizzes,
   prizeData,
+  isOwner,
 }: {
   userData: any,
   scores: any[],
@@ -38,6 +39,7 @@ export default function PublicProfileClient({
   seasonScore: number,
   seasonQuizzes: number,
   prizeData: any | null,
+  isOwner: boolean,
 }) {
   const [copied, setCopied] = useState(false);
   const xp = userData?.xp || 0;
@@ -54,7 +56,8 @@ export default function PublicProfileClient({
 
   const badges = getBadges({ rank, streak, xp, totalQuizzes, perfectScores });
 
-  const isPrizeWinner = prizeData && prizeData.rank <= 3 && prizeData.reward_status === "pending";
+  // Only show prize banner to the profile owner with a pending prize
+  const isPrizeWinner = isOwner && prizeData && prizeData.rank <= 3 && prizeData.reward_status === "pending";
   const qualifiesThisSeason = seasonQuizzes >= 10;
 
   function copyProfileLink() {
@@ -66,7 +69,7 @@ export default function PublicProfileClient({
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
-      {/* Prize Winner Inbox */}
+      {/* Prize Winner Banner — only visible to owner */}
       {isPrizeWinner && (
         <div style={{ background: "linear-gradient(135deg, rgba(255,227,71,0.12), rgba(184,76,255,0.08))", border: "2px solid rgba(255,227,71,0.4)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
@@ -76,7 +79,7 @@ export default function PublicProfileClient({
             </div>
             <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Claim your prize before the end of the month!</div>
           </div>
-          <a href="/rewards/claim" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", flexShrink: 0 }}>
+          <a href="/rewards" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", flexShrink: 0 }}>
             🎁 Claim Prize
           </a>
         </div>
