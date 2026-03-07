@@ -40,13 +40,12 @@ function getAngleDescription(angle: string) {
 // How many to publish this run based on weighted random
 function getBatchSize(): number {
   const roll = Math.random();
-  if (roll < 0.10) return 0;       // 10% — skip this run
-  if (roll < 0.35) return 1;       // 25% — publish 1
-  if (roll < 0.65) return 2;       // 30% — publish 2 (most common)
-  if (roll < 0.85) return 3;       // 20% — publish 3
-  if (roll < 0.95) return 4;       // 10% — publish 4
-  return 5;                         // 5%  — publish 5 (rare burst)
-  // Average: ~2.3/hour = ~55/day, naturally varied
+  if (roll < 0.50) return 0;       // 50% — skip
+  if (roll < 0.80) return 1;       // 30% — publish 1
+  if (roll < 0.93) return 2;       // 13% — publish 2
+  if (roll < 0.98) return 3;       // 5%  — publish 3
+  return 4;                         // 2%  — rare burst
+  // Some days you get 3, some days 10, average ~6/day
 }
 
 async function getTodayCount() {
@@ -205,7 +204,7 @@ export async function GET(req: Request) {
 
   // Check daily cap
   const todayCount = await getTodayCount();
-  const DAILY_CAP = 50;
+  const DAILY_CAP = 8;
 
   if (todayCount >= DAILY_CAP) {
     return NextResponse.json({ skipped: true, reason: "Daily cap reached", todayCount });
