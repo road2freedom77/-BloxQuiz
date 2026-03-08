@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     .from("quizzes")
     .select("slug, title, game, difficulty, angle")
     .is("intro", null)
-    .limit(5);
+    .limit(20);
 
   if (selectError) {
     return NextResponse.json({ error: "Select failed", details: selectError.message });
