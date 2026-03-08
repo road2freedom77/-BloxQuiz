@@ -1,6 +1,4 @@
 import { notFound } from "next/navigation";
-import fs from "fs";
-import path from "path";
 import { supabase } from "../../lib/supabase";
 import GamesClient from "./GamesClient";
 
@@ -305,34 +303,6 @@ function slugToGame(): Record<string, any> {
 }
 
 async function getQuizzesForGame(displayName: string) {
-  const quizzes: any[] = [];
-  const slugsSeen = new Set<string>();
-
-  try {
-    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const files = fs.readdirSync(quizzesDir);
-    for (const file of files) {
-      if (!file.endsWith(".json")) continue;
-      const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
-      const slug = file.replace(".json", "");
-      const matches =
-        content.game.toLowerCase().includes(displayName.toLowerCase()) ||
-        displayName.toLowerCase().includes(content.game.toLowerCase());
-      if (matches && !slugsSeen.has(slug)) {
-        quizzes.push({
-          slug,
-          title: content.title,
-          game: content.game,
-          difficulty: content.difficulty,
-          questions: content.questions?.length || 10,
-          angle: content.angle || null,
-          source: "static",
-        });
-        slugsSeen.add(slug);
-      }
-    }
-  } catch (e) {}
-
   try {
     const { data } = await supabase
       .from("quizzes")
@@ -341,28 +311,18 @@ async function getQuizzesForGame(displayName: string) {
       .order("published_at", { ascending: false });
 
     if (data) {
-      for (const q of data) {
-        if (!slugsSeen.has(q.slug)) {
-          quizzes.push({
-            slug: q.slug,
-            title: q.title,
-            game: q.game,
-            difficulty: q.difficulty,
-            questions: Array.isArray(q.questions) ? q.questions.length : 10,
-            angle: q.angle,
-            source: "generated",
-          });
-          slugsSeen.add(q.slug);
-        }
-      }
+      return data.map(q => ({
+        slug: q.slug,
+        title: q.title,
+        game: q.game,
+        difficulty: q.difficulty,
+        questions: Array.isArray(q.questions) ? q.questions.length : 10,
+        angle: q.angle || inferAngleServer(q.title, q.slug),
+      }));
     }
   } catch (e) {}
 
-  // Apply server-side angle inference for quizzes missing one
-  return quizzes.map(q => ({
-    ...q,
-    angle: q.angle || inferAngleServer(q.title, q.slug),
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
