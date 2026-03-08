@@ -1,4 +1,3 @@
-// app/api/backfill-intros/route.ts
 import { NextResponse } from "next/server";
 import { supabase } from "../../lib/supabase";
 
@@ -9,11 +8,15 @@ export async function GET(req: Request) {
   }
 
   // Get all quizzes missing an intro
-  const { data: quizzes } = await supabase
+  const { data: quizzes, error: selectError } = await supabase
     .from("quizzes")
     .select("slug, title, game, difficulty, angle")
     .is("intro", null)
-    .limit(20); // process 20 at a time to avoid timeout
+    .limit(20);
+
+  if (selectError) {
+    return NextResponse.json({ error: "Select failed", details: selectError.message });
+  }
 
   if (!quizzes || quizzes.length === 0) {
     return NextResponse.json({ done: true, message: "No quizzes need intros" });
@@ -48,12 +51,19 @@ Return ONLY the intro text, no quotes, no markdown, nothing else.`;
       const intro = data.content?.[0]?.text?.trim();
 
       if (intro) {
-        await supabase
+        const { data: updateData, error: updateError } = await supabase
           .from("quizzes")
           .update({ intro })
-          .eq("slug", quiz.slug);
+          .eq("slug", quiz.slug)
+          .select("slug, intro");
 
-        results.push({ slug: quiz.slug, status: "success" });
+        if (updateError) {
+          results.push({ slug: quiz.slug, status: "update_failed", error: updateError.message });
+        } else if (!updateData || updateData.length === 0) {
+          results.push({ slug: quiz.slug, status: "no_rows_matched", intro_preview: intro.substring(0, 50) });
+        } else {
+          results.push({ slug: quiz.slug, status: "success", intro_preview: updateData[0].intro?.substring(0, 50) });
+        }
       } else {
         results.push({ slug: quiz.slug, status: "no_response" });
       }
