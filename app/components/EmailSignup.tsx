@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
 
 export default function EmailSignup() {
   const [email, setEmail] = useState("");
@@ -16,22 +15,20 @@ export default function EmailSignup() {
     setLoading(true);
     setError("");
 
-    const { error: dbError } = await supabase
-      .from("emails")
-      .insert({ email });
+    const res = await fetch("/api/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
 
-    if (dbError) {
-      if (dbError.code === "23505") {
-        setError("You're already subscribed!");
-      } else {
-        setError("Something went wrong. Try again!");
-      }
-      setLoading(false);
-      return;
-    }
-
-    setSubmitted(true);
+    const data = await res.json();
     setLoading(false);
+
+    if (data.success) {
+      setSubmitted(true);
+    } else {
+      setError(data.error || "Something went wrong. Try again!");
+    }
   }
 
   return (
@@ -63,7 +60,7 @@ export default function EmailSignup() {
               <button
                 onClick={handleSubscribe}
                 disabled={loading}
-                style={{ padding: "14px 28px", background: "var(--gradient-main)", color: "var(--bg)", border: "none", borderRadius: 100, fontWeight: 900, fontSize: 15, cursor: loading ? "default" : "pointer", fontFamily: "var(--font-body)", whiteSpace: "nowrap", opacity: loading ? 0.7 : 1 }}
+                style={{ padding: "14px 28px", background: "var(--gradient-main)", color: "var(--bg)", border: "none", borderRadius: 100, fontWeight: 900, fontSize: 15, cursor: loading ? "default" : "pointer", fontFamily: "var(--font-body)", whiteSpace: "nowrap", opacity: loading ? 0.7 : 1, WebkitTextFillColor: "var(--bg)" }}
               >
                 {loading ? "Saving..." : "Subscribe"}
               </button>

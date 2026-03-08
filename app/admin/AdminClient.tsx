@@ -109,6 +109,8 @@ export default function AdminClient({
   const [claims, setClaims] = useState(initialClaims || []);
   const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [notifyingWinners, setNotifyingWinners] = useState(false);
+  const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
 
   const games = ["All", ...Array.from(new Set(quizList.map(q => q.game)))];
   const filtered = quizList.filter(q => {
@@ -202,6 +204,19 @@ export default function AdminClient({
     await fetch("/api/season/close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: season?.id }) });
     setClosingSeason(false);
     setSeasonClosed(true);
+  }
+
+  async function notifyWinners() {
+    if (!confirm("Send prize notification emails to all pending winners?")) return;
+    setNotifyingWinners(true);
+    const res = await fetch("/api/notify-winners", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seasonId: season?.id }),
+    });
+    const data = await res.json();
+    setNotifyingWinners(false);
+    setNotifyResult({ sent: data.sent || [], failed: data.failed || [] });
   }
 
   function copyToClipboard(text: string, id: string) {
@@ -604,10 +619,21 @@ export default function AdminClient({
                   ✅ Season 1 closed successfully! Results snapshot saved.
                 </div>
               ) : (
-                <button onClick={closeSeason} disabled={closingSeason}
-                  style={{ padding: "14px 32px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", fontWeight: 900, fontSize: 14, cursor: closingSeason ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
-                  {closingSeason ? "⏳ Closing Season..." : "⛔ Close Season 1 & Snapshot Results"}
-                </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <button onClick={notifyWinners} disabled={notifyingWinners}
+                    style={{ padding: "14px 32px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, cursor: notifyingWinners ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: notifyingWinners ? 0.7 : 1 }}>
+                    {notifyingWinners ? "⏳ Sending emails..." : "📧 Notify Winners via Email"}
+                  </button>
+                  {notifyResult && (
+                    <div style={{ padding: "12px 16px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "var(--neon-green)" }}>
+                      {"✅ Sent: " + notifyResult.sent.join(", ") + (notifyResult.failed.length > 0 ? " • ❌ Failed: " + notifyResult.failed.join(", ") : "")}
+                    </div>
+                  )}
+                  <button onClick={closeSeason} disabled={closingSeason}
+                    style={{ padding: "14px 32px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", fontWeight: 900, fontSize: 14, cursor: closingSeason ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
+                    {closingSeason ? "⏳ Closing Season..." : "⛔ Close Season 1 & Snapshot Results"}
+                  </button>
+                </div>
               )}
             </div>
           )}
