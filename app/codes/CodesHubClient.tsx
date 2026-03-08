@@ -2,12 +2,12 @@
 import { useState } from "react";
 
 const recentActivity = [
-  { action: "added", game: "Blox Fruits", code: "TRIPLEFLASH", reward: "2x XP Boost", date: "March 4, 2026" },
-  { action: "added", game: "Anime Defenders", code: "DEFENDERS2026", reward: "Free Gems", date: "March 4, 2026" },
-  { action: "added", game: "Murder Mystery 2", code: "CORRUPT", reward: "Free Knife", date: "March 3, 2026" },
-  { action: "expired", game: "Blox Fruits", code: "STRAWHATMAINE", reward: "2x XP Boost", date: "March 2, 2026" },
-  { action: "added", game: "Doors", code: "SURVIVE", reward: "Free Knobs", date: "March 1, 2026" },
-];
+    { action: "added", game: "Blox Fruits", code: "TRIPLEFLASH", reward: "2x XP Boost", date: "March 8, 2026" },
+    { action: "added", game: "Anime Defenders", code: "DEFENDERS2026", reward: "Free Gems", date: "March 8, 2026" },
+    { action: "added", game: "Murder Mystery 2", code: "CORRUPT", reward: "Free Knife", date: "March 8, 2026" },
+    { action: "expired", game: "Blox Fruits", code: "STRAWHATMAINE", reward: "2x XP Boost", date: "March 8, 2026" },
+    { action: "added", game: "Doors", code: "SURVIVE", reward: "Free Knobs", date: "March 8, 2026" },
+  ];
 
 export default function CodesHubClient({ games }: { games: any[] }) {
   const [copied, setCopied] = useState<string | null>(null);

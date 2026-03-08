@@ -85,7 +85,6 @@ export default function CodesClient({ data, game, description, activeCodes, expi
           <span style={{ background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", fontWeight: 800, fontSize: 12, padding: "6px 16px", borderRadius: 100 }}>{"❌ " + expiredCodes.length + " Expired"}</span>
           <span style={{ background: "rgba(255,227,71,0.1)", color: "var(--neon-yellow)", fontWeight: 800, fontSize: 12, padding: "6px 16px", borderRadius: 100 }}>{"🔄 Updated " + data.updatedAt}</span>
         </div>
-        {/* Freshness signal */}
         <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
           {"🕐 Last updated: " + data.updatedAt + " — bookmark this page for daily code updates"}
         </div>
@@ -113,35 +112,28 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--neon-green)", marginBottom: 12 }}>
           {"How To Redeem " + data.game + " Codes"}
         </h2>
-        {data.redeemSteps ? (
-          <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-            {data.redeemSteps.map((step: string, i: number) => (
-              <li key={i} style={{ fontSize: 14, fontWeight: 700, color: "var(--text-muted)", lineHeight: 1.6 }}>{step}</li>
-            ))}
-          </ol>
-        ) : (
-          <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, margin: 0 }}>
-            {"Open " + data.game + " → click the Codes button in the menu → enter the code exactly as shown → hit Redeem!"}
-          </p>
-        )}
+        <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, margin: 0 }}>
+          {data.howToRedeem}
+        </p>
         <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, marginTop: 12, fontStyle: "italic" }}>
           ⚠️ Codes are case sensitive — type them exactly as shown above.
         </p>
       </div>
 
-      {/* Active codes — year targeted H2 */}
+      {/* Active codes */}
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>
         {"🟢 " + data.game + " Codes 2026 — Active & Working"}
       </h2>
       {activeCodes.length === 0 ? (
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 24, textAlign: "center", color: "var(--text-muted)", fontWeight: 700, marginBottom: 40 }}>
-          No active codes right now — check back soon! New codes are added regularly.
+          {data.noCodesMessage || "No active codes right now — check back soon! New codes are added regularly."}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
           {activeCodes.map((c: any) => (
             <div key={c.code} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                {c.isNew && <span style={{ fontSize: 10, fontWeight: 900, background: "var(--neon-green)", color: "var(--bg)", padding: "2px 8px", borderRadius: 100 }}>NEW</span>}
                 <span style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--neon-green)", letterSpacing: 1 }}>{c.code}</span>
                 <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{"→ " + c.reward}</span>
               </div>
@@ -163,7 +155,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* Code tips section */}
+      {/* Tips */}
       {tips && (
         <div style={{ marginBottom: 40 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>
@@ -212,7 +204,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* Cross-link to quiz hub */}
+      {/* Quiz CTA */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>{data.icon}</div>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 8 }}>

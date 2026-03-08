@@ -1,294 +1,243 @@
-export const codesData: Record<string, {
-  game: string;
-  icon: string;
-  slug: string;
-  updatedAt: string;
-  redeemSteps: string[];
-  codes: { code: string; reward: string; active: boolean }[];
-}> = {
-  "blox-fruits": {
-    game: "Blox Fruits",
-    icon: "⚔️",
-    slug: "blox-fruits",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Launch Blox Fruits and join a server",
-      "Look for the Twitter bird icon on the left side of the screen",
-      "Click it to open the codes menu",
-      "Type the code exactly and press Enter to redeem",
-    ],
-    codes: [
-      { code: "TRIPLEFLASH", reward: "2x XP Boost (20 min)", active: true },
-      { code: "NOOB_MASTER69", reward: "2x XP Boost", active: true },
-      { code: "SUB2GAMERROBOT_EXP1", reward: "2x XP Boost", active: true },
-      { code: "SUB2GAMERROBOT_RESET1", reward: "Stat Reset", active: true },
-      { code: "FUDD10", reward: "$1 Beli", active: true },
-      { code: "BIGNEWS", reward: "In-game reward", active: true },
-      { code: "STRAWHATMAINE", reward: "2x XP Boost (20 min)", active: false },
-      { code: "ADMIN_RESET_TROLL", reward: "Stat Reset", active: false },
-    ]
-  },
-  "adopt-me": {
-    game: "Adopt Me!",
-    icon: "🐾",
-    slug: "adopt-me",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Adopt Me! on Roblox",
-      "Click the Twitter icon on the right side of the screen",
-      "Enter the code in the text box",
-      "Press Redeem to claim your reward",
-    ],
-    codes: [
-      { code: "SUMMERFUN", reward: "Free Buck", active: true },
-      { code: "WINTERSALE", reward: "Free Buck", active: true },
-      { code: "GIFTUNWRAP", reward: "Free Buck", active: true },
-      { code: "REBORNBUCKS", reward: "Free Buck", active: false },
-      { code: "ADOPTME2024", reward: "Free Buck", active: false },
-    ]
-  },
-  "murder-mystery-2": {
-    game: "Murder Mystery 2",
-    icon: "🔫",
-    slug: "murder-mystery-2",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Murder Mystery 2 on Roblox",
-      "Click the Inventory button at the bottom of the screen",
-      "Click the Codes button",
-      "Enter the code and press Redeem",
-    ],
-    codes: [
-      { code: "COMB4T2", reward: "Free Knife", active: true },
-      { code: "COMB4T1", reward: "Free Knife", active: true },
-      { code: "PR1SM", reward: "Free Knife", active: true },
-      { code: "CORRUPT", reward: "Free Knife", active: true },
-      { code: "DARKNESS", reward: "Free Knife", active: false },
-      { code: "GHOST", reward: "Free Knife", active: false },
-    ]
-  },
-  "grow-a-garden": {
-    game: "Grow a Garden",
-    icon: "🌱",
-    slug: "grow-a-garden",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Grow a Garden on Roblox",
-      "Click the Codes button on the side of the screen",
-      "Enter your code in the text field",
-      "Click Redeem to claim your reward",
-    ],
-    codes: [
-      { code: "GARDEN2026", reward: "Free Seeds", active: true },
-      { code: "SPROUT", reward: "Free Fertilizer", active: true },
-      { code: "HARVEST", reward: "Free Tools", active: true },
-      { code: "BLOOM2025", reward: "Free Seeds", active: false },
-    ]
-  },
-  "brookhaven-rp": {
-    game: "Brookhaven RP",
-    icon: "🏠",
-    slug: "brookhaven-rp",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Brookhaven RP on Roblox",
-      "Click the Codes button in the menu",
-      "Type the code exactly as shown",
-      "Press Enter to redeem your reward",
-    ],
-    codes: [
-      { code: "BROOKHAVEN2026", reward: "Free Item", active: true },
-      { code: "ROLEPLAY", reward: "Free Item", active: true },
-      { code: "SUBURB", reward: "Free Car", active: false },
-    ]
-  },
-  "tower-of-hell": {
-    game: "Tower of Hell",
-    icon: "🗼",
-    slug: "tower-of-hell",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Tower of Hell on Roblox",
-      "Click the Shop button on the left side",
-      "Click Codes at the top of the shop",
-      "Enter the code and press Redeem",
-    ],
-    codes: [
-      { code: "FLIGHTMODE", reward: "Free Modifier", active: true },
-      { code: "TOHSECRET", reward: "Free Modifier", active: true },
-      { code: "RINGS2025", reward: "Free Rings", active: false },
-    ]
-  },
-  "royale-high": {
-    game: "Royale High",
-    icon: "👑",
-    slug: "royale-high",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Royale High on Roblox",
-      "Click on any Fountain in the game",
-      "Select the Redeem Codes option",
-      "Enter your code and click Redeem",
-    ],
-    codes: [
-      { code: "ROYALE2026", reward: "Free Diamonds", active: true },
-      { code: "HALO2026", reward: "Free Diamonds", active: true },
-      { code: "SPRING2025", reward: "Free Diamonds", active: false },
-      { code: "WINTER2025", reward: "Free Diamonds", active: false },
-    ]
-  },
-  "doors": {
-    game: "Doors",
-    icon: "🚪",
-    slug: "doors",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Doors on Roblox",
-      "Click the Shop icon on the main menu",
-      "Select Redeem Code",
-      "Type the code and press Enter",
-    ],
-    codes: [
-      { code: "DOORS2026", reward: "Free Knobs", active: true },
-      { code: "SURVIVE", reward: "Free Knobs", active: true },
-      { code: "ENTITY", reward: "Free Knobs", active: false },
-    ]
-  },
-  "arsenal": {
-    game: "Arsenal",
-    icon: "🎯",
-    slug: "arsenal",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Arsenal on Roblox",
-      "Click the Codes button on the main menu",
-      "Enter the code in the text box",
-      "Press Redeem to claim your reward",
-    ],
-    codes: [
-      { code: "ARSENAL2026", reward: "Free Skin", active: true },
-      { code: "HEADSHOT", reward: "Free Bucks", active: true },
-      { code: "SPOOKYSZN", reward: "Free Skin", active: false },
-    ]
-  },
-  "anime-fighting-simulator": {
-    game: "Anime Fighting Simulator",
-    icon: "🥊",
-    slug: "anime-fighting-simulator",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Anime Fighting Simulator on Roblox",
-      "Click the Codes button on the left side of the screen",
-      "Enter the code exactly as shown",
-      "Press Enter to redeem",
-    ],
-    codes: [
-      { code: "ANIME2026", reward: "Free Chikara Shards", active: true },
-      { code: "POWERUP", reward: "Free Yen", active: true },
-      { code: "SWORDSMASTER", reward: "Free Chikara Shards", active: false },
-    ]
-  },
-  "berry-avenue": {
-    game: "Berry Avenue",
-    icon: "🍓",
-    slug: "berry-avenue",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Berry Avenue on Roblox",
-      "Click the Twitter/Codes button in the menu",
-      "Type your code in the text field",
-      "Click Redeem to claim your reward",
-    ],
-    codes: [
-      { code: "BERRY2026", reward: "Free Item", active: true },
-      { code: "AVENUE", reward: "Free Cash", active: true },
-      { code: "SUMMER2025", reward: "Free Item", active: false },
-    ]
-  },
-  "livetopia": {
-    game: "Livetopia",
-    icon: "🏖️",
-    slug: "livetopia",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Livetopia on Roblox",
-      "Click the Codes button in the main menu",
-      "Enter the code in the text box",
-      "Press Redeem to claim your free reward",
-    ],
-    codes: [
-      { code: "LIVETOPIA2026", reward: "Free Coins", active: true },
-      { code: "PARADISE", reward: "Free Item", active: true },
-      { code: "BEACH2025", reward: "Free Coins", active: false },
-    ]
-  },
-  "natural-disaster-survival": {
-    game: "Natural Disaster Survival",
-    icon: "🌪️",
-    slug: "natural-disaster-survival",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Natural Disaster Survival on Roblox",
-      "Click the Settings or Menu button",
-      "Look for the Codes option",
-      "Enter your code and press Redeem",
-    ],
-    codes: [
-      { code: "SURVIVE2026", reward: "Free Badge", active: true },
-      { code: "DISASTER", reward: "Free Reward", active: true },
-      { code: "TORNADO2025", reward: "Free Badge", active: false },
-    ]
-  },
-  "anime-defenders": {
-    game: "Anime Defenders",
-    icon: "🐉",
-    slug: "anime-defenders",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Anime Defenders on Roblox",
-      "Click the Codes button on the main lobby screen",
-      "Type the code exactly as shown",
-      "Press Redeem to claim your gems and rewards",
-    ],
-    codes: [
-      { code: "DEFENDERS2026", reward: "Free Gems", active: true },
-      { code: "ANIME2026", reward: "Free Gems", active: true },
-      { code: "SUMMON2025", reward: "Free Gems", active: false },
-      { code: "EVOLUTION", reward: "Free Gems", active: false },
-    ]
-  },
-  "funky-friday": {
-    game: "Funky Friday",
-    icon: "🎵",
-    slug: "funky-friday",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Funky Friday on Roblox",
-      "Click the Codes button on the main menu",
-      "Enter the code in the text field",
-      "Press Redeem to get your free points",
-    ],
-    codes: [
-      { code: "FUNKY2026", reward: "Free Points", active: true },
-      { code: "RHYTHM", reward: "Free Points", active: true },
-      { code: "FRIDAY2025", reward: "Free Points", active: false },
-    ]
-  },
-  "kick-off": {
-    game: "Kick Off",
-    icon: "⚽",
-    slug: "kick-off",
-    updatedAt: "March 4, 2026",
-    redeemSteps: [
-      "Open Kick Off on Roblox",
-      "Click the Codes button in the main menu",
-      "Enter your code in the text box",
-      "Press Redeem to claim your reward",
-    ],
-    codes: [
-      { code: "KICKOFF2026", reward: "Free Coins", active: true },
-      { code: "GOAL2026", reward: "Free Coins", active: true },
-      { code: "CHAMPION2025", reward: "Free Skin", active: false },
-    ]
-  },
+export const LAST_UPDATED = "March 8, 2026";
+
+export type GameCode = {
+  code: string;
+  reward: string;
+  active: boolean;
+  isNew?: boolean;
 };
+
+export type GameCodes = {
+  game: string;
+  slug: string;
+  icon: string;
+  updatedAt: string;
+  codes: GameCode[];
+  noCodesMessage?: string;
+  howToRedeem: string;
+};
+
+export const ALL_CODES: GameCodes[] = [
+  {
+    game: "Blox Fruits",
+    slug: "blox-fruits",
+    icon: "⚔️",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the gear icon on the left → Redeem Codes tab → enter code → Redeem",
+    codes: [
+      { code: "TRIPLEFLASH", reward: "2x EXP for 20 minutes", active: true, isNew: true },
+      { code: "Lightningabuse", reward: "2x EXP for 20 minutes", active: true, isNew: true },
+      { code: "KITT_RESET", reward: "1 free Stat Reset", active: true },
+      { code: "Sub2UncleKizaru", reward: "1 free Stat Reset", active: true },
+      { code: "fudd10_v2", reward: "$2 in-game Beli", active: true },
+      { code: "Fudd10", reward: "$1 in-game Beli", active: true },
+      { code: "Bignews", reward: "Free in-game Title", active: true },
+      { code: "kittgaming", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Sub2CaptainMaui", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Enyu_is_Pro", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Magicbus", reward: "2x EXP for 20 minutes", active: true },
+      { code: "JCWK", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Bluxxy", reward: "2x EXP for 20 minutes", active: true },
+      { code: "TheGreatAce", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Sub2OfficialNoobie", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Sub2NoobMaster123", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Axiore", reward: "2x EXP for 20 minutes", active: true },
+      { code: "Sub2Daigrock", reward: "2x EXP for 20 minutes", active: true },
+      { code: "TantaiGaming", reward: "2x EXP for 20 minutes", active: true },
+      { code: "StrawHatMaine", reward: "2x EXP for 20 minutes", active: false },
+    ],
+  },
+  {
+    game: "Brookhaven RP",
+    slug: "brookhaven-rp",
+    icon: "🏠",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Requires Music Unlimited pass (199 Robux) → click car icon → music speaker → enter ID",
+    noCodesMessage: "Brookhaven codes are music IDs. They require the Music Unlimited pass (199 Robux) to use in-game.",
+    codes: [
+      { code: "1845682760", reward: "Hallelujah", active: true },
+      { code: "1330132640", reward: "Michael Jackson – Smooth Criminal", active: true },
+      { code: "1836454247", reward: "The Weeknd – Blinding Lights", active: true },
+      { code: "1846033382", reward: "Maroon 5 – Moves Like Jagger", active: true },
+      { code: "1836702661", reward: "Taylor Swift – You Belong With Me", active: true },
+    ],
+  },
+  {
+    game: "Adopt Me!",
+    slug: "adopt-me",
+    icon: "🐾",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "No active codes at this time. Check back around Easter for seasonal codes.",
+    noCodesMessage: "No active codes right now. Adopt Me rarely releases codes — they typically appear during seasonal events.",
+    codes: [],
+  },
+  {
+    game: "Tower of Hell",
+    slug: "tower-of-hell",
+    icon: "🗼",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Tower of Hell does not have a codes system.",
+    noCodesMessage: "Tower of Hell has never had a redeem codes system. All cosmetics are unlocked through gameplay or Robux.",
+    codes: [],
+  },
+  {
+    game: "Murder Mystery 2",
+    slug: "murder-mystery-2",
+    icon: "🔪",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click Inventory in lobby → EnterCode box (bottom right) → Redeem",
+    noCodesMessage: "No active codes right now. MM2 codes are extremely rare — the developer hasn't released one in over a year.",
+    codes: [
+      { code: "CORRUPT", reward: "Free Knife", active: true, isNew: true },
+    ],
+  },
+  {
+    game: "Grow a Garden",
+    slug: "grow-a-garden",
+    icon: "🌱",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the cog icon (top left) → scroll to Redeem Codes → type code → Claim",
+    codes: [
+      { code: "SPROUT", reward: "Free Seed Pack", active: true, isNew: true },
+      { code: "GARDEN", reward: "Free Seed Pack", active: true },
+      { code: "FREEBIES", reward: "Free Seed Pack", active: true },
+    ],
+  },
+  {
+    game: "Royale High",
+    slug: "royale-high",
+    icon: "👑",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the Shop button (right side of screen) → scroll to redeem codes section → enter code",
+    codes: [
+      { code: "SmythsChandelier2024", reward: "Precious Flower Chandelier decoration", active: true },
+    ],
+  },
+  {
+    game: "Doors",
+    slug: "doors",
+    icon: "🚪",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the Shop icon (left side) → enter code in text box → checkmark to redeem",
+    noCodesMessage: "No active codes right now. DOORS codes are milestone-based and rare — check back after major updates.",
+    codes: [
+      { code: "SURVIVE", reward: "Free Knobs", active: true, isNew: true },
+    ],
+  },
+  {
+    game: "Arsenal",
+    slug: "arsenal",
+    icon: "🔫",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the gift icon (bottom left of main menu) → enter code → REDEEM",
+    codes: [
+      { code: "ARSENALSEASON10", reward: "Free skin", active: true, isNew: true },
+      { code: "kekw", reward: "Announcer voice", active: true },
+      { code: "ROLVe", reward: "ROLVe Announcer Pack", active: true },
+      { code: "GetSome", reward: "Get Some Announcer Pack", active: true },
+      { code: "STATSANDSTUFF", reward: "Stats and Stuff Announcer Pack", active: true },
+      { code: "Bandites", reward: "Bandites Announcer Pack", active: true },
+      { code: "BRAWL", reward: "Teleport to Brawl map", active: true },
+      { code: "FATE", reward: "Teleport to Fate map", active: true },
+    ],
+  },
+  {
+    game: "Anime Fighting Simulator",
+    slug: "anime-fighting-simulator",
+    icon: "💥",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the ↓ arrow (bottom left) → Codes tab → enter code → Redeem",
+    codes: [
+      { code: "WeekendEXPCode", reward: "EXP boost", active: true, isNew: true },
+      { code: "Dim2Soon", reward: "Chikara + Yen", active: true, isNew: true },
+      { code: "DIMENSION3", reward: "Chikara Shards", active: true },
+      { code: "AFS3YEARS", reward: "Chikara Shards + Yen", active: true },
+      { code: "Sub2Bravingitall", reward: "Chikara Shards", active: true },
+      { code: "Sub2kawaiipanda12", reward: "Chikara Shards", active: true },
+    ],
+  },
+  {
+    game: "Berry Avenue",
+    slug: "berry-avenue",
+    icon: "🫐",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Tap arrow (right side) → AVATAR → MENU → Equipped → IMPORT ID → enter code",
+    codes: [
+      { code: "77481867185789", reward: "Pink Preppy Summer outfit", active: true, isNew: true },
+      { code: "5173577947", reward: "Free outfit item", active: true },
+      { code: "2524675805", reward: "Free outfit item", active: true },
+      { code: "1567446376", reward: "Free outfit item", active: true },
+    ],
+  },
+  {
+    game: "Livetopia",
+    slug: "livetopia",
+    icon: "🏙️",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the Twitter/Codes icon in the lobby → enter code → Redeem",
+    noCodesMessage: "No active codes right now. Livetopia releases codes during updates and events — check back soon.",
+    codes: [],
+  },
+  {
+    game: "Natural Disaster Survival",
+    slug: "natural-disaster-survival",
+    icon: "🌪️",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Natural Disaster Survival does not have a codes system.",
+    noCodesMessage: "Natural Disaster Survival is a classic Roblox experience with no codes system. Enjoy the pure survival gameplay!",
+    codes: [],
+  },
+  {
+    game: "Anime Defenders",
+    slug: "anime-defenders",
+    icon: "🛡️",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the '…' button (top left) → Codes → enter code → Redeem (requires Level 8+)",
+    codes: [
+      { code: "DEFENDERS2026", reward: "Free Gems", active: true, isNew: true },
+      { code: "YEARZERO", reward: "Free Gems", active: true },
+      { code: "1BILLION", reward: "Free Gems + Tokens", active: true },
+      { code: "PATCHFIX", reward: "Free Gems", active: true },
+      { code: "SORRYFORWAIT", reward: "Free Gems", active: true },
+      { code: "NEWSEASON", reward: "Free Gems", active: true },
+      { code: "HALFYEAR", reward: "Gems + Tokens", active: true },
+    ],
+  },
+  {
+    game: "Funky Friday",
+    slug: "funky-friday",
+    icon: "🎵",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the shopping cart icon (top left) → Twitter bird icon → enter code → REDEEM",
+    codes: [
+      { code: "fridaynight", reward: "Free Points", active: true },
+      { code: "GROOVY", reward: "Free Points", active: true },
+      { code: "SWAG", reward: "Free Points", active: true },
+      { code: "lytegames", reward: "Free Points", active: true },
+      { code: "funkyfriday", reward: "Free Points", active: true },
+    ],
+  },
+  {
+    game: "Kick Off",
+    slug: "kick-off",
+    icon: "⚽",
+    updatedAt: "March 8, 2026",
+    howToRedeem: "Click the Codes button in the main menu → enter code → Redeem",
+    noCodesMessage: "No active codes right now. Check back after major updates for new codes.",
+    codes: [],
+  },
+];
+
+export function getCodesBySlug(slug: string): GameCodes | undefined {
+  return ALL_CODES.find((g) => g.slug === slug);
+}
+
+export function getAllGamesWithCodes(): GameCodes[] {
+  return ALL_CODES.filter((g) => g.codes.length > 0);
+}
+
+export function getTotalActiveCodesCount(): number {
+  return ALL_CODES.reduce((sum, g) => sum + g.codes.length, 0);
+}
+
+export const codesData = ALL_CODES;

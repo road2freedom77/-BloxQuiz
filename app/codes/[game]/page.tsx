@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { codesData } from "../../data/codes";
+import { ALL_CODES } from "../../data/codes";
 import CodesClient from "./CodesClient";
 
 const gameDescriptions: Record<string, string> = {
@@ -23,15 +23,16 @@ const gameDescriptions: Record<string, string> = {
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const data = codesData[game];
+  const data = ALL_CODES.find(g => g.slug === game);
   if (!data) return { title: "Not Found" };
+  const activeCount = data.codes.filter(c => c.active).length;
   return {
     title: `${data.game} Codes 2026 — All Active & Working Codes | BloxQuiz`,
-    description: `All active ${data.game} codes for 2026. ${data.codes.filter(c => c.active).length} working codes updated ${data.updatedAt}. Redeem free rewards before they expire!`,
+    description: `All active ${data.game} codes for 2026. ${activeCount} working codes updated ${data.updatedAt}. Redeem free rewards before they expire!`,
     alternates: { canonical: `https://www.bloxquiz.gg/codes/${game}` },
     openGraph: {
       title: `${data.game} Codes 2026 — All Active Codes | BloxQuiz`,
-      description: `${data.codes.filter(c => c.active).length} active ${data.game} codes. Updated daily on BloxQuiz.gg`,
+      description: `${activeCount} active ${data.game} codes. Updated daily on BloxQuiz.gg`,
       url: `https://www.bloxquiz.gg/codes/${game}`,
       siteName: "BloxQuiz",
       type: "website",
@@ -41,11 +42,11 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 
 export default async function CodesGamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const data = codesData[game];
+  const data = ALL_CODES.find(g => g.slug === game);
   if (!data) notFound();
 
-  const activeCodes = data.codes.filter((c: any) => c.active);
-  const expiredCodes = data.codes.filter((c: any) => !c.active);
+  const activeCodes = data.codes.filter((c) => c.active);
+  const expiredCodes = data.codes.filter((c) => !c.active);
   const description = gameDescriptions[game] || `Find all active ${data.game} codes here. Updated regularly with the latest working codes.`;
 
   const jsonLd = {
@@ -65,7 +66,7 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
           {
             "@type": "Question",
             "name": `How do I redeem ${data.game} codes?`,
-            "acceptedAnswer": { "@type": "Answer", "text": data.redeemSteps ? data.redeemSteps.join(". ") : `Open ${data.game} and look for the Codes button in the menu. Enter the code exactly as shown and press Redeem.` }
+            "acceptedAnswer": { "@type": "Answer", "text": data.howToRedeem }
           },
           {
             "@type": "Question",

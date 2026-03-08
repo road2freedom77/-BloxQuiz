@@ -1,7 +1,5 @@
-import { codesData } from "../data/codes";
+import { codesData, LAST_UPDATED } from "../data/codes";
 import CodesHubClient from "./CodesHubClient";
-
-const LAST_UPDATED = "March 4, 2026";
 
 export const metadata = {
   title: `Roblox Codes 2026 — Active & Updated Daily | BloxQuiz`,
@@ -17,7 +15,7 @@ export const metadata = {
 };
 
 export default function CodesPage() {
-  const games = Object.values(codesData);
+  const games = codesData;
   const totalActive = games.reduce((acc, g) => acc + g.codes.filter(c => c.active).length, 0);
 
   const jsonLd = {
@@ -56,10 +54,8 @@ export default function CodesPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
-        {/* Breadcrumb */}
         <nav style={{ marginBottom: 20 }}>
           <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", gap: 6, alignItems: "center", fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>
             <li><a href="/" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Home</a></li>
@@ -68,7 +64,6 @@ export default function CodesPage() {
           </ol>
         </nav>
 
-        {/* Hero */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", marginBottom: 12 }}>
             {"🎁 Roblox Game Codes — Active & Updated Daily"}
@@ -86,7 +81,6 @@ export default function CodesPage() {
           </div>
         </div>
 
-        {/* How to redeem */}
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 32 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"How To Redeem Roblox Codes"}</h2>
           <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 16 }}>
@@ -108,10 +102,8 @@ export default function CodesPage() {
           </p>
         </div>
 
-        {/* Client component — recent activity + games grid with copy buttons */}
         <CodesHubClient games={games} />
 
-        {/* FAQ */}
         <div style={{ marginBottom: 48 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16 }}>{"Frequently Asked Questions"}</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -130,7 +122,6 @@ export default function CodesPage() {
           </div>
         </div>
 
-        {/* Cross-link to quizzes */}
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>{"🎮 Test Your Roblox Knowledge"}</h2>
           <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, maxWidth: 500, margin: "0 auto 20px" }}>
