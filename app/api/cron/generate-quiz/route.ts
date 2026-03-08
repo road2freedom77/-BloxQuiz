@@ -106,6 +106,7 @@ async function generateQuiz(game: string, angle: string) {
 Return ONLY a valid JSON object with this exact structure, no markdown, no explanation:
 {
   "title": "A specific engaging quiz title about ${game} (${angle} angle)",
+  "intro": "A unique 2-3 sentence paragraph about this specific quiz topic. Reference specific game mechanics, items, areas, or lore relevant to ${game} and the ${angle} angle. Do NOT use generic phrases like 'Test your knowledge' or 'Can you get a perfect score'. Write it as if a fan is hyping up another player.",
   "game": "${game}",
   "difficulty": "${difficulty}",
   "angle": "${angle}",
@@ -127,6 +128,7 @@ Rules:
 - Vary question difficulty within the quiz
 - No duplicate questions
 - Title must be unique and specific, not generic
+- The intro must reference actual ${game} content like specific items, areas, mechanics, or updates relevant to the "${angle}" angle
 - Return ONLY the JSON, nothing else`;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -174,6 +176,7 @@ async function publishOneQuiz(existing: any[]) {
   const { error } = await supabase.from("quizzes").insert({
     slug,
     title: quiz.title,
+    intro: quiz.intro || null,
     game: quiz.game,
     difficulty: quiz.difficulty,
     angle: quiz.angle,
