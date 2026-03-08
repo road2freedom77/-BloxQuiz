@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 const ADMIN_USER_IDS = [
   "user_3ALlHJlXwNoezsy7eoC7qAp6yTO",
   "user_3AM3VzXy7LGvyivPbtHeNak7BDT",
+  "user_3APPYs0LjMfWCIt6lBfIiYyVteU",
 ];
 
 const clerkAppearance = {
