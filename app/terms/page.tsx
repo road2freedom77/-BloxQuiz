@@ -1,6 +1,7 @@
 export const metadata = {
     title: "Terms of Service — BloxQuiz",
     description: "BloxQuiz terms of service. Read our terms before using the platform.",
+    robots: { index: false },
   };
   
   export default function TermsPage() {

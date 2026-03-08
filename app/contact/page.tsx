@@ -1,6 +1,7 @@
 export const metadata = {
     title: "Contact BloxQuiz — Get In Touch",
     description: "Contact the BloxQuiz team for questions, feedback, advertising inquiries or to report issues.",
+    robots: { index: false },
   };
   
   export default function ContactPage() {

@@ -1,6 +1,7 @@
 export const metadata = {
     title: "Privacy Policy — BloxQuiz",
     description: "BloxQuiz privacy policy. Learn how we collect, use and protect your data.",
+    robots: { index: false },
   };
   
   export default function PrivacyPage() {

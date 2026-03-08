@@ -1,6 +1,7 @@
 export const metadata = {
     title: "About BloxQuiz — The #1 Roblox Trivia Site",
     description: "Learn about BloxQuiz, the free Roblox trivia and quiz platform for fans of Blox Fruits, Adopt Me, Brookhaven and more.",
+    robots: { index: false },
   };
   
   export default function AboutPage() {
