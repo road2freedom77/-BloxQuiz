@@ -207,7 +207,7 @@ export async function GET(req: Request) {
 
   // Check daily cap
   const todayCount = await getTodayCount();
-  const DAILY_CAP = 8;
+  const DAILY_CAP = 15;
 
   if (todayCount >= DAILY_CAP) {
     return NextResponse.json({ skipped: true, reason: "Daily cap reached", todayCount });
