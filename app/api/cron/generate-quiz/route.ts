@@ -37,15 +37,13 @@ function getAngleDescription(angle: string) {
   return descriptions[angle] || angle;
 }
 
-// How many to publish this run based on weighted random
 function getBatchSize(): number {
   const roll = Math.random();
-  if (roll < 0.50) return 0;       // 50% — skip
-  if (roll < 0.80) return 1;       // 30% — publish 1
-  if (roll < 0.93) return 2;       // 13% — publish 2
-  if (roll < 0.98) return 3;       // 5%  — publish 3
-  return 4;                         // 2%  — rare burst
-  // Some days you get 3, some days 10, average ~6/day
+  if (roll < 0.50) return 0;
+  if (roll < 0.80) return 1;
+  if (roll < 0.93) return 2;
+  if (roll < 0.98) return 3;
+  return 4;
 }
 
 async function getTodayCount() {
@@ -110,6 +108,12 @@ Return ONLY a valid JSON object with this exact structure, no markdown, no expla
   "game": "${game}",
   "difficulty": "${difficulty}",
   "angle": "${angle}",
+  "faqs": [
+    {
+      "question": "A specific question about this particular quiz topic",
+      "answer": "A detailed 1-2 sentence answer that references specific ${game} content relevant to this quiz"
+    }
+  ],
   "questions": [
     {
       "q": "Question text here?",
@@ -121,6 +125,7 @@ Return ONLY a valid JSON object with this exact structure, no markdown, no expla
 
 Rules:
 - Exactly 10 questions
+- Exactly 4 FAQs
 - All questions must be about ${game} specifically
 - Angle "${angle}" means: ${getAngleDescription(angle)}
 - "correct" is the index (0-3) of the correct answer in the "a" array
@@ -129,6 +134,7 @@ Rules:
 - No duplicate questions
 - Title must be unique and specific, not generic
 - The intro must reference actual ${game} content like specific items, areas, mechanics, or updates relevant to the "${angle}" angle
+- FAQs must be specific to THIS quiz topic, not generic. Each FAQ answer must mention specific ${game} game content. Do NOT use generic answers like "Practice by playing more quizzes". Do NOT include FAQs about number of questions, difficulty level, or whether the quiz is free.
 - Return ONLY the JSON, nothing else`;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -140,7 +146,7 @@ Rules:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
+      max_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -181,6 +187,7 @@ async function publishOneQuiz(existing: any[]) {
     difficulty: quiz.difficulty,
     angle: quiz.angle,
     questions: quiz.questions,
+    faqs: quiz.faqs || null,
     published_at: new Date().toISOString(),
   });
 
@@ -193,7 +200,6 @@ async function publishOneQuiz(existing: any[]) {
     quiz_slug: slug,
   });
 
-  // Add to existing so next quiz in same batch avoids same game/angle
   existing.push({ game, angle, slug });
 
   return { slug, game, angle };
@@ -205,18 +211,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check daily cap
   const todayCount = await getTodayCount();
-  const DAILY_CAP = 8;
+  const DAILY_CAP = 15;
 
   if (todayCount >= DAILY_CAP) {
     return NextResponse.json({ skipped: true, reason: "Daily cap reached", todayCount });
   }
 
-  // Get randomized batch size for this run
   let batchSize = getBatchSize();
-
-  // Cap batch so we don't exceed daily limit
   batchSize = Math.min(batchSize, DAILY_CAP - todayCount);
 
   if (batchSize === 0) {
@@ -243,7 +245,6 @@ export async function GET(req: Request) {
     }
   }
 
-  // Ping Google sitemap once after batch
   if (published.length > 0) {
     await fetch("https://www.google.com/ping?sitemap=https://www.bloxquiz.gg/sitemap.xml");
   }
