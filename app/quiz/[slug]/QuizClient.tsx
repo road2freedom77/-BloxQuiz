@@ -413,7 +413,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 8 }}>{quiz.title}</h1>
           <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto 8px" }}>
-            {"Test your " + quiz.game + " knowledge across " + quiz.questions.length + " questions. Can you get a perfect score?"}
+            {quiz.intro || ("Test your " + quiz.game + " knowledge across " + quiz.questions.length + " questions. Can you get a perfect score?")}
           </p>
           {whatYouLearn[quiz.game] && (
             <p style={{ color: "var(--text-dim)", fontSize: 13, fontWeight: 600, maxWidth: 500, margin: "0 auto 12px", fontStyle: "italic" }}>
