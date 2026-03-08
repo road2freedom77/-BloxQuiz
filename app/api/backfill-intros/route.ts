@@ -7,12 +7,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get all quizzes missing an intro
   const { data: quizzes, error: selectError } = await supabase
     .from("quizzes")
     .select("slug, title, game, difficulty, angle")
     .is("intro", null)
-    .limit(20);
+    .limit(5);
 
   if (selectError) {
     return NextResponse.json({ error: "Select failed", details: selectError.message });
@@ -47,25 +46,39 @@ Return ONLY the intro text, no quotes, no markdown, nothing else.`;
         }),
       });
 
-      const data = await response.json();
+      const rawText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        results.push({ slug: quiz.slug, status: "parse_error", raw: rawText.substring(0, 300) });
+        continue;
+      }
+
       const intro = data.content?.[0]?.text?.trim();
 
-      if (intro) {
-        const { data: updateData, error: updateError } = await supabase
-          .from("quizzes")
-          .update({ intro })
-          .eq("slug", quiz.slug)
-          .select("slug, intro");
+      if (!intro) {
+        results.push({
+          slug: quiz.slug,
+          status: "no_response",
+          http_status: response.status,
+          raw: JSON.stringify(data).substring(0, 300),
+        });
+        continue;
+      }
 
-        if (updateError) {
-          results.push({ slug: quiz.slug, status: "update_failed", error: updateError.message });
-        } else if (!updateData || updateData.length === 0) {
-          results.push({ slug: quiz.slug, status: "no_rows_matched", intro_preview: intro.substring(0, 50) });
-        } else {
-          results.push({ slug: quiz.slug, status: "success", intro_preview: updateData[0].intro?.substring(0, 50) });
-        }
+      const { data: updateData, error: updateError } = await supabase
+        .from("quizzes")
+        .update({ intro })
+        .eq("slug", quiz.slug)
+        .select("slug, intro");
+
+      if (updateError) {
+        results.push({ slug: quiz.slug, status: "update_failed", error: updateError.message });
+      } else if (!updateData || updateData.length === 0) {
+        results.push({ slug: quiz.slug, status: "no_rows_matched", intro_preview: intro.substring(0, 50) });
       } else {
-        results.push({ slug: quiz.slug, status: "no_response" });
+        results.push({ slug: quiz.slug, status: "success", intro_preview: updateData[0].intro?.substring(0, 50) });
       }
     } catch (error: any) {
       results.push({ slug: quiz.slug, status: "error", error: error.message });
