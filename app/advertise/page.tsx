@@ -1,6 +1,7 @@
 export const metadata = {
     title: "Advertise on BloxQuiz — Reach Roblox Players",
     description: "Advertise on BloxQuiz and reach thousands of Roblox players. Sponsored quizzes, banner ads, and email sponsorships available.",
+    robots: { index: false },
   };
   
   export default function AdvertisePage() {
