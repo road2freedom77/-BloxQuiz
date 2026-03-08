@@ -30,6 +30,13 @@ export default function Footer() {
             Blox<span style={{ background: "var(--gradient-fire)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Quiz</span>
           </a>
           <p style={{ color: "var(--text-dim)", fontSize: 14, fontWeight: 600, marginTop: 12, lineHeight: 1.6 }}>The #1 Roblox trivia & quiz site. Test your knowledge, earn XP, and compete with friends. Not affiliated with Roblox Corporation.</p>
+          <a href="https://x.com/BloxQuiz" target="_blank" rel="noopener noreferrer"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 16, padding: "8px 16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, textDecoration: "none", color: "var(--text-muted)", fontSize: 13, fontWeight: 800 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            @BloxQuiz
+          </a>
         </div>
         <div>
           <h4 style={{ fontSize: 12, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1, color: "var(--text-muted)", marginBottom: 14 }}>Popular Games</h4>
