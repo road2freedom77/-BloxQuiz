@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "March 8, 2026";
+export const LAST_UPDATED = "March 9, 2026";
 
 export type GameCode = {
   code: string;
@@ -72,24 +72,22 @@ export const ALL_CODES: GameCodes[] = [
     codes: [],
   },
   {
-    game: "Tower of Hell",
-    slug: "tower-of-hell",
-    icon: "🗼",
-    updatedAt: "March 8, 2026",
-    howToRedeem: "Tower of Hell does not have a codes system.",
-    noCodesMessage: "Tower of Hell has never had a redeem codes system. All cosmetics are unlocked through gameplay or Robux.",
+    game: "Murder Mystery 2",
+    slug: "murder-mystery-2",
+    icon: "🔪",
+    updatedAt: "March 9, 2026",
+    howToRedeem: "Click Inventory in lobby → EnterCode box (bottom right) → Redeem",
+    noCodesMessage: "No active codes right now. MM2 codes are extremely rare — the developer hasn't released one in over a year.",
     codes: [],
   },
   {
     game: "Murder Mystery 2",
     slug: "murder-mystery-2",
     icon: "🔪",
-    updatedAt: "March 8, 2026",
+    updatedAt: "March 9, 2026",
     howToRedeem: "Click Inventory in lobby → EnterCode box (bottom right) → Redeem",
     noCodesMessage: "No active codes right now. MM2 codes are extremely rare — the developer hasn't released one in over a year.",
-    codes: [
-      { code: "CORRUPT", reward: "Free Knife", active: true, isNew: true },
-    ],
+    codes: [],
   },
   {
     game: "Grow a Garden",
