@@ -49,16 +49,18 @@ export default async function GameCategories() {
     { name: "Tower of Hell", icon: "🗼", bg: "rgba(0,245,160,0.12)", badge: null, slug: "tower-of-hell" },
     { name: "Grow a Garden", icon: "🌱", bg: "rgba(184,76,255,0.12)", badge: "✨ New", badgeColor: "#00F5A0", badgeBg: "rgba(0,245,160,0.15)", slug: "grow-a-garden" },
     { name: "Murder Mystery 2", icon: "🔫", bg: "rgba(255,138,71,0.12)", badge: null, slug: "murder-mystery-2" },
-    { name: "Royale High", icon: "👑", bg: "rgba(255,105,180,0.12)", badge: "✨ New", badgeColor: "#FF69B4", badgeBg: "rgba(255,105,180,0.15)", slug: "royale-high" },
+    { name: "Royale High", icon: "👑", bg: "rgba(255,105,180,0.12)", badge: null, slug: "royale-high" },
     { name: "Doors", icon: "🚪", bg: "rgba(255,60,60,0.12)", badge: "🔥 Hot", badgeColor: "#FF3C3C", badgeBg: "rgba(255,60,60,0.15)", slug: "doors" },
     { name: "Arsenal", icon: "🎯", bg: "rgba(255,165,0,0.12)", badge: null, slug: "arsenal" },
     { name: "Anime Fighting Simulator", icon: "🥊", bg: "rgba(0,245,160,0.12)", badge: null, slug: "anime-fighting-simulator" },
-    { name: "Berry Avenue", icon: "🍓", bg: "rgba(255,20,147,0.12)", badge: "✨ New", badgeColor: "#FF1493", badgeBg: "rgba(255,20,147,0.15)", slug: "berry-avenue" },
+    { name: "Berry Avenue", icon: "🍓", bg: "rgba(255,20,147,0.12)", badge: null, slug: "berry-avenue" },
     { name: "Livetopia", icon: "🏖️", bg: "rgba(0,191,255,0.12)", badge: null, slug: "livetopia" },
     { name: "Natural Disaster Survival", icon: "🌪️", bg: "rgba(128,128,128,0.12)", badge: null, slug: "natural-disaster-survival" },
     { name: "Anime Defenders", icon: "🐉", bg: "rgba(148,0,211,0.12)", badge: "📈 Trending", badgeColor: "#9400D3", badgeBg: "rgba(148,0,211,0.15)", slug: "anime-defenders" },
     { name: "Funky Friday", icon: "🎵", bg: "rgba(255,215,0,0.12)", badge: null, slug: "funky-friday" },
     { name: "Kick Off", icon: "⚽", bg: "rgba(0,128,0,0.12)", badge: null, slug: "kick-off" },
+    { name: "Bee Swarm Simulator", icon: "🐝", bg: "rgba(255,200,0,0.12)", badge: "✨ New", badgeColor: "#FFB800", badgeBg: "rgba(255,184,0,0.15)", slug: "bee-swarm-simulator" },
+    { name: "Dress to Impress", icon: "👗", bg: "rgba(255,105,180,0.12)", badge: "✨ New", badgeColor: "#FF69B4", badgeBg: "rgba(255,105,180,0.15)", slug: "dress-to-impress" },
   ];
 
   const [games, total] = await Promise.all([

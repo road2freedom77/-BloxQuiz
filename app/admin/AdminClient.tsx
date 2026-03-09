@@ -46,6 +46,8 @@ const GAME_SLUGS: Record<string, string> = {
   "Anime Defenders": "anime-defenders",
   "Funky Friday": "funky-friday",
   "Kick Off": "kick-off",
+  "Bee Swarm Simulator": "bee-swarm-simulator",
+  "Dress to Impress": "dress-to-impress",
 };
 
 const ANGLES = ["Beginner", "Mechanics", "Expert", "Lore", "Trading", "Secrets", "Updates"];
