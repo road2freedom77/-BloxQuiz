@@ -35,6 +35,8 @@ const gameSlugMap: Record<string, string> = {
   "Anime Defenders": "anime-defenders",
   "Funky Friday": "funky-friday",
   "Kick Off": "kick-off",
+  "Bee Swarm Simulator": "bee-swarm-simulator",
+  "Dress to Impress": "dress-to-impress",
 };
 
 const diffColors: Record<string, { color: string, bg: string }> = {
@@ -60,6 +62,8 @@ const gameEmojis: Record<string, string> = {
   "Anime Defenders": "🐉",
   "Funky Friday": "🎵",
   "Kick Off": "⚽",
+  "Bee Swarm Simulator": "🐝",
+  "Dress to Impress": "👗",
 };
 
 const whatYouLearn: Record<string, string> = {
@@ -79,6 +83,8 @@ const whatYouLearn: Record<string, string> = {
   "Anime Defenders": "Covers units, traits, evolutions, stages and summon mechanics.",
   "Funky Friday": "Covers songs, arrow patterns, ranks, characters and battle mechanics.",
   "Kick Off": "Covers teams, skills, tactics, power shots and tournament mechanics.",
+  "Bee Swarm Simulator": "Covers bee types, hive mechanics, field pollen values, NPC quests, amulet crafting and seasonal events.",
+  "Dress to Impress": "Covers themes, outfit scoring, accessories, runway mechanics, VIP items and styling strategies.",
 };
 
 function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionIndex: number }) {
@@ -162,9 +168,13 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   const q = quiz.questions[current];
   const letters = ["A", "B", "C", "D"];
   const pct = Math.round(score / quiz.questions.length * 100);
-  const gameSlug = gameSlugMap[quiz.game] || "blox-fruits";
+  const gameSlug = gameSlugMap[quiz.game] || slugify(quiz.game);
   const diff = diffColors[quiz.difficulty] || diffColors.Medium;
   const multiplier = DIFFICULTY_MULTIPLIER[quiz.difficulty] || 1;
+
+  function slugify(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
 
   async function saveScore(finalScore: number) {
     const today = new Date().toISOString().split("T")[0];
@@ -172,7 +182,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
     const basePoints = finalScore * 10;
     const weightedScore = Math.round(basePoints * multiplier);
 
-    // Save anonymous play
     await supabase.from("plays").insert({
       quiz_slug: slug,
       score: finalScore,
@@ -181,7 +190,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
 
     if (!user) return;
 
-    // Check daily cap
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const { count: todayCount } = await supabase
@@ -191,14 +199,12 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       .gte("completed_at", todayStart.toISOString());
     const capped = (todayCount || 0) >= DAILY_SCORE_CAP;
 
-    // Get user data
     const { data: userData } = await supabase
       .from("users")
       .select("streak, last_played, longest_streak, badges, monthly_score")
       .eq("id", user.id)
       .single();
 
-    // Calculate streak
     let newStreak = 1;
     if (userData?.last_played) {
       const yesterday = new Date();
@@ -214,13 +220,9 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       }
     }
 
-    // Streak bonus
     const streakBonus = (!capped && STREAK_BONUSES[newStreak]) ? STREAK_BONUSES[newStreak] : 0;
-
-    // Longest streak
     const longestStreak = Math.max(newStreak, userData?.longest_streak || 0);
 
-    // Badges
     const currentBadges: string[] = userData?.badges || [];
     const newBadges = [...currentBadges];
     if (newStreak >= 3 && !newBadges.includes("streak_3")) newBadges.push("streak_3");
@@ -231,7 +233,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
     const monthlyAdd = capped ? 0 : weightedScore + streakBonus;
     const xpGained = capped ? 0 : finalScore * 10;
 
-    // Save score record
     await supabase.from("scores").insert({
       user_id: user.id,
       quiz_slug: slug,
@@ -243,7 +244,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       completed_at: new Date().toISOString(),
     });
 
-    // Update user
     await supabase.from("users").upsert({
       id: user.id,
       username: user.username || user.firstName || "Anonymous",
@@ -478,7 +478,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score + "/" + quiz.questions.length}</div>
             <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>{getResultLabel().label}</div>
 
-            {/* Points breakdown */}
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
               {!user ? (
                 <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14 }}>
@@ -518,7 +517,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
               )}
             </div>
 
-            {/* Season 1 hype banner */}
             <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: 12, padding: "14px 20px", marginBottom: 24 }}>
               <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Coming Soon</div>
               <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players will win Robux gift cards. Keep playing to climb the leaderboard!</div>
