@@ -7,7 +7,7 @@ const diffColors: Record<string, { color: string, bg: string }> = {
   Hard: { color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
 };
 
-const games = ["All", "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell", "Murder Mystery 2", "Grow a Garden", "Royale High", "Doors", "Arsenal", "Anime Fighting Simulator", "Berry Avenue", "Livetopia", "Natural Disaster Survival", "Anime Defenders", "Funky Friday", "Kick Off"];
+const games = ["All", "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell", "Murder Mystery 2", "Grow a Garden", "Royale High", "Doors", "Arsenal", "Anime Fighting Simulator", "Berry Avenue", "Livetopia", "Natural Disaster Survival", "Anime Defenders", "Funky Friday", "Kick Off", "Bee Swarm Simulator", "Dress to Impress"];
 const difficulties = ["All", "Easy", "Medium", "Hard"];
 const PAGE_SIZE = 12;
 
