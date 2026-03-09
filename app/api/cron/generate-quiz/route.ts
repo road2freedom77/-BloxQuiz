@@ -5,7 +5,8 @@ const GAMES = [
   "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell",
   "Murder Mystery 2", "Grow a Garden", "Royale High", "Doors",
   "Arsenal", "Anime Fighting Simulator", "Berry Avenue", "Livetopia",
-  "Natural Disaster Survival", "Anime Defenders", "Funky Friday", "Kick Off"
+  "Natural Disaster Survival", "Anime Defenders", "Funky Friday", "Kick Off",
+  "Bee Swarm Simulator", "Dress to Impress"  // ← ADD THIS LINE
 ];
 
 const ANGLES = ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates"];
