@@ -19,6 +19,8 @@ const gameDescriptions: Record<string, string> = {
   "anime-defenders": "Anime Defenders codes give players free gems to use for summons and upgrades. New codes release with major unit and content updates.",
   "funky-friday": "Funky Friday codes give players free points to unlock songs and cosmetics. Codes drop during collaborations and community milestones.",
   "kick-off": "Kick Off codes give players free coins and skins to customize their football experience. New codes release during tournaments and updates.",
+  "bee-swarm-simulator": "Bee Swarm Simulator codes give players free bees, gumdrops, tickets, and boosts to help grow their hive faster. New codes drop during game milestones and seasonal events.",
+  "dress-to-impress": "Dress to Impress codes give players free exclusive outfits and accessories to wear on the runway. New codes release with major updates and seasonal events.",
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
