@@ -19,6 +19,8 @@ const gameEmojis: Record<string, string> = {
   "Anime Defenders": "🐉",
   "Funky Friday": "🎵",
   "Kick Off": "⚽",
+  "Bee Swarm Simulator": "🐝",
+  "Dress to Impress": "👗",
 };
 
 const gameData: Record<string, {
@@ -221,6 +223,30 @@ const gameData: Record<string, {
       { q: "How often are new Kick Off quizzes added?", a: "New quizzes are added regularly after seasonal updates and tournaments introduce new content." },
     ],
   },
+  "Bee Swarm Simulator": {
+    intro: "Bee Swarm Simulator is one of Roblox's most beloved progression games, challenging players to grow a thriving hive, collect pollen from fields, and convert it into honey to unlock powerful upgrades. With dozens of bee types, complex field mechanics, quests from unique NPC characters, and a deep crafting system built around amulets and royal jelly, there is an enormous amount of knowledge to master. Our quizzes cover everything from basic hive mechanics to advanced field strategies, NPC quest rewards, and rare item knowledge.",
+    whatIs: "Bee Swarm Simulator is a Roblox game where players collect bees, gather pollen from fields, and convert it into honey to purchase upgrades and grow their hive. Each bee has unique abilities that contribute to pollen collection, honey conversion, and combat against monster enemies. The game features a rich quest system with NPC characters, a complex amulet and crafting system, and regular seasonal events that introduce limited-time bees and exclusive items.",
+    whatTests: "Bee Swarm Simulator quizzes test knowledge of bee types and abilities, field pollen values, NPC quest requirements, amulet crafting, royal jelly mechanics, and seasonal event content. From identifying bees by their rarity to understanding optimal field rotation strategies and late-game quest progression, these quizzes challenge players at every stage of the game.",
+    topics: ["Bee types, rarities, and abilities", "Field types and pollen values", "NPC quests and rewards", "Amulet crafting and bonuses", "Royal jelly and mutation mechanics", "Seasonal events and limited bees", "Honey and ticket economy"],
+    whyPlay: "Bee Swarm Simulator quizzes help players discover hidden mechanics and optimize their hive progression. Many amulet bonuses, quest requirements, and field strategies are far from obvious — our quizzes surface them through trivia and challenge you to deepen your mastery of the game's complex systems.",
+    faqs: [
+      { q: "What do Bee Swarm Simulator quizzes cover?", a: "Quizzes cover bee types, field mechanics, NPC quests, amulet crafting, royal jelly, and seasonal event content." },
+      { q: "Are there quizzes for advanced BSS players?", a: "Yes — we have quizzes covering advanced topics like amulet optimization, rare bee abilities, and late-game quest mechanics." },
+      { q: "How often are new Bee Swarm Simulator quizzes added?", a: "New quizzes are added regularly, especially after seasonal events introduce new bees and mechanics." },
+    ],
+  },
+  "Dress to Impress": {
+    intro: "Dress to Impress is one of Roblox's fastest-growing fashion games, challenging players to style outfits around themed prompts and earn votes from other players. With a vast wardrobe of clothing items, accessories, and shoes, plus rotating themes and seasonal event exclusives, the game rewards both creative flair and deep knowledge of its item catalog. Our quizzes cover outfit strategies, item knowledge, theme interpretation, and all the mechanics behind climbing the leaderboard.",
+    whatIs: "Dress to Impress is a Roblox fashion game where players compete by styling their avatar around a randomly selected theme within a time limit. Other players then vote on the best outfits, with the highest-voted looks earning the most points. The game features a constantly expanding wardrobe of items, seasonal event collections, and a social voting format that rewards creativity and sharp fashion knowledge.",
+    whatTests: "Dress to Impress quizzes test knowledge of clothing items and accessories, theme interpretation strategies, voting mechanics, seasonal event collections, and styling tips. From identifying items by category to understanding what separates winning outfits from the rest, these quizzes challenge fashion enthusiasts of all experience levels.",
+    topics: ["Clothing items and accessories", "Theme interpretation strategies", "Voting mechanics and scoring", "Seasonal event collections", "Styling tips and combinations", "Game mechanics and features", "Popular trends and meta styles"],
+    whyPlay: "Dress to Impress quizzes help players build a stronger fashion sense and deeper item knowledge that translates directly into better voting performance. Understanding what makes a winning outfit and knowing the full catalog of available items gives you a genuine competitive edge in every round.",
+    faqs: [
+      { q: "What do Dress to Impress quizzes cover?", a: "Quizzes cover clothing items, theme strategies, voting mechanics, seasonal collections, and styling knowledge." },
+      { q: "Do I need to be good at fashion to play these quizzes?", a: "Not at all — our beginner quizzes cover basic game mechanics, while harder quizzes test advanced styling and item knowledge." },
+      { q: "How often are new Dress to Impress quizzes added?", a: "New quizzes are added regularly, especially after seasonal events introduce new clothing collections." },
+    ],
+  },
 };
 
 const relatedGames: Record<string, string[]> = {
@@ -230,7 +256,7 @@ const relatedGames: Record<string, string[]> = {
   "Tower of Hell": ["Arsenal", "Funky Friday", "Natural Disaster Survival"],
   "Murder Mystery 2": ["Arsenal", "Blox Fruits", "Doors"],
   "Grow a Garden": ["Adopt Me!", "Livetopia", "Berry Avenue"],
-  "Royale High": ["Adopt Me!", "Berry Avenue", "Brookhaven RP"],
+  "Royale High": ["Adopt Me!", "Berry Avenue", "Dress to Impress"],
   "Doors": ["Murder Mystery 2", "Natural Disaster Survival", "Arsenal"],
   "Arsenal": ["Murder Mystery 2", "Tower of Hell", "Kick Off"],
   "Anime Fighting Simulator": ["Anime Defenders", "Blox Fruits", "Arsenal"],
@@ -240,6 +266,8 @@ const relatedGames: Record<string, string[]> = {
   "Anime Defenders": ["Anime Fighting Simulator", "Blox Fruits", "Doors"],
   "Funky Friday": ["Tower of Hell", "Arsenal", "Kick Off"],
   "Kick Off": ["Arsenal", "Funky Friday", "Tower of Hell"],
+  "Bee Swarm Simulator": ["Grow a Garden", "Adopt Me!", "Natural Disaster Survival"],
+  "Dress to Impress": ["Royale High", "Berry Avenue", "Brookhaven RP"],
 };
 
 const gameSlugMap: Record<string, string> = {
@@ -259,6 +287,8 @@ const gameSlugMap: Record<string, string> = {
   "Anime Defenders": "anime-defenders",
   "Funky Friday": "funky-friday",
   "Kick Off": "kick-off",
+  "Bee Swarm Simulator": "bee-swarm-simulator",
+  "Dress to Impress": "dress-to-impress",
 };
 
 function inferAngleServer(title: string, slug: string): string | null {
