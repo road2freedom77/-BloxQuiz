@@ -336,6 +336,7 @@ export default function AdminClient({
   const growingCount = siloData.filter(s => s.count >= 8 && s.count < 15).length;
   const weakCount = siloData.filter(s => s.count < 8).length;
   const generatedCount = quizList.filter(q => q.source === "generated").length;
+  const adminCount = quizList.filter(q => q.source === "admin").length;
   const staticCount = quizList.filter(q => q.source === "static").length;
   const qualifiedStandings = standings.filter((p: any) => p.quizzes_completed >= 10 && !p.disqualified);
   const pendingClaims = claims.filter((c: any) => c.status === "pending").length;
@@ -897,10 +898,10 @@ export default function AdminClient({
             <input type="text" placeholder="🔍 Search quizzes..." value={search} onChange={e => { setSearch(e.target.value); setQuizPage(1); }}
               style={{ padding: "10px 20px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 100, color: "var(--text)", fontSize: 14, fontFamily: "var(--font-body)", fontWeight: 600, outline: "none", minWidth: 260 }} />
             <div style={{ display: "flex", gap: 6 }}>
-              {["All", "static", "generated"].map(s => (
+              {["All", "static", "generated", "admin"].map(s => (
                 <button key={s} onClick={() => { setSourceFilter(s); setQuizPage(1); }}
                   style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: sourceFilter === s ? "#B84CFF" : "var(--surface)", color: sourceFilter === s ? "#fff" : "var(--text-muted)", WebkitTextFillColor: sourceFilter === s ? "#fff" : "var(--text-muted)", textTransform: "capitalize" }}>
-                  {s === "static" ? `📁 Static (${staticCount})` : s === "generated" ? `🤖 Generated (${generatedCount})` : "All"}
+                  {s === "static" ? `📁 Static (${staticCount})` : s === "generated" ? `🤖 Generated (${generatedCount})` : s === "admin" ? `✍️ Admin (${adminCount})` : "All"}
                 </button>
               ))}
             </div>
