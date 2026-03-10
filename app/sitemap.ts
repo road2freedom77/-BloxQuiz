@@ -36,6 +36,14 @@ function getAllJsonGameSlugs(): string[] {
   }
 }
 
+function slugifyGame(game: string): string {
+  return game.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://www.bloxquiz.gg";
   const now = new Date();
@@ -61,19 +69,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const gamePages: MetadataRoute.Sitemap = getAllJsonGameSlugs().map(slug => ({
-    url: `${base}/games/${slug}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
+  // Game pages from JSON files
+  const jsonGameSlugs = getAllJsonGameSlugs();
 
-  // Supabase generated quizzes
+  // Supabase generated quizzes + game slugs
   let supabaseQuizzes: MetadataRoute.Sitemap = [];
+  const supabaseGameSlugs = new Set<string>();
+
   try {
     const { data } = await supabase
       .from("quizzes")
-      .select("slug, published_at");
+      .select("slug, game, published_at")
+      .eq("status", "published");
     if (data) {
       supabaseQuizzes = data.map(q => ({
         url: `${base}/quiz/${q.slug}`,
@@ -81,10 +88,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));
+      for (const q of data) {
+        if (q.game) supabaseGameSlugs.add(slugifyGame(q.game));
+      }
     }
   } catch (e) {}
 
-  // Deduplicate — supabase slugs take priority over static
+  // Merge all game slugs
+  const allGameSlugs = new Set([...jsonGameSlugs, ...Array.from(supabaseGameSlugs)]);
+  const gamePages: MetadataRoute.Sitemap = Array.from(allGameSlugs).map(slug => ({
+    url: `${base}/games/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
+  // Deduplicate quizzes — supabase slugs take priority over static
   const allQuizUrls = new Map<string, MetadataRoute.Sitemap[0]>();
   for (const q of jsonQuizzes) allQuizUrls.set(q.url, q);
   for (const q of supabaseQuizzes) allQuizUrls.set(q.url, q);
