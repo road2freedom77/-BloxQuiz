@@ -115,17 +115,41 @@ export default function AdminClient({
   const [claims, setClaims] = useState(initialClaims || []);
   const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
   const [updatingAngle, setUpdatingAngle] = useState<string | null>(null);
+  const [quizPage, setQuizPage] = useState(1);
+  const [sortBy, setSortBy] = useState<"none" | "difficulty" | "angle">("none");
+  const [angleFilter, setAngleFilter] = useState("All");
+  const QUIZ_PAGE_SIZE = 30;
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [notifyingWinners, setNotifyingWinners] = useState(false);
   const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
 
   const games = ["All", ...Array.from(new Set(quizList.map(q => q.game)))];
-  const filtered = quizList.filter(q => {
+  const difficultyOrder: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
+
+  let filtered = quizList.filter(q => {
     if (gameFilter !== "All" && q.game !== gameFilter) return false;
     if (sourceFilter !== "All" && q.source !== sourceFilter) return false;
+    if (angleFilter !== "All") {
+      if (angleFilter === "Unassigned" && q.angle) return false;
+      if (angleFilter !== "Unassigned" && q.angle !== angleFilter) return false;
+    }
     if (search && !q.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  if (sortBy === "difficulty") {
+    filtered = [...filtered].sort((a, b) => (difficultyOrder[a.difficulty] ?? 99) - (difficultyOrder[b.difficulty] ?? 99));
+  } else if (sortBy === "angle") {
+    filtered = [...filtered].sort((a, b) => {
+      if (!a.angle && !b.angle) return 0;
+      if (!a.angle) return 1;
+      if (!b.angle) return -1;
+      return a.angle.localeCompare(b.angle);
+    });
+  }
+
+  const quizTotalPages = Math.ceil(filtered.length / QUIZ_PAGE_SIZE);
+  const paginatedQuizzes = filtered.slice((quizPage - 1) * QUIZ_PAGE_SIZE, quizPage * QUIZ_PAGE_SIZE);
 
   const siloData = Object.keys(GAME_SLUGS).map(game => {
     const gameQuizzes = quizList.filter(q => q.game === game);
@@ -698,33 +722,60 @@ export default function AdminClient({
       {tab === "quizzes" && (
         <div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
-            <input type="text" placeholder="🔍 Search quizzes..." value={search} onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder="🔍 Search quizzes..." value={search} onChange={e => { setSearch(e.target.value); setQuizPage(1); }}
               style={{ padding: "10px 20px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 100, color: "var(--text)", fontSize: 14, fontFamily: "var(--font-body)", fontWeight: 600, outline: "none", minWidth: 260 }} />
             <div style={{ display: "flex", gap: 6 }}>
               {["All", "static", "generated"].map(s => (
-                <button key={s} onClick={() => setSourceFilter(s)}
+                <button key={s} onClick={() => { setSourceFilter(s); setQuizPage(1); }}
                   style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: sourceFilter === s ? "#B84CFF" : "var(--surface)", color: sourceFilter === s ? "#fff" : "var(--text-muted)", WebkitTextFillColor: sourceFilter === s ? "#fff" : "var(--text-muted)", textTransform: "capitalize" }}>
                   {s === "static" ? `📁 Static (${staticCount})` : s === "generated" ? `🤖 Generated (${generatedCount})` : "All"}
                 </button>
               ))}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+
+          {/* Game filter */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
             {games.map(g => (
-              <button key={g} onClick={() => setGameFilter(g)}
+              <button key={g} onClick={() => { setGameFilter(g); setQuizPage(1); }}
                 style={{ padding: "5px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 11, background: gameFilter === g ? "var(--gradient-main)" : "var(--surface)", color: gameFilter === g ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: gameFilter === g ? "var(--bg)" : "var(--text-muted)" }}>
                 {g}
               </button>
             ))}
           </div>
+
+          {/* Sort + Angle filter row */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase" }}>Sort:</span>
+            {(["none", "difficulty", "angle"] as const).map(s => (
+              <button key={s} onClick={() => { setSortBy(s); setQuizPage(1); }}
+                style={{ padding: "5px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 11, background: sortBy === s ? "var(--neon-yellow)" : "var(--surface)", color: sortBy === s ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: sortBy === s ? "var(--bg)" : "var(--text-muted)" }}>
+                {s === "none" ? "Default" : s === "difficulty" ? "Difficulty" : "Angle"}
+              </button>
+            ))}
+            <span style={{ fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", marginLeft: 8 }}>Angle:</span>
+            {(["All", "Unassigned", ...ANGLES.slice(0, 10)]).map(a => (
+              <button key={a} onClick={() => { setAngleFilter(a); setQuizPage(1); }}
+                style={{ padding: "5px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 11, background: angleFilter === a ? "#B84CFF" : "var(--surface)", color: angleFilter === a ? "#fff" : "var(--text-muted)", WebkitTextFillColor: angleFilter === a ? "#fff" : "var(--text-muted)" }}>
+                {a}
+              </button>
+            ))}
+            <select value={angleFilter} onChange={e => { setAngleFilter(e.target.value); setQuizPage(1); }}
+              style={{ padding: "5px 10px", borderRadius: 100, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text-muted)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 800, cursor: "pointer" }}>
+              <option value="All">All angles</option>
+              <option value="Unassigned">Unassigned</option>
+              {ANGLES.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 100px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
               <div>Title</div><div>Game</div><div>Difficulty</div><div>Qs</div><div>Source</div><div>Angle</div><div>Actions</div>
             </div>
-            {filtered.map((quiz, i) => {
+            {paginatedQuizzes.map((quiz, i) => {
               const diff = diffColors[quiz.difficulty] || diffColors.Medium;
               return (
-                <div key={quiz.slug} style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 100px", alignItems: "center", padding: "12px 20px", borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none" }}>
+                <div key={quiz.slug} style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 100px", alignItems: "center", padding: "12px 20px", borderBottom: i < paginatedQuizzes.length - 1 ? "1px solid var(--border)" : "none" }}>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{quiz.title}</div>
                     <div style={{ fontSize: 10, color: "var(--text-dim)" }}>{quiz.slug}</div>
@@ -761,7 +812,25 @@ export default function AdminClient({
               );
             })}
           </div>
-          <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>{"Showing " + filtered.length + " of " + quizList.length + " quizzes"}</div>
+
+          {/* Pagination + count */}
+          <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>
+              {"Showing " + ((quizPage - 1) * QUIZ_PAGE_SIZE + 1) + "–" + Math.min(quizPage * QUIZ_PAGE_SIZE, filtered.length) + " of " + filtered.length + " quizzes"}
+            </div>
+            {quizTotalPages > 1 && (
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <button onClick={() => setQuizPage(p => Math.max(1, p - 1))} disabled={quizPage === 1}
+                  style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: quizPage === 1 ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: "var(--surface)", color: "var(--text-muted)", opacity: quizPage === 1 ? 0.4 : 1 }}>← Prev</button>
+                {Array.from({ length: quizTotalPages }, (_, i) => i + 1).map(p => (
+                  <button key={p} onClick={() => setQuizPage(p)}
+                    style={{ padding: "6px 12px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, minWidth: 36, background: quizPage === p ? "var(--gradient-main)" : "var(--surface)", color: quizPage === p ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: quizPage === p ? "var(--bg)" : "var(--text-muted)" }}>{p}</button>
+                ))}
+                <button onClick={() => setQuizPage(p => Math.min(quizTotalPages, p + 1))} disabled={quizPage === quizTotalPages}
+                  style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: quizPage === quizTotalPages ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: "var(--surface)", color: "var(--text-muted)", opacity: quizPage === quizTotalPages ? 0.4 : 1 }}>Next →</button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
