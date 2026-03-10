@@ -56,7 +56,7 @@ export async function sendNewQuizEmail({
       <!-- Footer -->
       <div style="text-align:center;font-size:12px;color:#4A5568;line-height:1.6;">
         <p>You're receiving this because you subscribed to BloxQuiz updates.</p>
-        <p><a href="https://www.bloxquiz.gg" style="color:#00F5A0;text-decoration:none;">bloxquiz.gg</a> · Not affiliated with Roblox Corporation</p>
+        <p><a href="{{{ unsubscribe_url }}}" style="color:#4A5568;text-decoration:underline;">Unsubscribe</a> · <a href="https://www.bloxquiz.gg" style="color:#00F5A0;text-decoration:none;">bloxquiz.gg</a> · Not affiliated with Roblox Corporation</p>
       </div>
   
     </div>
