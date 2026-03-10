@@ -51,7 +51,7 @@ const GAME_SLUGS: Record<string, string> = {
 };
 
 const ANGLES = [
-  "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
+  "Beginner", "Expert", "Items", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
   "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
   "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
   "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes",
