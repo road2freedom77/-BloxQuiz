@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../../lib/supabase";
+import { sendNewQuizEmail } from "../../../lib/sendQuizEmail";
 
 const GAMES = [
   "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell",
@@ -335,6 +336,17 @@ async function publishOneQuiz(existing: any[]) {
   });
 
   existing.push({ game, angle, slug });
+
+  // Send email notification if auto-published
+  if (status === "published") {
+    await sendNewQuizEmail({
+      title: quiz.title,
+      game: quiz.game,
+      difficulty: quiz.difficulty,
+      intro: quiz.intro,
+      slug,
+    }).catch(err => console.error("Email failed:", err));
+  }
 
   return { slug, game, angle, rewrites, replacements };
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendNewQuizEmail } from "../../../lib/sendQuizEmail";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,6 +22,23 @@ export async function POST(req: Request) {
 
     if (error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    // Fetch quiz details for email
+    const { data: quiz } = await supabase
+      .from("quizzes")
+      .select("title, game, difficulty, intro")
+      .eq("slug", slug)
+      .single();
+
+    if (quiz) {
+      await sendNewQuizEmail({
+        title: quiz.title,
+        game: quiz.game,
+        difficulty: quiz.difficulty,
+        intro: quiz.intro,
+        slug,
+      }).catch(err => console.error("Email failed:", err));
     }
 
     return NextResponse.json({ success: true, slug });
