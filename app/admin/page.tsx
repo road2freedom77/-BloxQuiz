@@ -33,12 +33,12 @@ async function getAllQuizzes() {
   try {
     const { data } = await supabase
       .from("quizzes")
-      .select("slug, title, game, difficulty, questions, angle, published_at")
+      .select("slug, title, game, difficulty, questions, angle, source, published_at")
       .order("published_at", { ascending: false });
     if (data) {
       for (const q of data) {
         if (!slugsSeen.has(q.slug)) {
-          quizzes.push({ slug: q.slug, title: q.title, game: q.game, difficulty: q.difficulty, questions: Array.isArray(q.questions) ? q.questions.length : 10, angle: q.angle, published_at: q.published_at, source: "generated" });
+          quizzes.push({ slug: q.slug, title: q.title, game: q.game, difficulty: q.difficulty, questions: Array.isArray(q.questions) ? q.questions.length : 10, angle: q.angle, published_at: q.published_at, source: q.source || "generated" });
           slugsSeen.add(q.slug);
         }
       }
