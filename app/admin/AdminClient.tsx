@@ -1126,18 +1126,25 @@ export default function AdminClient({
             <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No cron logs yet.</div>
           ) : (
             <>
-              <div style={{ display: "grid", gridTemplateColumns: "80px 120px 100px 1fr 140px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
-                <div>Status</div><div>Game</div><div>Angle</div><div>Quiz / Error</div><div>Date</div>
+              <div style={{ display: "grid", gridTemplateColumns: "80px 120px 100px 1fr 180px 140px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+                <div>Status</div><div>Game</div><div>Angle</div><div>Quiz / Error</div><div>Fact-Check</div><div>Date</div>
               </div>
               {cronLogs.map((log, i) => {
                 const lc = logColors[log.status] || logColors.skipped;
+                const allConfident = log.notes === "fact-check: all confident";
+                const hasChanges = log.notes && log.notes.startsWith("fact-check:") && !allConfident;
                 return (
-                  <div key={log.id} style={{ display: "grid", gridTemplateColumns: "80px 120px 100px 1fr 140px", alignItems: "center", padding: "12px 20px", borderBottom: i < cronLogs.length - 1 ? "1px solid var(--border)" : "none" }}>
+                  <div key={log.id} style={{ display: "grid", gridTemplateColumns: "80px 120px 100px 1fr 180px 140px", alignItems: "center", padding: "12px 20px", borderBottom: i < cronLogs.length - 1 ? "1px solid var(--border)" : "none" }}>
                     <div><span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: lc.bg, color: lc.color, textTransform: "uppercase" }}>{log.status}</span></div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{log.game || "—"}</div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{log.angle || "—"}</div>
                     <div style={{ fontSize: 12, color: log.error ? "var(--neon-pink)" : "var(--text-muted)", fontWeight: 600 }}>
                       {log.quiz_slug ? <a href={"/quiz/" + log.quiz_slug} target="_blank" style={{ color: "var(--neon-blue)", textDecoration: "none", fontWeight: 700 }}>{log.quiz_slug}</a> : log.error || "—"}
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 700 }}>
+                      {allConfident && <span style={{ color: "var(--neon-green)" }}>✅ All confident</span>}
+                      {hasChanges && <span style={{ color: "var(--neon-yellow)" }}>⚠️ {log.notes.replace("fact-check: ", "")}</span>}
+                      {!log.notes && <span style={{ color: "var(--text-dim)" }}>—</span>}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{new Date(log.created_at).toLocaleString()}</div>
                   </div>
