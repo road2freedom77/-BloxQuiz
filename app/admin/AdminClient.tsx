@@ -288,7 +288,7 @@ export default function AdminClient({
   const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
   const [updatingAngle, setUpdatingAngle] = useState<string | null>(null);
   const [quizPage, setQuizPage] = useState(1);
-  const [sortBy, setSortBy] = useState<"none" | "difficulty" | "angle">("none");
+  const [sortBy, setSortBy] = useState<"none" | "difficulty" | "angle" | "title_asc" | "title_desc">("none");
   const [angleFilter, setAngleFilter] = useState("All");
   const QUIZ_PAGE_SIZE = 30;
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -318,6 +318,10 @@ export default function AdminClient({
       if (!b.angle) return -1;
       return a.angle.localeCompare(b.angle);
     });
+  } else if (sortBy === "title_asc") {
+    filtered = [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortBy === "title_desc") {
+    filtered = [...filtered].sort((a, b) => b.title.localeCompare(a.title));
   }
 
   const quizTotalPages = Math.ceil(filtered.length / QUIZ_PAGE_SIZE);
@@ -920,10 +924,10 @@ export default function AdminClient({
           {/* Sort + Angle filter row */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase" }}>Sort:</span>
-            {(["none", "difficulty", "angle"] as const).map(s => (
+            {(["none", "difficulty", "angle", "title_asc", "title_desc"] as const).map(s => (
               <button key={s} onClick={() => { setSortBy(s); setQuizPage(1); }}
                 style={{ padding: "5px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 11, background: sortBy === s ? "var(--neon-yellow)" : "var(--surface)", color: sortBy === s ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: sortBy === s ? "var(--bg)" : "var(--text-muted)" }}>
-                {s === "none" ? "Default" : s === "difficulty" ? "Difficulty" : "Angle"}
+                {s === "none" ? "Default" : s === "difficulty" ? "Difficulty" : s === "angle" ? "Angle" : s === "title_asc" ? "Title A–Z" : "Title Z–A"}
               </button>
             ))}
             <span style={{ fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", marginLeft: 8 }}>Angle:</span>
