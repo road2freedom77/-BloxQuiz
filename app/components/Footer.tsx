@@ -12,6 +12,7 @@ export default function Footer() {
     { label: "Daily Challenge", href: "/#daily" },
     { label: "Roblox Codes", href: "/codes" },
     { label: "Leaderboard", href: "/leaderboard" },
+    { label: "Username Generator", href: "/roblox-username-ideas" },
   ];
 
   const moreLinks = [

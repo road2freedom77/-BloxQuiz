@@ -5,6 +5,7 @@ import DailyChallenge from "./components/DailyChallenge";
 import Codes from "./components/Codes";
 import Leaderboard from "./components/Leaderboard";
 import EmailSignup from "./components/EmailSignup";
+import UsernameGeneratorBanner from "./components/UsernameGeneratorBanner";
 import { supabase } from "./lib/supabase";
 import fs from "fs";
 import path from "path";
@@ -104,6 +105,7 @@ export default async function Home() {
     <>
       <Hero initialStats={initialStats} />
       <GameCategories />
+      <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
       <DailyChallenge initialDaily={initialDaily} />
       <Codes />
