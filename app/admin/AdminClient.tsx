@@ -288,6 +288,7 @@ export default function AdminClient({
   const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
   const [updatingAngle, setUpdatingAngle] = useState<string | null>(null);
   const [quizPage, setQuizPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState<"none" | "difficulty" | "angle" | "title_asc" | "title_desc">("none");
   const [angleFilter, setAngleFilter] = useState("All");
   const QUIZ_PAGE_SIZE = 30;
@@ -301,6 +302,8 @@ export default function AdminClient({
   let filtered = quizList.filter(q => {
     if (gameFilter !== "All" && q.game !== gameFilter) return false;
     if (sourceFilter !== "All" && q.source !== sourceFilter) return false;
+    if (statusFilter === "Draft" && q.status !== "draft") return false;
+    if (statusFilter === "Published" && q.status === "draft") return false;
     if (angleFilter !== "All") {
       if (angleFilter === "Unassigned" && q.angle) return false;
       if (angleFilter !== "Unassigned" && q.angle !== angleFilter) return false;
@@ -341,6 +344,7 @@ export default function AdminClient({
   const weakCount = siloData.filter(s => s.count < 8).length;
   const generatedCount = quizList.filter(q => q.source === "generated").length;
   const adminCount = quizList.filter(q => q.source === "admin").length;
+  const draftCount = quizList.filter(q => q.status === "draft").length;
   const staticCount = quizList.filter(q => q.source === "static").length;
   const qualifiedStandings = standings.filter((p: any) => p.quizzes_completed >= 10 && !p.disqualified);
   const pendingClaims = claims.filter((c: any) => c.status === "pending").length;
@@ -359,6 +363,22 @@ export default function AdminClient({
     await fetch("/api/quiz/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug }) });
     setQuizList((prev: any[]) => prev.filter(q => q.slug !== slug));
     setDeleting(null);
+  }
+
+  async function publishQuiz(slug: string) {
+    try {
+      const res = await fetch("/api/quiz/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setQuizList(prev => prev.map(q => q.slug === slug ? { ...q, status: "published" } : q));
+      }
+    } catch (e) {
+      console.error("Publish failed", e);
+    }
   }
 
   async function updateAngle(slug: string, angle: string) {
@@ -911,6 +931,16 @@ export default function AdminClient({
             </div>
           </div>
 
+          {/* Status filter */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+            {(["All", "Published", "Draft"] as const).map(s => (
+              <button key={s} onClick={() => { setStatusFilter(s); setQuizPage(1); }}
+                style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: statusFilter === s ? (s === "Draft" ? "var(--neon-yellow)" : "var(--neon-green)") : "var(--surface)", color: statusFilter === s ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: statusFilter === s ? "var(--bg)" : "var(--text-muted)" }}>
+                {s === "Draft" ? `⏳ Drafts (${draftCount})` : s === "Published" ? "✅ Published" : "All"}
+              </button>
+            ))}
+          </div>
+
           {/* Game filter */}
           <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
             {games.map(g => (
@@ -976,9 +1006,13 @@ export default function AdminClient({
                     </select>
                     {updatingAngle === quiz.slug && <span style={{ fontSize: 9, color: "var(--text-dim)", marginLeft: 4 }}>saving...</span>}
                   </div>
-                  <div style={{ display: "flex", gap: 6 }}>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {quiz.status === "draft" && (
+                      <button onClick={() => publishQuiz(quiz.slug)}
+                        style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,245,160,0.15)", color: "var(--neon-green)", border: "1px solid rgba(0,245,160,0.3)", cursor: "pointer" }}>🚀 Publish</button>
+                    )}
                     <a href={"/quiz/" + quiz.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View</a>
-                    {quiz.source === "generated" && (
+                    {(quiz.source === "generated" || quiz.source === "admin") && (
                       <button onClick={() => deleteQuiz(quiz.slug)} disabled={deleting === quiz.slug}
                         style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", border: "none", cursor: "pointer" }}>
                         {deleting === quiz.slug ? "..." : "🗑️"}

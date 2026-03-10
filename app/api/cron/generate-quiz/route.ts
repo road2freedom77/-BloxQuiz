@@ -9,10 +9,8 @@ const GAMES = [
   "Bee Swarm Simulator", "Dress to Impress"
 ];
 
-// Default angles for most games
 const DEFAULT_ANGLES = ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"];
 
-// Per-game angle overrides — customize angles to fit each game's theme
 const GAME_ANGLES: Record<string, string[]> = {
   "Blox Fruits":              ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"],
   "Brookhaven RP":            ["Beginner", "Expert", "Lore", "Secrets", "Updates", "Characters", "Locations", "Roleplay"],
@@ -34,50 +32,25 @@ const GAME_ANGLES: Record<string, string[]> = {
   "Dress to Impress":         ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Characters", "Fashion", "Themes"],
 };
 
-// All possible angle difficulties
 const DIFFICULTIES: Record<string, string> = {
-  Beginner:   "Easy",
-  Expert:     "Hard",
-  Lore:       "Medium",
-  Trading:    "Medium",
-  Mechanics:  "Hard",
-  Secrets:    "Medium",
-  Updates:    "Medium",
-  Characters: "Medium",
-  Locations:  "Medium",
-  Roleplay:   "Easy",
-  Pets:       "Medium",
-  Stages:     "Medium",
-  Tips:       "Easy",
-  Modifiers:  "Hard",
-  Plants:     "Medium",
-  Mutations:  "Hard",
-  Strategy:   "Hard",
-  Fashion:    "Medium",
-  Entities:   "Hard",
-  Survival:   "Hard",
-  Weapons:    "Medium",
-  Maps:       "Medium",
-  Training:   "Medium",
-  Jobs:       "Easy",
-  Disasters:  "Hard",
-  Songs:      "Medium",
-  Ranks:      "Medium",
-  Teams:      "Easy",
-  Skills:     "Hard",
-  Bees:       "Medium",
-  Themes:     "Medium",
+  Beginner: "Easy", Expert: "Hard", Lore: "Medium", Trading: "Medium",
+  Mechanics: "Hard", Secrets: "Medium", Updates: "Medium", Characters: "Medium",
+  Locations: "Medium", Roleplay: "Easy", Pets: "Medium", Stages: "Medium",
+  Tips: "Easy", Modifiers: "Hard", Plants: "Medium", Mutations: "Hard",
+  Strategy: "Hard", Fashion: "Medium", Entities: "Hard", Survival: "Hard",
+  Weapons: "Medium", Maps: "Medium", Training: "Medium", Jobs: "Easy",
+  Disasters: "Hard", Songs: "Medium", Ranks: "Medium", Teams: "Easy",
+  Skills: "Hard", Bees: "Medium", Themes: "Medium",
 };
 
-// Angle descriptions for the AI prompt
 const ANGLE_DESCRIPTIONS: Record<string, string> = {
   Beginner:    "basic mechanics, starter items, fundamental gameplay for new players",
   Expert:      "advanced strategies, endgame content, rare items, expert-level knowledge",
   Lore:        "story, characters, world-building, lore and narrative elements",
-  Trading:     "item values, trading strategies, rare items, economy and market knowledge",
+  Trading:     "item types and categories, trading mechanics, notable item tiers — avoid specific numerical values that change frequently",
   Mechanics:   "combat systems, abilities, game mechanics, technical gameplay",
   Secrets:     "hidden items, Easter eggs, secret locations, tricks and discoveries",
-  Updates:     "recent additions, new content, latest features and changes",
+  Updates:     "major named updates, new content additions, significant feature changes — avoid patch-specific numbers",
   Characters:  "NPCs, characters, personalities, and their roles in the game",
   Locations:   "maps, areas, districts, landmarks and hidden spots in the game world",
   Roleplay:    "roleplay scenarios, jobs, social dynamics and creative gameplay",
@@ -91,7 +64,7 @@ const ANGLE_DESCRIPTIONS: Record<string, string> = {
   Fashion:     "outfits, accessories, styles, customization and fashion trends",
   Entities:    "monsters, entities, bosses, their behaviors and how to survive them",
   Survival:    "survival strategies, escape routes, safe zones and defensive play",
-  Weapons:     "weapon types, stats, unlocks and combat effectiveness",
+  Weapons:     "weapon types, categories, unlocks and combat effectiveness",
   Maps:        "map layouts, key areas, spawn points and navigational knowledge",
   Training:    "training mechanics, stat grinding, zone progression and benchmarks",
   Jobs:        "available jobs, tasks, earning mechanics and job-specific rewards",
@@ -133,9 +106,7 @@ async function getTodayCount() {
 }
 
 async function getExistingQuizzes() {
-  const { data } = await supabase
-    .from("quizzes")
-    .select("game, angle, slug");
+  const { data } = await supabase.from("quizzes").select("game, angle, slug");
   return data || [];
 }
 
@@ -167,7 +138,6 @@ async function pickGameAndAngle(existing: any[]) {
     }
   }
 
-  // All angles exhausted — pick random game and angle from its list
   const game = GAMES[Math.floor(Math.random() * GAMES.length)];
   const angles = getAnglesForGame(game);
   const angle = angles[Math.floor(Math.random() * angles.length)];
@@ -202,18 +172,20 @@ Return ONLY a valid JSON object with this exact structure, no markdown, no expla
   ]
 }
 
-Rules:
-- Exactly 10 questions
-- Exactly 4 FAQs
-- All questions must be about ${game} specifically
+CRITICAL ACCURACY RULES — follow these strictly or the quiz will be rejected:
+- Only ask questions about facts you are 100% certain are correct and stable
+- NEVER ask about specific numerical values (prices, stats, percentages, drop rates) that change with game updates
+- NEVER ask about rankings or "best" items — these change with patches
+- NEVER ask about limited-time events or seasonal content unless it is a permanent recurring feature
+- PREFER questions about: named items/characters/locations, how mechanics work conceptually, lore and story events, named bosses and their behaviors, core game systems that rarely change
+- If you are not fully confident a fact is accurate, replace it with a question you ARE certain about
 - Angle "${angle}" means: ${angleDescription}
+- Exactly 10 questions, exactly 4 FAQs
+- All questions must be about ${game} specifically
 - "correct" is the index (0-3) of the correct answer in the "a" array
-- Make questions genuinely challenging and accurate
-- Vary question difficulty within the quiz
 - No duplicate questions
 - Title must be unique and specific, not generic
-- The intro must reference actual ${game} content like specific items, areas, mechanics, or updates relevant to the "${angle}" angle
-- FAQs must be specific to THIS quiz topic, not generic. Each FAQ answer must mention specific ${game} game content. Do NOT use generic answers like "Practice by playing more quizzes". Do NOT include FAQs about number of questions, difficulty level, or whether the quiz is free.
+- FAQs must be specific to THIS quiz topic. Do NOT use generic answers. Do NOT include FAQs about number of questions, difficulty level, or whether the quiz is free.
 - Return ONLY the JSON, nothing else`;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -244,11 +216,89 @@ Rules:
   return parsed;
 }
 
+async function factCheckQuiz(quiz: any): Promise<any> {
+  const prompt = `You are a Roblox game fact-checker. Review these quiz questions for the game "${quiz.game}" and fix any issues.
+
+For each question, return one of:
+- "confident": question and answer are correct and stable
+- "rewrite": question is about something uncertain or too patch-dependent — rewrite it with a safer question on the same topic
+- "replace": answer is likely wrong — replace with a completely new accurate question about ${quiz.game} (${quiz.angle} angle)
+
+Return ONLY a valid JSON object with this exact structure, no markdown:
+{
+  "questions": [
+    {
+      "verdict": "confident" | "rewrite" | "replace",
+      "reason": "brief reason if rewrite or replace",
+      "q": "final question text",
+      "a": ["Option A", "Option B", "Option C", "Option D"],
+      "correct": 0
+    }
+  ]
+}
+
+Rules:
+- Always return exactly 10 questions
+- For "confident" questions, copy them exactly as-is
+- For "rewrite" or "replace", write a NEW accurate question you are 100% certain about
+- Never ask about specific numerical values that change with patches
+- Never ask about "best" or "highest" ranked items
+- "correct" is the index (0-3) of the correct answer
+- Return ONLY the JSON
+
+Here are the questions to review:
+${JSON.stringify(quiz.questions, null, 2)}`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2500,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  const data = await response.json();
+  const text = data.content?.[0]?.text;
+  if (!text) throw new Error("No fact-check response from Claude");
+
+  const clean = text.replace(/```json|```/g, "").trim();
+  const checked = JSON.parse(clean);
+
+  if (!checked.questions || checked.questions.length !== 10) {
+    throw new Error("Invalid fact-check structure from Claude");
+  }
+
+  // Count rewrites/replacements for logging
+  const rewrites = checked.questions.filter((q: any) => q.verdict === "rewrite").length;
+  const replacements = checked.questions.filter((q: any) => q.verdict === "replace").length;
+
+  // Strip verdict/reason fields, keep only q/a/correct
+  const cleanQuestions = checked.questions.map((q: any) => ({
+    q: q.q,
+    a: q.a,
+    correct: q.correct,
+  }));
+
+  return { questions: cleanQuestions, rewrites, replacements };
+}
+
 async function publishOneQuiz(existing: any[]) {
   const { game, angle } = await pickGameAndAngle(existing);
 
+  // Step 1: Generate
   const quiz = await generateQuiz(game, angle);
 
+  // Step 2: Fact-check and fix
+  const { questions: checkedQuestions, rewrites, replacements } = await factCheckQuiz(quiz);
+  quiz.questions = checkedQuestions;
+
+  // Step 3: Save as draft
   const baseSlug = slugify(quiz.title);
   const { data: existingSlug } = await supabase
     .from("quizzes")
@@ -267,6 +317,8 @@ async function publishOneQuiz(existing: any[]) {
     angle: quiz.angle,
     questions: quiz.questions,
     faqs: quiz.faqs || null,
+    source: "generated",
+    status: "draft",
     published_at: new Date().toISOString(),
   });
 
@@ -277,11 +329,12 @@ async function publishOneQuiz(existing: any[]) {
     game,
     angle,
     quiz_slug: slug,
+    notes: rewrites > 0 || replacements > 0 ? `fact-check: ${rewrites} rewritten, ${replacements} replaced` : "fact-check: all confident",
   });
 
   existing.push({ game, angle, slug });
 
-  return { slug, game, angle };
+  return { slug, game, angle, rewrites, replacements };
 }
 
 export async function GET(req: Request) {
