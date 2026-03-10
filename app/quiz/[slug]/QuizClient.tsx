@@ -432,7 +432,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
         {!finished ? (
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-              <a href="/" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)", padding: "8px 18px", borderRadius: 100, fontSize: 13, fontWeight: 800, textDecoration: "none" }}>{"← Back"}</a>
+              <button onClick={() => { if (current === 0) { window.location.href = "/games/" + gameSlug; } else { setCurrent(c => c - 1); setSelected(null); setAnswered(false); } }} style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)", padding: "8px 18px", borderRadius: 100, fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: "var(--font-body)" }}>{"← Back"}</button>
               <div style={{ flex: 1, margin: "0 20px", background: "var(--surface)", height: 10, borderRadius: 100, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${(current / quiz.questions.length) * 100}%`, background: "var(--gradient-main)", borderRadius: 100, transition: "width 0.4s ease" }} />
               </div>

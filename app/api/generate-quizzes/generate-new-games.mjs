@@ -11,10 +11,10 @@ const supabase = createClient(
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const GAMES = ["Bee Swarm Simulator", "Dress to Impress"];
-const ANGLES = ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates"];
+const ANGLES = ["Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"];
 const DIFFICULTIES = {
-  Beginner: "Easy", Expert: "Hard", Lore: "Medium",
-  Trading: "Medium", Mechanics: "Hard", Secrets: "Medium", Updates: "Medium",
+  Expert: "Hard", Lore: "Medium", Trading: "Medium",
+  Mechanics: "Hard", Secrets: "Medium", Updates: "Medium", Characters: "Medium",
 };
 
 function slugify(text) {
@@ -29,7 +29,7 @@ function getAngleDescription(angle) {
     Trading: "item values, trading strategies, rare items, economy and market knowledge",
     Mechanics: "combat systems, abilities, game mechanics, technical gameplay",
     Secrets: "hidden items, Easter eggs, secret locations, tricks and discoveries",
-    Updates: "recent additions, new content, latest features and changes",
+    Characters: "NPCs, characters, personalities, and their roles in the game",
   };
   return descriptions[angle] || angle;
 }
@@ -133,25 +133,26 @@ async function publishQuiz(game, angle) {
 }
 
 async function main() {
-  console.log("🧪 TEST MODE — 1 quiz per game...\n");
+  console.log("🚀 Generating quizzes for new games...\n");
 
   for (const game of GAMES) {
     console.log(`\n🎮 ${game}`);
-    const angle = "Beginner";
-    try {
-      await publishQuiz(game, angle);
-    } catch (err) {
-      console.error(`  ❌ Failed ${game} — ${angle}:`, err.message);
-      await supabase.from("cron_logs").insert({
-        status: "failed",
-        game,
-        angle,
-        error: err.message,
-      });
+    for (const angle of ANGLES) {
+      try {
+        await publishQuiz(game, angle);
+      } catch (err) {
+        console.error(`  ❌ Failed ${game} — ${angle}:`, err.message);
+        await supabase.from("cron_logs").insert({
+          status: "failed",
+          game,
+          angle,
+          error: err.message,
+        });
+      }
     }
   }
 
-  console.log("\n✅ Done! 2 test quizzes generated.");
+  console.log("\n✅ Done! 16 quizzes generated (8 per game). Total: 8 + 1 existing = ~9 per game, hitting 15 with cron.");
 
   // Ping Google sitemap
   await fetch("https://www.google.com/ping?sitemap=https://www.bloxquiz.gg/sitemap.xml");
