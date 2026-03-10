@@ -18,8 +18,9 @@ async function syncSubscribers() {
 
   // Try common table names — update if yours is different
   const { data, error } = await supabase
-    .from("emails")
-    .select("email");
+    .from("users")
+    .select("email")
+    .not("email", "is", null);
 
   if (error) {
     console.error("Supabase error:", error.message);
