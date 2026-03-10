@@ -1,11 +1,11 @@
 import UsernameIdeasClient from "./UsernameIdeasClient";
 
 export const metadata = {
-  title: "1000+ Roblox Username Ideas (2026) — Cool, Aesthetic & Funny Names",
+  title: "1,100+ Roblox Username Ideas (2026) – Cool, Funny & Aesthetic",
   description: "Looking for the perfect Roblox username? Browse 1000+ Roblox username ideas including cool, aesthetic, funny, tryhard, girl, boy, short, and game-themed names. Copy any name instantly.",
   alternates: { canonical: "https://www.bloxquiz.gg/roblox-username-ideas" },
   openGraph: {
-    title: "1000+ Roblox Username Ideas (2026) — Cool, Aesthetic & Funny Names",
+    title: "1,100+ Roblox Username Ideas (2026) – Cool, Funny & Aesthetic",
     description: "Browse 1000+ Roblox username ideas. Cool, aesthetic, funny, tryhard, short names and more. Copy any name with one click.",
     url: "https://www.bloxquiz.gg/roblox-username-ideas",
     siteName: "BloxQuiz",
