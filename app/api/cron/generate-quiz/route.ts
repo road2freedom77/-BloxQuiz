@@ -6,36 +6,110 @@ const GAMES = [
   "Murder Mystery 2", "Grow a Garden", "Royale High", "Doors",
   "Arsenal", "Anime Fighting Simulator", "Berry Avenue", "Livetopia",
   "Natural Disaster Survival", "Anime Defenders", "Funky Friday", "Kick Off",
-  "Bee Swarm Simulator", "Dress to Impress"  // ← ADD THIS LINE
+  "Bee Swarm Simulator", "Dress to Impress"
 ];
 
-const ANGLES = ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates"];
+// Default angles for most games
+const DEFAULT_ANGLES = ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"];
 
+// Per-game angle overrides — customize angles to fit each game's theme
+const GAME_ANGLES: Record<string, string[]> = {
+  "Blox Fruits":              ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"],
+  "Brookhaven RP":            ["Beginner", "Expert", "Lore", "Secrets", "Updates", "Characters", "Locations", "Roleplay"],
+  "Adopt Me!":                ["Beginner", "Expert", "Lore", "Trading", "Secrets", "Updates", "Characters", "Pets"],
+  "Tower of Hell":            ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Stages", "Tips", "Modifiers"],
+  "Murder Mystery 2":         ["Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"],
+  "Grow a Garden":            ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Plants", "Mutations", "Strategy"],
+  "Royale High":              ["Beginner", "Expert", "Lore", "Trading", "Secrets", "Updates", "Characters", "Fashion"],
+  "Doors":                    ["Beginner", "Expert", "Lore", "Mechanics", "Secrets", "Updates", "Entities", "Survival"],
+  "Arsenal":                  ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Weapons", "Maps", "Strategy"],
+  "Anime Fighting Simulator": ["Beginner", "Expert", "Lore", "Mechanics", "Secrets", "Updates", "Characters", "Training"],
+  "Berry Avenue":             ["Beginner", "Expert", "Secrets", "Updates", "Characters", "Locations", "Roleplay", "Jobs"],
+  "Livetopia":                ["Beginner", "Expert", "Secrets", "Updates", "Characters", "Locations", "Roleplay", "Jobs"],
+  "Natural Disaster Survival":["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Disasters", "Survival", "Maps"],
+  "Anime Defenders":          ["Beginner", "Expert", "Lore", "Mechanics", "Secrets", "Updates", "Characters", "Strategy"],
+  "Funky Friday":             ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Songs", "Characters", "Ranks"],
+  "Kick Off":                 ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Strategy", "Teams", "Skills"],
+  "Bee Swarm Simulator":      ["Beginner", "Expert", "Lore", "Mechanics", "Secrets", "Updates", "Characters", "Bees"],
+  "Dress to Impress":         ["Beginner", "Expert", "Mechanics", "Secrets", "Updates", "Characters", "Fashion", "Themes"],
+};
+
+// All possible angle difficulties
 const DIFFICULTIES: Record<string, string> = {
-  Beginner: "Easy",
-  Expert: "Hard",
-  Lore: "Medium",
-  Trading: "Medium",
-  Mechanics: "Hard",
-  Secrets: "Medium",
-  Updates: "Medium",
+  Beginner:   "Easy",
+  Expert:     "Hard",
+  Lore:       "Medium",
+  Trading:    "Medium",
+  Mechanics:  "Hard",
+  Secrets:    "Medium",
+  Updates:    "Medium",
+  Characters: "Medium",
+  Locations:  "Medium",
+  Roleplay:   "Easy",
+  Pets:       "Medium",
+  Stages:     "Medium",
+  Tips:       "Easy",
+  Modifiers:  "Hard",
+  Plants:     "Medium",
+  Mutations:  "Hard",
+  Strategy:   "Hard",
+  Fashion:    "Medium",
+  Entities:   "Hard",
+  Survival:   "Hard",
+  Weapons:    "Medium",
+  Maps:       "Medium",
+  Training:   "Medium",
+  Jobs:       "Easy",
+  Disasters:  "Hard",
+  Songs:      "Medium",
+  Ranks:      "Medium",
+  Teams:      "Easy",
+  Skills:     "Hard",
+  Bees:       "Medium",
+  Themes:     "Medium",
+};
+
+// Angle descriptions for the AI prompt
+const ANGLE_DESCRIPTIONS: Record<string, string> = {
+  Beginner:    "basic mechanics, starter items, fundamental gameplay for new players",
+  Expert:      "advanced strategies, endgame content, rare items, expert-level knowledge",
+  Lore:        "story, characters, world-building, lore and narrative elements",
+  Trading:     "item values, trading strategies, rare items, economy and market knowledge",
+  Mechanics:   "combat systems, abilities, game mechanics, technical gameplay",
+  Secrets:     "hidden items, Easter eggs, secret locations, tricks and discoveries",
+  Updates:     "recent additions, new content, latest features and changes",
+  Characters:  "NPCs, characters, personalities, and their roles in the game",
+  Locations:   "maps, areas, districts, landmarks and hidden spots in the game world",
+  Roleplay:    "roleplay scenarios, jobs, social dynamics and creative gameplay",
+  Pets:        "pet types, rarities, abilities, aging and care mechanics",
+  Stages:      "stage layouts, obstacle types, difficulty progression and completion strategies",
+  Tips:        "useful tips, tricks, shortcuts and beginner-friendly advice",
+  Modifiers:   "game modifiers, power-ups, rings and special gameplay alterations",
+  Plants:      "plant types, growth stages, harvest mechanics and rare crops",
+  Mutations:   "rare mutations, special variants, unique drops and mutation triggers",
+  Strategy:    "optimal strategies, meta builds, team compositions and winning tactics",
+  Fashion:     "outfits, accessories, styles, customization and fashion trends",
+  Entities:    "monsters, entities, bosses, their behaviors and how to survive them",
+  Survival:    "survival strategies, escape routes, safe zones and defensive play",
+  Weapons:     "weapon types, stats, unlocks and combat effectiveness",
+  Maps:        "map layouts, key areas, spawn points and navigational knowledge",
+  Training:    "training mechanics, stat grinding, zone progression and benchmarks",
+  Jobs:        "available jobs, tasks, earning mechanics and job-specific rewards",
+  Disasters:   "disaster types, mechanics, survival tips and rare disaster events",
+  Songs:       "song catalog, artists, difficulty ratings and notable tracks",
+  Ranks:       "rank system, progression, requirements and prestige mechanics",
+  Teams:       "team compositions, roles, synergies and team-based strategies",
+  Skills:      "skill trees, ability unlocks, power shots and advanced techniques",
+  Bees:        "bee types, rarities, abilities, hive synergies and collection strategies",
+  Themes:      "outfit themes, judging criteria, theme interpretations and runway strategy",
 };
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-function getAngleDescription(angle: string) {
-  const descriptions: Record<string, string> = {
-    Beginner: "basic mechanics, starter items, fundamental gameplay for new players",
-    Expert: "advanced strategies, endgame content, rare items, expert-level knowledge",
-    Lore: "story, characters, world-building, lore and narrative elements",
-    Trading: "item values, trading strategies, rare items, economy and market knowledge",
-    Mechanics: "combat systems, abilities, game mechanics, technical gameplay",
-    Secrets: "hidden items, Easter eggs, secret locations, tricks and discoveries",
-    Updates: "recent additions, new content, latest features and changes",
-  };
-  return descriptions[angle] || angle;
+function getAnglesForGame(game: string): string[] {
+  return GAME_ANGLES[game] || DEFAULT_ANGLES;
 }
 
 function getBatchSize(): number {
@@ -84,21 +158,25 @@ async function pickGameAndAngle(existing: any[]) {
   const sortedGames = [...GAMES].sort((a, b) => gameCounts[a] - gameCounts[b]);
 
   for (const game of sortedGames) {
+    const angles = getAnglesForGame(game);
     const usedAngles = gameAngles[game];
-    const availableAngles = ANGLES.filter(a => !usedAngles.includes(a));
+    const availableAngles = angles.filter(a => !usedAngles.includes(a));
     if (availableAngles.length > 0) {
       const angle = availableAngles[Math.floor(Math.random() * availableAngles.length)];
       return { game, angle };
     }
   }
 
+  // All angles exhausted — pick random game and angle from its list
   const game = GAMES[Math.floor(Math.random() * GAMES.length)];
-  const angle = ANGLES[Math.floor(Math.random() * ANGLES.length)];
+  const angles = getAnglesForGame(game);
+  const angle = angles[Math.floor(Math.random() * angles.length)];
   return { game, angle };
 }
 
 async function generateQuiz(game: string, angle: string) {
-  const difficulty = DIFFICULTIES[angle];
+  const difficulty = DIFFICULTIES[angle] || "Medium";
+  const angleDescription = ANGLE_DESCRIPTIONS[angle] || angle;
 
   const prompt = `Generate a Roblox ${game} quiz with a "${angle}" angle.
 
@@ -128,7 +206,7 @@ Rules:
 - Exactly 10 questions
 - Exactly 4 FAQs
 - All questions must be about ${game} specifically
-- Angle "${angle}" means: ${getAngleDescription(angle)}
+- Angle "${angle}" means: ${angleDescription}
 - "correct" is the index (0-3) of the correct answer in the "a" array
 - Make questions genuinely challenging and accurate
 - Vary question difficulty within the quiz

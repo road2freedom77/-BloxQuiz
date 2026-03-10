@@ -50,7 +50,12 @@ const GAME_SLUGS: Record<string, string> = {
   "Dress to Impress": "dress-to-impress",
 };
 
-const ANGLES = ["Beginner", "Mechanics", "Expert", "Lore", "Trading", "Secrets", "Updates"];
+const ANGLES = [
+  "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
+  "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
+  "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
+  "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes",
+];
 
 const DISQUALIFY_REASONS = [
   "Bot activity",
@@ -105,11 +110,11 @@ export default function AdminClient({
   const [disqualifying, setDisqualifying] = useState<string | null>(null);
   const [disqualifyReason, setDisqualifyReason] = useState<Record<string, string>>({});
   const [closingSeason, setClosingSeason] = useState(false);
-  // ✅ FIX: initialize from DB prop instead of hardcoded false
   const [seasonClosed, setSeasonClosed] = useState(season?.status === "closed");
   const [updatingReward, setUpdatingReward] = useState<string | null>(null);
   const [claims, setClaims] = useState(initialClaims || []);
   const [updatingClaim, setUpdatingClaim] = useState<string | null>(null);
+  const [updatingAngle, setUpdatingAngle] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [notifyingWinners, setNotifyingWinners] = useState(false);
   const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
@@ -153,6 +158,17 @@ export default function AdminClient({
     await fetch("/api/quiz/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug }) });
     setQuizList((prev: any[]) => prev.filter(q => q.slug !== slug));
     setDeleting(null);
+  }
+
+  async function updateAngle(slug: string, angle: string) {
+    setUpdatingAngle(slug);
+    await fetch("/api/quiz/update-angle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, angle }),
+    });
+    setQuizList((prev: any[]) => prev.map(q => q.slug === slug ? { ...q, angle } : q));
+    setUpdatingAngle(null);
   }
 
   async function startEdit(f: any) {
@@ -322,12 +338,9 @@ export default function AdminClient({
             </div>
           </div>
 
-          {/* Winners Podium — only when season is closed */}
           {seasonClosed && qualifiedStandings.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>🏆 Final Winners</div>
-
-              {/* Top 3 podium */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 12 }}>
                 {[0, 1, 2].map(i => {
                   const player = qualifiedStandings[i];
@@ -378,12 +391,9 @@ export default function AdminClient({
                 })}
               </div>
 
-              {/* Runners up — ranks 4–10 */}
               {qualifiedStandings.length > 3 && (
                 <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-                  <div style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
-                    Runners Up
-                  </div>
+                  <div style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>Runners Up</div>
                   {qualifiedStandings.slice(3, 10).map((player: any, i: number) => (
                     <div key={player.user_id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px", borderBottom: i < Math.min(qualifiedStandings.length - 4, 6) ? "1px solid var(--border)" : "none", gap: 12 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -415,7 +425,6 @@ export default function AdminClient({
             ))}
           </div>
 
-          {/* Standings */}
           {seasonTab === "standings" && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
               <div style={{ display: "grid", gridTemplateColumns: "50px 1fr 100px 80px 80px 120px 140px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
@@ -471,7 +480,6 @@ export default function AdminClient({
             </div>
           )}
 
-          {/* Flagged */}
           {seasonTab === "flagged" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {flaggedUsers.length === 0 ? (
@@ -504,13 +512,10 @@ export default function AdminClient({
             </div>
           )}
 
-          {/* Claims */}
           {seasonTab === "claims" && (
             <div>
               {claims.length === 0 ? (
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 48, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>
-                  No prize claims submitted yet.
-                </div>
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 48, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No prize claims submitted yet.</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {claims.map((claim: any) => {
@@ -528,7 +533,6 @@ export default function AdminClient({
                               <span style={{ fontSize: 11, fontWeight: 900, padding: "3px 12px", borderRadius: 100, background: "rgba(255,227,71,0.1)", color: "var(--neon-yellow)" }}>{prizeAmount} Gift Card</span>
                               <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: cs.bg, color: cs.color, textTransform: "uppercase" }}>{claim.status}</span>
                             </div>
-
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginTop: 4 }}>
                               <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
                                 <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Roblox Username</div>
@@ -540,7 +544,6 @@ export default function AdminClient({
                                   </button>
                                 </div>
                               </div>
-
                               <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
                                 <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Email</div>
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
@@ -551,21 +554,18 @@ export default function AdminClient({
                                   </button>
                                 </div>
                               </div>
-
                               {claim.discord && (
                                 <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
                                   <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Discord</div>
                                   <span style={{ fontSize: 13, fontWeight: 700, color: "#B84CFF" }}>{claim.discord}</span>
                                 </div>
                               )}
-
                               <div style={{ background: "var(--surface)", borderRadius: 8, padding: "10px 14px" }}>
                                 <div style={{ fontSize: 10, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Submitted</div>
                                 <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{new Date(claim.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                               </div>
                             </div>
                           </div>
-
                           <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
                             {claim.status === "pending" && (
                               <button onClick={() => updateClaimStatus(claim.id, "sent")} disabled={updatingClaim === claim.id}
@@ -592,7 +592,6 @@ export default function AdminClient({
             </div>
           )}
 
-          {/* Close Season */}
           {seasonTab === "close" && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32 }}>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>⛔ Close Season 1</h2>
@@ -719,17 +718,16 @@ export default function AdminClient({
             ))}
           </div>
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 120px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
-              <div>Title</div><div>Game</div><div>Difficulty</div><div>Qs</div><div>Source</div><div>Actions</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 100px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+              <div>Title</div><div>Game</div><div>Difficulty</div><div>Qs</div><div>Source</div><div>Angle</div><div>Actions</div>
             </div>
             {filtered.map((quiz, i) => {
               const diff = diffColors[quiz.difficulty] || diffColors.Medium;
               return (
-                <div key={quiz.slug} style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 120px", alignItems: "center", padding: "12px 20px", borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none" }}>
+                <div key={quiz.slug} style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 100px", alignItems: "center", padding: "12px 20px", borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none" }}>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{quiz.title}</div>
                     <div style={{ fontSize: 10, color: "var(--text-dim)" }}>{quiz.slug}</div>
-                    {quiz.angle && <div style={{ fontSize: 10, color: "#B84CFF", fontWeight: 700, marginTop: 2 }}>{quiz.angle}</div>}
                   </div>
                   <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)" }}>{quiz.game}</div>
                   <div><span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: diff.bg, color: diff.color }}>{quiz.difficulty}</span></div>
@@ -738,6 +736,17 @@ export default function AdminClient({
                     <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: quiz.source === "generated" ? "rgba(184,76,255,0.15)" : "rgba(0,217,255,0.1)", color: quiz.source === "generated" ? "#B84CFF" : "var(--neon-blue)" }}>
                       {quiz.source === "generated" ? "🤖 AI" : "📁 Static"}
                     </span>
+                  </div>
+                  <div>
+                    <select
+                      value={quiz.angle || ""}
+                      onChange={e => updateAngle(quiz.slug, e.target.value)}
+                      disabled={updatingAngle === quiz.slug}
+                      style={{ fontSize: 10, fontWeight: 800, padding: "3px 6px", borderRadius: 6, background: quiz.angle ? "rgba(184,76,255,0.1)" : "var(--surface)", color: quiz.angle ? "#B84CFF" : "var(--text-dim)", border: "1px solid " + (quiz.angle ? "rgba(184,76,255,0.3)" : "var(--border)"), cursor: "pointer", fontFamily: "var(--font-body)", maxWidth: 150 }}>
+                      <option value="">— unset —</option>
+                      {ANGLES.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                    {updatingAngle === quiz.slug && <span style={{ fontSize: 9, color: "var(--text-dim)", marginLeft: 4 }}>saving...</span>}
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
                     <a href={"/quiz/" + quiz.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View</a>
