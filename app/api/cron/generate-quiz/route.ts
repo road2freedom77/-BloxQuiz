@@ -298,7 +298,9 @@ async function publishOneQuiz(existing: any[]) {
   const { questions: checkedQuestions, rewrites, replacements } = await factCheckQuiz(quiz);
   quiz.questions = checkedQuestions;
 
-  // Step 3: Save as draft
+  // Step 3: Auto-publish if all confident, otherwise draft
+  const status = (rewrites === 0 && replacements === 0) ? "published" : "draft";
+
   const baseSlug = slugify(quiz.title);
   const { data: existingSlug } = await supabase
     .from("quizzes")
@@ -318,7 +320,7 @@ async function publishOneQuiz(existing: any[]) {
     questions: quiz.questions,
     faqs: quiz.faqs || null,
     source: "generated",
-    status: "draft",
+    status,
     published_at: new Date().toISOString(),
   });
 
