@@ -14,17 +14,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    // Format questions to match existing schema
-    const formattedQuestions = questions.map((q: any, i: number) => ({
-      id: i + 1,
-      question: q.q,
-      answers: {
-        A: q.a[0],
-        B: q.a[1],
-        C: q.a[2],
-        D: q.a[3],
-      },
-      correct: ["A", "B", "C", "D"][q.correct],
+    // Format questions to match existing schema { q, a: [], correct: index }
+    const formattedQuestions = questions.map((q: any) => ({
+      q: q.q,
+      a: q.a,
+      correct: q.correct,
     }));
 
     const { error } = await supabase.from("quizzes").insert({
