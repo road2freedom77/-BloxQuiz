@@ -51,7 +51,7 @@ const GAME_SLUGS: Record<string, string> = {
 };
 
 const ANGLES = [
-  "Beginner", "Expert", "Items", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
+  "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
   "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
   "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
   "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes",
@@ -64,6 +64,178 @@ const DISQUALIFY_REASONS = [
   "Manual review",
   "Other",
 ];
+
+
+function SubmitQuizTab() {
+  const GAMES_LIST = [
+    "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell", "Murder Mystery 2",
+    "Grow a Garden", "Royale High", "Doors", "Arsenal", "Anime Fighting Simulator",
+    "Berry Avenue", "Livetopia", "Natural Disaster Survival", "Anime Defenders",
+    "Funky Friday", "Kick Off", "Bee Swarm Simulator", "Dress to Impress",
+  ];
+  const ANGLES_LIST = [
+    "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
+    "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
+    "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
+    "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes",
+  ];
+
+  const emptyQuestion = () => ({ q: "", a: ["", "", "", ""], correct: 0 });
+
+  const [title, setTitle] = useState("");
+  const [intro, setIntro] = useState("");
+  const [game, setGame] = useState(GAMES_LIST[0]);
+  const [difficulty, setDifficulty] = useState("Medium");
+  const [angle, setAngle] = useState("");
+  const [questions, setQuestions] = useState(Array.from({ length: 10 }, emptyQuestion));
+  const [faqs, setFaqs] = useState([
+    { question: "", answer: "" },
+    { question: "", answer: "" },
+    { question: "", answer: "" },
+    { question: "", answer: "" },
+  ]);
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  function slugify(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  function updateQuestion(i: number, field: string, value: any) {
+    setQuestions(prev => prev.map((q, idx) => idx === i ? { ...q, [field]: value } : q));
+  }
+
+  function updateAnswer(qi: number, ai: number, value: string) {
+    setQuestions(prev => prev.map((q, idx) => idx === qi ? { ...q, a: q.a.map((a: string, j: number) => j === ai ? value : a) } : q));
+  }
+
+  function updateFaq(i: number, field: string, value: string) {
+    setFaqs(prev => prev.map((f, idx) => idx === i ? { ...f, [field]: value } : f));
+  }
+
+  async function handleSubmit() {
+    if (!title.trim()) { setError("Title is required."); return; }
+    if (!game) { setError("Game is required."); return; }
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      if (!q.q.trim()) { setError(`Question ${i + 1} is empty.`); return; }
+      for (let j = 0; j < 4; j++) {
+        if (!q.a[j].trim()) { setError(`Question ${i + 1}, Answer ${["A","B","C","D"][j]} is empty.`); return; }
+      }
+    }
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    const slug = slugify(title) + "-" + Date.now();
+    const res = await fetch("/api/quiz/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, title, intro, game, difficulty, angle: angle || null, questions, faqs, source: "admin" }),
+    });
+    const data = await res.json();
+    setSubmitting(false);
+    if (data.success) {
+      setSuccess("✅ Quiz published! " + slug);
+      setTitle(""); setIntro(""); setAngle("");
+      setQuestions(Array.from({ length: 10 }, emptyQuestion));
+      setFaqs([{ question: "", answer: "" }, { question: "", answer: "" }, { question: "", answer: "" }, { question: "", answer: "" }]);
+    } else {
+      setError("Failed: " + data.error);
+    }
+  }
+
+  const inputStyle = { width: "100%", padding: "10px 14px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 10, color: "var(--text)", fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 600, boxSizing: "border-box" as const };
+  const labelStyle = { fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase" as const, letterSpacing: 1, display: "block" as const, marginBottom: 6 };
+
+  return (
+    <div style={{ maxWidth: 800 }}>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 24 }}>✍️ Submit Admin Quiz</h2>
+
+      {/* Meta */}
+      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24, marginBottom: 20 }}>
+        <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>Quiz Details</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>Title</label>
+            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Blox Fruits: Ultimate Devil Fruit Quiz" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Intro (2-3 sentences, fan tone)</label>
+            <textarea value={intro} onChange={e => setIntro(e.target.value)} rows={3} placeholder="Write a hype intro for this quiz..." style={{ ...inputStyle, resize: "vertical" }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Game</label>
+              <select value={game} onChange={e => setGame(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                {GAMES_LIST.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Difficulty</label>
+              <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                {["Easy", "Medium", "Hard"].map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Angle</label>
+              <select value={angle} onChange={e => setAngle(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                <option value="">— unset —</option>
+                {ANGLES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Questions */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20 }}>
+        {questions.map((q, i) => (
+          <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Question {i + 1}</div>
+            <div style={{ marginBottom: 12 }}>
+              <input value={q.q} onChange={e => updateQuestion(i, "q", e.target.value)} placeholder={`Question ${i + 1}...`} style={inputStyle} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {q.a.map((ans: string, j: number) => (
+                <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button onClick={() => updateQuestion(i, "correct", j)}
+                    style={{ width: 30, height: 30, borderRadius: "50%", border: "2px solid " + (q.correct === j ? "var(--neon-green)" : "var(--border)"), background: q.correct === j ? "rgba(0,245,160,0.15)" : "var(--surface)", color: q.correct === j ? "var(--neon-green)" : "var(--text-dim)", fontSize: 12, fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>
+                    {["A","B","C","D"][j]}
+                  </button>
+                  <input value={ans} onChange={e => updateAnswer(i, j, e.target.value)} placeholder={`Answer ${["A","B","C","D"][j]}...`}
+                    style={{ ...inputStyle, border: "1.5px solid " + (q.correct === j ? "var(--neon-green)" : "var(--border)") }} />
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginTop: 8 }}>Click a letter to mark the correct answer</p>
+          </div>
+        ))}
+      </div>
+
+      {/* FAQs */}
+      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24, marginBottom: 24 }}>
+        <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>FAQs (4 required)</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {faqs.map((faq, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <input value={faq.question} onChange={e => updateFaq(i, "question", e.target.value)} placeholder={`FAQ ${i + 1} question...`} style={inputStyle} />
+              <textarea value={faq.answer} onChange={e => updateFaq(i, "answer", e.target.value)} placeholder="Answer..." rows={2} style={{ ...inputStyle, resize: "vertical" }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {error && <div style={{ padding: "12px 16px", background: "rgba(255,60,172,0.1)", border: "1px solid rgba(255,60,172,0.3)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "var(--neon-pink)", marginBottom: 16 }}>{error}</div>}
+      {success && <div style={{ padding: "12px 16px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.3)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "var(--neon-green)", marginBottom: 16 }}>{success}</div>}
+
+      <button onClick={handleSubmit} disabled={submitting}
+        style={{ padding: "14px 40px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 15, cursor: submitting ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: submitting ? 0.7 : 1 }}>
+        {submitting ? "⏳ Publishing..." : "🚀 Publish Quiz"}
+      </button>
+    </div>
+  );
+}
 
 function siloStrength(count: number): { label: string, color: string, bg: string } {
   if (count >= 15) return { label: "🏆 Strong", color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" };
@@ -93,7 +265,7 @@ export default function AdminClient({
   season: any,
   prizeClaims: any[],
 }) {
-  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons">("overview");
+  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "submit">("overview");
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -293,10 +465,10 @@ export default function AdminClient({
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        {(["overview", "seasons", "silos", "quizzes", "flags", "logs"] as const).map(t => (
+        {(["overview", "seasons", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-            {t === "flags" && flags.length > 0 ? `flags (${flags.length})` : t === "seasons" ? "🏆 Seasons" : t}
+            {t === "flags" && flags.length > 0 ? `flags (${flags.length})` : t === "seasons" ? "🏆 Seasons" : t === "submit" ? "✍️ Submit Quiz" : t}
           </button>
         ))}
       </div>
@@ -903,6 +1075,10 @@ export default function AdminClient({
           )}
         </div>
       )}
+
+
+      {/* Submit Quiz Tab */}
+      {tab === "submit" && <SubmitQuizTab />}
 
       {/* Logs Tab */}
       {tab === "logs" && (
