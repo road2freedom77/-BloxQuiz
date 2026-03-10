@@ -127,7 +127,7 @@ function SubmitQuizTab() {
     setSubmitting(true);
     setError(null);
     setSuccess(null);
-    const slug = slugify(title) + "-" + Date.now();
+    const slug = slugify(title);
     const res = await fetch("/api/quiz/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
