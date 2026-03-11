@@ -65,37 +65,40 @@ export async function sendNewQuizEmail({
     `.trim();
   
     try {
-      // Get all subscribers from audience
-      const audienceRes = await fetch(
-        `https://api.resend.com/audiences/${audienceId}/contacts`,
-        { headers: { Authorization: `Bearer ${apiKey}` } }
-      );
-      const audienceData = await audienceRes.json();
-      const subscribers = (audienceData.data || []).filter((c: any) => !c.unsubscribed);
-  
-      if (subscribers.length === 0) {
-        console.log("No subscribers, skipping email");
-        return;
-      }
-  
-      const to = subscribers.map((c: any) => c.email);
-  
-      const res = await fetch("https://api.resend.com/emails", {
+      // Step 1: Create broadcast
+      const createRes = await fetch("https://api.resend.com/broadcasts", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          audience_id: audienceId,
           from: "BloxQuiz <noreply@bloxquiz.gg>",
-          to,
           subject: `🎮 New Quiz Drop — ${title}`,
           html,
+          name: `Quiz Drop: ${title}`,
         }),
       });
   
-      const result = await res.json();
-      console.log("Email sent:", result.id);
+      const broadcast = await createRes.json();
+  
+      if (!broadcast.id) {
+        console.error("Failed to create broadcast:", broadcast);
+        return;
+      }
+  
+      // Step 2: Send broadcast
+      const sendRes = await fetch(`https://api.resend.com/broadcasts/${broadcast.id}/send`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const result = await sendRes.json();
+      console.log("Broadcast sent:", broadcast.id, result);
       return result;
     } catch (err) {
       console.error("Email send failed:", err);
