@@ -28,9 +28,6 @@ const GAMES_TO_UPDATE = [
   { slug: 'dress-to-impress', game: 'Dress to Impress' },
   { slug: 'anime-defenders', game: 'Anime Defenders' },
   { slug: 'funky-friday', game: 'Funky Friday' },
-  { slug: 'livetopia', game: 'Livetopia' },                          // add
-  { slug: 'natural-disaster-survival', game: 'Natural Disaster Survival' }, // add
-  { slug: 'kick-off', game: 'Kick Off' },                            // add
 ]
 
 export async function GET(request: Request) {
@@ -69,8 +66,8 @@ export async function GET(request: Request) {
         .join(', ')
 
       const message = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
-        max_tokens: 1024,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 512,
         tools: [{ type: 'web_search_20250305', name: 'web_search' } as any],
         messages: [
           {
