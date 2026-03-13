@@ -1,6 +1,6 @@
 // app/api/cron/update-codes/route.ts
-// Vercel cron: runs daily at 6am UTC
-// vercel.json: { "crons": [{ "path": "/api/cron/update-codes", "schedule": "0 6 * * *" }] }
+// Run one game per cron job via ?slug=blox-fruits
+// cron-job.org: create 14 jobs staggered 5min apart
 
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
@@ -13,7 +13,6 @@ const supabaseAdmin = createClient(
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
-// Games we actively maintain codes for
 const GAMES_TO_UPDATE = [
   { slug: 'blox-fruits', game: 'Blox Fruits' },
   { slug: 'brookhaven-rp', game: 'Brookhaven RP' },
@@ -29,29 +28,33 @@ const GAMES_TO_UPDATE = [
   { slug: 'dress-to-impress', game: 'Dress to Impress' },
   { slug: 'anime-defenders', game: 'Anime Defenders' },
   { slug: 'funky-friday', game: 'Funky Friday' },
+  { slug: 'livetopia', game: 'Livetopia' },                          // add
+  { slug: 'natural-disaster-survival', game: 'Natural Disaster Survival' }, // add
+  { slug: 'kick-off', game: 'Kick Off' },                            // add
 ]
 
-interface CodeEntry {
-  code: string
-  reward: string
-  active: boolean
-}
-
 export async function GET(request: Request) {
-  // Verify this is an authorized cron call
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const results: Record<string, { added: number; deactivated: number }> = {}
-  const today = new Date().toLocaleDateString('en-US', {
-    month: 'long', day: 'numeric', year: 'numeric',
-  })
+  const { searchParams } = new URL(request.url)
+  const slugParam = searchParams.get('slug')
 
-  for (const { slug, game } of GAMES_TO_UPDATE) {
+  // Determine which games to process
+  const gamesToProcess = slugParam
+    ? GAMES_TO_UPDATE.filter((g) => g.slug === slugParam)
+    : GAMES_TO_UPDATE
+
+  if (gamesToProcess.length === 0) {
+    return NextResponse.json({ error: `Unknown slug: ${slugParam}` }, { status: 400 })
+  }
+
+  const results: Record<string, { added: number; deactivated: number }> = {}
+
+  for (const { slug, game } of gamesToProcess) {
     try {
-      // Get existing codes from DB
       const { data: existingCodes } = await supabaseAdmin
         .from('codes')
         .select('code, active')
@@ -65,7 +68,6 @@ export async function GET(request: Request) {
         .map((c) => c.code)
         .join(', ')
 
-      // Ask Claude to research current active codes
       const message = await anthropic.messages.create({
         model: 'claude-opus-4-6',
         max_tokens: 1024,
@@ -90,7 +92,6 @@ Rules:
         ],
       })
 
-      // Extract the text response
       const textBlock = message.content.find((b) => b.type === 'text')
       if (!textBlock || textBlock.type !== 'text') {
         console.error(`No text response for ${game}`)
@@ -111,7 +112,6 @@ Rules:
       let added = 0
       let deactivated = 0
 
-      // Deactivate codes no longer in the active list
       for (const [key, existing] of existingMap) {
         if (existing.active && !newCodeKeys.has(key)) {
           await supabaseAdmin
@@ -123,11 +123,9 @@ Rules:
         }
       }
 
-      // Add new codes or re-activate existing ones
       for (const { code, reward } of newCodes) {
         const key = code.toLowerCase()
         if (!existingMap.has(key)) {
-          // Brand new code
           await supabaseAdmin.from('codes').insert({
             game,
             slug,
@@ -138,7 +136,6 @@ Rules:
           })
           added++
         } else if (!existingMap.get(key)!.active) {
-          // Was inactive, now active again
           await supabaseAdmin
             .from('codes')
             .update({ active: true, is_new: true })
@@ -148,16 +145,12 @@ Rules:
         }
       }
 
-      // Update the game's updated_at timestamp
       await supabaseAdmin
         .from('code_games')
         .update({ updated_at: new Date().toISOString() })
         .eq('slug', slug)
 
       results[slug] = { added, deactivated }
-
-      // Small delay to avoid rate limits
-      await new Promise((r) => setTimeout(r, 1000))
     } catch (err) {
       console.error(`Error updating codes for ${game}:`, err)
       results[slug] = { added: 0, deactivated: 0 }
@@ -166,7 +159,9 @@ Rules:
 
   return NextResponse.json({
     success: true,
-    date: today,
+    date: new Date().toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric',
+    }),
     results,
   })
 }
