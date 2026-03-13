@@ -2,7 +2,7 @@
 import { supabase } from '@/app/lib/supabase'
 import CodesHubClient from './CodesHubClient'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Roblox Codes 2026 — Active & Updated Daily | BloxQuiz',
