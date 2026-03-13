@@ -70,7 +70,6 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
   const expiredCodes = (codesData ?? []).filter((c) => !c.active);
   const description = gameDescriptions[game] || `Find all active ${gameData.game} codes here. Updated regularly with the latest working codes.`;
 
-  // Map DB columns to the shape CodesClient expects
   const data = {
     game: gameData.game,
     slug: gameData.slug,

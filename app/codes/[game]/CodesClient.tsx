@@ -125,11 +125,11 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         {"🟢 " + data.game + " Codes 2026 — Active & Working"}
       </h2>
       {activeCodes.length === 0 ? (
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 24, textAlign: "center", color: "var(--text-muted)", fontWeight: 700, marginBottom: 40 }}>
+        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 24, textAlign: "center", color: "var(--text-muted)", fontWeight: 700, marginBottom: 24 }}>
           {data.noCodesMessage || "No active codes right now — check back soon! New codes are added regularly."}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
           {activeCodes.map((c: any) => (
             <div key={c.code} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -145,6 +145,25 @@ export default function CodesClient({ data, game, description, activeCodes, expi
           ))}
         </div>
       )}
+
+    {/* ===== QUIZ CTA — right after active codes ===== */}
+      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span style={{ fontSize: 32 }}>{data.icon}</span>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 15, marginBottom: 3 }}>
+              {"Think You Know " + data.game + "?"}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
+              {"Test your knowledge with free " + data.game + " trivia quizzes!"}
+            </div>
+          </div>
+        </div>
+        <a href={"/games/" + quizSlug}
+          style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, padding: "10px 22px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", whiteSpace: "nowrap", flexShrink: 0 }}>
+          {"🎮 Take the Quiz"}
+        </a>
+      </div>
 
       {/* Expiring soon notice */}
       <div style={{ background: "rgba(255,227,71,0.08)", border: "1px solid rgba(255,227,71,0.2)", borderRadius: "var(--radius-sm)", padding: "14px 20px", marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
@@ -204,14 +223,14 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* Quiz CTA */}
+      {/* Bottom CTA */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>{data.icon}</div>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 8 }}>
-          {"Think You Know " + data.game + "?"}
+          {"More " + data.game + " Content"}
         </h2>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20, maxWidth: 400, margin: "0 auto 20px" }}>
-          {"Put your " + data.game + " knowledge to the test with our free trivia quizzes!"}
+          {"Explore all " + data.game + " quizzes or browse codes for every Roblox game."}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href={"/games/" + quizSlug}
