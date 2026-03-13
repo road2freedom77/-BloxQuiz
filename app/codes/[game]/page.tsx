@@ -1,6 +1,13 @@
 import { notFound } from "next/navigation";
-import { ALL_CODES } from "../../data/codes";
+import { createClient } from "@supabase/supabase-js";
 import CodesClient from "./CodesClient";
+
+export const dynamic = "force-dynamic";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const gameDescriptions: Record<string, string> = {
   "blox-fruits": "Blox Fruits codes give players free XP boosts, stat resets, and Beli to help progress faster through the seas. New codes are released during updates and milestones.",
@@ -25,16 +32,23 @@ const gameDescriptions: Record<string, string> = {
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const data = ALL_CODES.find(g => g.slug === game);
-  if (!data) return { title: "Not Found" };
-  const activeCount = data.codes.filter(c => c.active).length;
+
+  const [{ data: gameData }, { data: codesData }] = await Promise.all([
+    supabase.from("code_games").select("game").eq("slug", game).single(),
+    supabase.from("codes").select("active").eq("slug", game),
+  ]);
+
+  if (!gameData) return { title: "Not Found" };
+
+  const activeCount = (codesData ?? []).filter((c) => c.active).length;
+
   return {
-    title: `${data.game} Codes 2026 — All Active & Working Codes | BloxQuiz`,
-    description: `All active ${data.game} codes for 2026. ${activeCount} working codes updated ${data.updatedAt}. Redeem free rewards before they expire!`,
+    title: `${gameData.game} Codes 2026 — All Active & Working Codes | BloxQuiz`,
+    description: `All active ${gameData.game} codes for 2026. ${activeCount} working codes updated daily. Redeem free rewards before they expire!`,
     alternates: { canonical: `https://www.bloxquiz.gg/codes/${game}` },
     openGraph: {
-      title: `${data.game} Codes 2026 — All Active Codes | BloxQuiz`,
-      description: `${activeCount} active ${data.game} codes. Updated daily on BloxQuiz.gg`,
+      title: `${gameData.game} Codes 2026 — All Active Codes | BloxQuiz`,
+      description: `${activeCount} active ${gameData.game} codes. Updated daily on BloxQuiz.gg`,
       url: `https://www.bloxquiz.gg/codes/${game}`,
       siteName: "BloxQuiz",
       type: "website",
@@ -44,12 +58,31 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 
 export default async function CodesGamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const data = ALL_CODES.find(g => g.slug === game);
-  if (!data) notFound();
 
-  const activeCodes = data.codes.filter((c) => c.active);
-  const expiredCodes = data.codes.filter((c) => !c.active);
-  const description = gameDescriptions[game] || `Find all active ${data.game} codes here. Updated regularly with the latest working codes.`;
+  const [{ data: gameData }, { data: codesData }] = await Promise.all([
+    supabase.from("code_games").select("*").eq("slug", game).single(),
+    supabase.from("codes").select("*").eq("slug", game).order("is_new", { ascending: false }),
+  ]);
+
+  if (!gameData) notFound();
+
+  const activeCodes = (codesData ?? []).filter((c) => c.active);
+  const expiredCodes = (codesData ?? []).filter((c) => !c.active);
+  const description = gameDescriptions[game] || `Find all active ${gameData.game} codes here. Updated regularly with the latest working codes.`;
+
+  // Map DB columns to the shape CodesClient expects
+  const data = {
+    game: gameData.game,
+    slug: gameData.slug,
+    icon: gameData.icon,
+    howToRedeem: gameData.how_to_redeem,
+    noCodesMessage: gameData.no_codes_message,
+    updatedAt: new Date(gameData.updated_at).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }),
+  };
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -60,7 +93,7 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
           { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
           { "@type": "ListItem", "position": 2, "name": "Roblox Codes", "item": "https://www.bloxquiz.gg/codes" },
           { "@type": "ListItem", "position": 3, "name": `${data.game} Codes`, "item": `https://www.bloxquiz.gg/codes/${game}` },
-        ]
+        ],
       },
       {
         "@type": "FAQPage",
@@ -68,27 +101,33 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
           {
             "@type": "Question",
             "name": `How do I redeem ${data.game} codes?`,
-            "acceptedAnswer": { "@type": "Answer", "text": data.howToRedeem }
+            "acceptedAnswer": { "@type": "Answer", "text": data.howToRedeem },
           },
           {
             "@type": "Question",
             "name": `How many active ${data.game} codes are there?`,
-            "acceptedAnswer": { "@type": "Answer", "text": `There are currently ${activeCodes.length} active ${data.game} codes. This page is updated regularly with the latest working codes.` }
+            "acceptedAnswer": { "@type": "Answer", "text": `There are currently ${activeCodes.length} active ${data.game} codes. This page is updated regularly with the latest working codes.` },
           },
           {
             "@type": "Question",
             "name": `Do ${data.game} codes expire?`,
-            "acceptedAnswer": { "@type": "Answer", "text": `Yes, ${data.game} codes expire. Redeem them as soon as possible to avoid missing out on free rewards.` }
+            "acceptedAnswer": { "@type": "Answer", "text": `Yes, ${data.game} codes expire. Redeem them as soon as possible to avoid missing out on free rewards.` },
           },
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <CodesClient data={data} game={game} description={description} activeCodes={activeCodes} expiredCodes={expiredCodes} />
+      <CodesClient
+        data={data}
+        game={game}
+        description={description}
+        activeCodes={activeCodes}
+        expiredCodes={expiredCodes}
+      />
     </>
   );
 }
