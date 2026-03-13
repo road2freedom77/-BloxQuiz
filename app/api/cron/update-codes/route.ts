@@ -1,6 +1,6 @@
 // app/api/cron/update-codes/route.ts
 // Run one game per cron job via ?slug=blox-fruits
-// cron-job.org: create 14 jobs staggered 5min apart
+// cron-job.org: create 17 jobs staggered 5min apart
 
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
@@ -28,6 +28,9 @@ const GAMES_TO_UPDATE = [
   { slug: 'dress-to-impress', game: 'Dress to Impress' },
   { slug: 'anime-defenders', game: 'Anime Defenders' },
   { slug: 'funky-friday', game: 'Funky Friday' },
+  { slug: 'livetopia', game: 'Livetopia' },
+  { slug: 'natural-disaster-survival', game: 'Natural Disaster Survival' },
+  { slug: 'kick-off', game: 'Kick Off' },
 ]
 
 export async function GET(request: Request) {
@@ -39,7 +42,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const slugParam = searchParams.get('slug')
 
-  // Determine which games to process
   const gamesToProcess = slugParam
     ? GAMES_TO_UPDATE.filter((g) => g.slug === slugParam)
     : GAMES_TO_UPDATE
@@ -67,24 +69,23 @@ export async function GET(request: Request) {
 
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 512,
+        max_tokens: 1024,
         tools: [{ type: 'web_search_20250305', name: 'web_search' } as any],
         messages: [
           {
             role: 'user',
-            content: `Search for the current active codes for the Roblox game "${game}" as of today.
-            
-Current codes in our database (active): ${existingActiveList || 'none'}
+            content: `Search for current active codes for the Roblox game "${game}".
 
-Return ONLY a JSON array of currently active codes. Format:
-[{"code": "CODENAME", "reward": "reward description"}]
+Current active codes in our DB: ${existingActiveList || 'none'}
+
+Respond with ONLY a raw JSON array — no explanation, no markdown, no preamble. Start with [ and end with ].
+
+Example: [{"code":"ABC123","reward":"Free gems"},{"code":"XYZ","reward":"2x EXP"}]
 
 Rules:
-- Only include codes that are confirmed working/active right now
-- Do not include expired codes
-- Be conservative — only include codes you find confirmed on multiple sources or official channels
-- If you find no active codes, return []
-- Return ONLY the JSON array, no other text`,
+- Only confirmed working codes
+- No expired codes
+- Return [] if none found`,
           },
         ],
       })
@@ -97,8 +98,10 @@ Rules:
 
       let newCodes: { code: string; reward: string }[] = []
       try {
-        const cleaned = textBlock.text.replace(/```json|```/g, '').trim()
-        newCodes = JSON.parse(cleaned)
+        // Robustly extract JSON array even if model adds surrounding text
+        const match = textBlock.text.match(/\[[\s\S]*\]/)
+        if (!match) throw new Error('No JSON array found')
+        newCodes = JSON.parse(match[0])
         if (!Array.isArray(newCodes)) newCodes = []
       } catch {
         console.error(`Failed to parse codes JSON for ${game}:`, textBlock.text)
