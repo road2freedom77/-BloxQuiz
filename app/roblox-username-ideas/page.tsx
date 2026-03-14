@@ -1,12 +1,12 @@
 import UsernameIdeasClient from "./UsernameIdeasClient";
 
 export const metadata = {
-  title: "1,100+ Roblox Username Ideas (2026) – Cool, Funny & Aesthetic",
-  description: "Looking for the perfect Roblox username? Browse 1000+ Roblox username ideas including cool, aesthetic, funny, tryhard, girl, boy, short, and game-themed names. Copy any name instantly.",
+  title: "Roblox Username Ideas (2026) — 1,100+ Cool, Funny & Aesthetic Names",
+  description: "Find the perfect Roblox username from 1,100+ ideas. Cool, aesthetic, funny, tryhard, short, girl & boy names — all free to copy instantly. Updated 2026.",
   alternates: { canonical: "https://www.bloxquiz.gg/roblox-username-ideas" },
   openGraph: {
-    title: "1,100+ Roblox Username Ideas (2026) – Cool, Funny & Aesthetic",
-    description: "Browse 1000+ Roblox username ideas. Cool, aesthetic, funny, tryhard, short names and more. Copy any name with one click.",
+    title: "Roblox Username Ideas (2026) — 1,100+ Cool, Funny & Aesthetic Names",
+    description: "1,100+ free Roblox username ideas. Cool, aesthetic, funny, tryhard, short names and more. Copy any name instantly.",
     url: "https://www.bloxquiz.gg/roblox-username-ideas",
     siteName: "BloxQuiz",
     type: "website",
