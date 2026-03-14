@@ -92,6 +92,7 @@ function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionI
   const [reason, setReason] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { user } = useUser();
 
   async function submit() {
     if (submitting) return;
@@ -100,6 +101,8 @@ function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionI
       quiz_slug: quizSlug,
       question_index: questionIndex,
       reason: reason || null,
+      user_id: user?.id || null,
+      username: user?.username || user?.firstName || null,
     });
     setSubmitted(true);
     setSubmitting(false);
