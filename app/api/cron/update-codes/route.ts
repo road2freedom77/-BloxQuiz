@@ -31,6 +31,7 @@ const GAMES_TO_UPDATE = [
   { slug: 'livetopia', game: 'Livetopia' },
   { slug: 'natural-disaster-survival', game: 'Natural Disaster Survival' },
   { slug: 'kick-off', game: 'Kick Off' },
+  { slug: 'fisch', game: 'Fisch' },
 ]
 
 export async function GET(request: Request) {
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
         .join(', ')
 
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 1024,
         tools: [{ type: 'web_search_20250305', name: 'web_search' } as any],
         messages: [

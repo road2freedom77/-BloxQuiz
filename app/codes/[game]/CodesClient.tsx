@@ -18,6 +18,7 @@ const gameTips: Record<string, string> = {
   "anime-defenders": "Anime Defenders codes give players free gems for summons and upgrades. New codes release alongside major unit updates and milestones. Because gems are valuable for progression, redeem codes as soon as they are announced.",
   "funky-friday": "Funky Friday codes reward free points to unlock songs and cosmetics. Codes drop during collaborations and community milestones. Redeem them quickly as Funky Friday codes often expire within a few days.",
   "kick-off": "Kick Off codes give players free coins and skins for customization. Codes are released during tournaments and updates. Follow Kick Off's social channels to catch new codes as soon as they drop.",
+  "fisch": "Fisch codes typically reward free coins and bait to help you progress faster. Redeem codes as soon as they are released since they often expire within days. Follow the Fisch developers on Twitter/X and join the Discord for the fastest code announcements.",
 };
 
 const gameSlugMap: Record<string, string> = {
@@ -37,6 +38,7 @@ const gameSlugMap: Record<string, string> = {
   "anime-defenders": "anime-defenders",
   "funky-friday": "funky-friday",
   "kick-off": "kick-off",
+  "fisch": "fisch",
 };
 
 export default function CodesClient({ data, game, description, activeCodes, expiredCodes }: {

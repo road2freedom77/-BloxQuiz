@@ -28,6 +28,7 @@ const gameDescriptions: Record<string, string> = {
   "kick-off": "Kick Off codes give players free coins and skins to customize their football experience. New codes release during tournaments and updates.",
   "bee-swarm-simulator": "Bee Swarm Simulator codes give players free bees, gumdrops, tickets, and boosts to help grow their hive faster. New codes drop during game milestones and seasonal events.",
   "dress-to-impress": "Dress to Impress codes give players free exclusive outfits and accessories to wear on the runway. New codes release with major updates and seasonal events.",
+  "fisch": "Fisch codes give players free coins, bait, and exclusive rods to help catch rare fish faster. New codes are released during updates and game milestones.",
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
