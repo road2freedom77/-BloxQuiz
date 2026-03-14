@@ -48,13 +48,14 @@ const GAME_SLUGS: Record<string, string> = {
   "Kick Off": "kick-off",
   "Bee Swarm Simulator": "bee-swarm-simulator",
   "Dress to Impress": "dress-to-impress",
+  "Fisch": "fisch",
 };
 
 const ANGLES = [
   "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
   "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
   "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
-  "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes",
+  "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes", "Fishing",
 ];
 
 const DISQUALIFY_REASONS = [
@@ -68,17 +69,17 @@ const DISQUALIFY_REASONS = [
 
 function SubmitQuizTab() {
   const GAMES_LIST = [
-    "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell", "Murder Mystery 2",
-    "Grow a Garden", "Royale High", "Doors", "Arsenal", "Anime Fighting Simulator",
-    "Berry Avenue", "Livetopia", "Natural Disaster Survival", "Anime Defenders",
-    "Funky Friday", "Kick Off", "Bee Swarm Simulator", "Dress to Impress",
-  ];
+  "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hell", "Murder Mystery 2",
+  "Grow a Garden", "Royale High", "Doors", "Arsenal", "Anime Fighting Simulator",
+  "Berry Avenue", "Livetopia", "Natural Disaster Survival", "Anime Defenders",
+  "Funky Friday", "Kick Off", "Bee Swarm Simulator", "Dress to Impress", "Fisch",
+];
   const ANGLES_LIST = [
-    "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
-    "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
-    "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
-    "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes",
-  ];
+  "Beginner", "Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters",
+  "Locations", "Roleplay", "Pets", "Stages", "Tips", "Modifiers", "Plants", "Mutations",
+  "Strategy", "Fashion", "Entities", "Survival", "Weapons", "Maps", "Training", "Jobs",
+  "Disasters", "Songs", "Ranks", "Teams", "Skills", "Bees", "Themes", "Fishing",
+];
 
   const emptyQuestion = () => ({ q: "", a: ["", "", "", ""], correct: 0 });
 
