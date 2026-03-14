@@ -1054,10 +1054,11 @@ export default function AdminClient({
           ) : (
             flags.map((f: any) => (
               <div key={f.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 100px auto", alignItems: "center", padding: "14px 20px", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 120px 100px auto", alignItems: "center", padding: "14px 20px", gap: 12 }}>
                   <div><a href={"/quiz/" + f.quiz_slug} target="_blank" style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-blue)", textDecoration: "none" }}>{f.quiz_slug}</a></div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{"Q" + (f.question_index + 1)}</div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{f.reason || "No reason given"}</div>
+                  <div style={{ fontSize: 11, color: "var(--neon-blue)", fontWeight: 700 }}>{"👤 " + (f.username || "Anonymous")}</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{new Date(f.created_at).toLocaleDateString()}</div>
                   <div style={{ display: "flex", gap: 6 }}>
                     <button onClick={() => startEdit(f)}
