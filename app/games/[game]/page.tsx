@@ -21,6 +21,7 @@ const gameEmojis: Record<string, string> = {
   "Kick Off": "⚽",
   "Bee Swarm Simulator": "🐝",
   "Dress to Impress": "👗",
+  "Fisch": "🎣",
 };
 
 const gameData: Record<string, {
@@ -247,6 +248,18 @@ const gameData: Record<string, {
       { q: "How often are new Dress to Impress quizzes added?", a: "New quizzes are added regularly, especially after seasonal events introduce new clothing collections." },
     ],
   },
+  "Fisch": {
+    intro: "Fisch is one of Roblox's most relaxing yet surprisingly deep fishing games, challenging players to discover rare fish across multiple locations, master different rod types, and build up their collection. With hidden fish species, seasonal events, and a thriving trading community, there's far more to Fisch than casting a line. Our quizzes cover everything from basic fishing mechanics to rare fish locations and advanced rod knowledge.",
+    whatIs: "Fisch is a Roblox fishing game where players cast their line across a variety of locations to catch fish of different rarities. The game features dozens of fish species, multiple rod types with different stats, bait mechanics, and a trading system. Seasonal events introduce limited-time fish and exclusive gear, creating a dynamic economy around rare catches.",
+    whatTests: "Fisch quizzes test knowledge of fish species and rarities, rod types and stats, bait mechanics, fishing locations, trading values, and seasonal event content. From identifying fish by their appearance to understanding optimal fishing strategies, these quizzes challenge anglers of all experience levels.",
+    topics: ["Fish species and rarities", "Rod types and stats", "Bait mechanics", "Fishing locations", "Trading values", "Seasonal events and limited fish", "Progression and upgrades"],
+    whyPlay: "Fisch quizzes help players discover rare fish locations and understand the game's deeper mechanics. Many rare fish spawn conditions and rod stat differences are not obvious — our quizzes surface them through trivia.",
+    faqs: [
+      { q: "What do Fisch quizzes cover?", a: "Quizzes cover fish species, rod types, bait mechanics, fishing locations, trading values, and seasonal event content." },
+      { q: "Are there Fisch quizzes for beginners?", a: "Yes — we have beginner-friendly quizzes covering basic fishing mechanics as well as harder challenges testing rare fish knowledge." },
+      { q: "How often are new Fisch quizzes added?", a: "New quizzes are added regularly, especially after updates introduce new fish species and locations." },
+    ],
+  },
 };
 
 const relatedGames: Record<string, string[]> = {
@@ -268,6 +281,7 @@ const relatedGames: Record<string, string[]> = {
   "Kick Off": ["Arsenal", "Funky Friday", "Tower of Hell"],
   "Bee Swarm Simulator": ["Grow a Garden", "Adopt Me!", "Natural Disaster Survival"],
   "Dress to Impress": ["Royale High", "Berry Avenue", "Brookhaven RP"],
+  "Fisch": ["Bee Swarm Simulator", "Grow a Garden", "Adopt Me!"],
 };
 
 const gameSlugMap: Record<string, string> = {
@@ -289,6 +303,7 @@ const gameSlugMap: Record<string, string> = {
   "Kick Off": "kick-off",
   "Bee Swarm Simulator": "bee-swarm-simulator",
   "Dress to Impress": "dress-to-impress",
+  "Fisch": "fisch",
 };
 
 function inferAngleServer(title: string, slug: string): string | null {
@@ -308,6 +323,8 @@ function inferAngleServer(title: string, slug: string): string | null {
       text.includes("mystery") || text.includes("unknown") || text.includes("discovery")) return "Secrets";
   if (text.includes("update") || text.includes("new content") || text.includes("latest") ||
       text.includes("recent") || text.includes("patch") || text.includes("season")) return "Updates";
+  if (text.includes("fish") || text.includes("rod") || text.includes("bait") ||
+      text.includes("catch") || text.includes("cast")) return "Fishing";
   return null;
 }
 

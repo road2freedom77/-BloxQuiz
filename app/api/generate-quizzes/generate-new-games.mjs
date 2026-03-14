@@ -10,11 +10,11 @@ const supabase = createClient(
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const GAMES = ["Bee Swarm Simulator", "Dress to Impress"];
-const ANGLES = ["Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Characters"];
+const GAMES = ["Fisch"];
+const ANGLES = ["Expert", "Lore", "Trading", "Mechanics", "Secrets", "Updates", "Fishing"];
 const DIFFICULTIES = {
   Expert: "Hard", Lore: "Medium", Trading: "Medium",
-  Mechanics: "Hard", Secrets: "Medium", Updates: "Medium", Characters: "Medium",
+  Mechanics: "Hard", Secrets: "Medium", Updates: "Medium", Fishing: "Medium",
 };
 
 function slugify(text) {
@@ -23,14 +23,14 @@ function slugify(text) {
 
 function getAngleDescription(angle) {
   const descriptions = {
-    Beginner: "basic mechanics, starter items, fundamental gameplay for new players",
-    Expert: "advanced strategies, endgame content, rare items, expert-level knowledge",
-    Lore: "story, characters, world-building, lore and narrative elements",
-    Trading: "item values, trading strategies, rare items, economy and market knowledge",
-    Mechanics: "combat systems, abilities, game mechanics, technical gameplay",
-    Secrets: "hidden items, Easter eggs, secret locations, tricks and discoveries",
-    Characters: "NPCs, characters, personalities, and their roles in the game",
-  };
+  Beginner: "basic mechanics, starter items, fundamental gameplay for new players",
+  Expert: "advanced strategies, endgame content, rare items, expert-level knowledge",
+  Lore: "story, characters, world-building, lore and narrative elements",
+  Trading: "item values, trading strategies, rare items, economy and market knowledge",
+  Mechanics: "combat systems, abilities, game mechanics, technical gameplay",
+  Secrets: "hidden items, Easter eggs, secret locations, tricks and discoveries",
+  Fishing: "specific fish species, rarities, habitats, spawn conditions, and fishing locations",
+};
   return descriptions[angle] || angle;
 }
 
