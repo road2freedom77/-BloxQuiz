@@ -5,12 +5,12 @@ import CodesHubClient from './CodesHubClient'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'Roblox Codes 2026 — Active & Updated Daily | BloxQuiz',
-  description: 'All active Roblox codes for 2026. Blox Fruits, Adopt Me, Murder Mystery 2, Doors, Anime Defenders and more. Updated daily — redeem before they expire!',
+  title: 'Roblox Codes (2026) — All Active Codes Updated Daily | BloxQuiz',
+  description: 'Find active Roblox codes for 2026. Blox Fruits, Adopt Me, Anime Defenders, Doors, Bee Swarm & 12 more games. Free rewards updated daily — redeem before they expire!',
   alternates: { canonical: 'https://www.bloxquiz.gg/codes' },
   openGraph: {
-    title: 'Roblox Codes 2026 — Active & Updated Daily | BloxQuiz',
-    description: 'All active Roblox codes for 2026. Updated daily — redeem before they expire!',
+    title: 'Roblox Codes (2026) — All Active Codes Updated Daily | BloxQuiz',
+    description: 'Active Roblox codes for Blox Fruits, Adopt Me, Anime Defenders, Doors & more. Updated daily — redeem free rewards before they expire!',
     url: 'https://www.bloxquiz.gg/codes',
     siteName: 'BloxQuiz',
     type: 'website',
