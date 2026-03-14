@@ -1,17 +1,13 @@
 "use client";
 import { useState } from "react";
 
-const recentActivity = [
-    { action: "added", game: "Blox Fruits", code: "TRIPLEFLASH", reward: "2x XP Boost", date: "March 8, 2026" },
-    { action: "added", game: "Anime Defenders", code: "DEFENDERS2026", reward: "Free Gems", date: "March 8, 2026" },
-    { action: "added", game: "Murder Mystery 2", code: "CORRUPT", reward: "Free Knife", date: "March 8, 2026" },
-    { action: "expired", game: "Blox Fruits", code: "STRAWHATMAINE", reward: "2x XP Boost", date: "March 8, 2026" },
-    { action: "added", game: "Doors", code: "SURVIVE", reward: "Free Knobs", date: "March 8, 2026" },
-    { action: "added", game: "Bee Swarm Simulator", code: "MarchIsMerry", reward: "Marshmallow Bee + Boosts", date: "March 9, 2026" },
-    { action: "added", game: "Dress to Impress", code: "LNY", reward: "Lunar New Year items", date: "March 9, 2026" },
-  ];
-
-export default function CodesHubClient({ games }: { games: any[] }) {
+export default function CodesHubClient({
+  games,
+  recentActivity,
+}: {
+  games: any[];
+  recentActivity: { action: string; game: string; code: string; reward: string; date: string }[];
+}) {
   const [copied, setCopied] = useState<string | null>(null);
 
   function copyCode(code: string) {

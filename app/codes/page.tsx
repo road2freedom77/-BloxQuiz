@@ -26,9 +26,14 @@ const faqs = [
 ]
 
 export default async function CodesPage() {
-  const [{ data: games }, { data: codes }] = await Promise.all([
+  const [{ data: games }, { data: codes }, { data: recentCodes }] = await Promise.all([
     supabase.from('code_games').select('*').order('game'),
     supabase.from('codes').select('*').order('is_new', { ascending: false }),
+    supabase
+      .from('codes')
+      .select('code, reward, game, slug, active, is_new, updated_at')
+      .order('updated_at', { ascending: false })
+      .limit(20),
   ])
 
   const allCodes = (games ?? []).map((g) => ({
@@ -50,6 +55,18 @@ export default async function CodesPage() {
         active: c.active,
         isNew: c.is_new,
       })),
+  }))
+
+  const recentActivity = (recentCodes ?? []).slice(0, 7).map((c) => ({
+    action: c.active ? 'added' : 'expired',
+    game: c.game,
+    code: c.code,
+    reward: c.reward,
+    date: new Date(c.updated_at).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }),
   }))
 
   const totalActive = allCodes.reduce((sum, g) => sum + g.codes.filter((c) => c.active).length, 0)
@@ -112,7 +129,7 @@ export default async function CodesPage() {
       </div>
 
       {/* Games grid via client component */}
-      <CodesHubClient games={allCodes} />
+      <CodesHubClient games={allCodes} recentActivity={recentActivity} />
 
       {/* FAQ */}
       <div style={{ marginBottom: 48 }}>
