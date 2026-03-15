@@ -50,19 +50,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const cleanSlug = slug.replace(/-/g, ' ');
 
   return {
-    title: `${quiz.title} | BloxQuiz — Roblox Trivia`,
-    description: `Test your ${quiz.game} knowledge! ${quiz.questions.length} questions on ${cleanSlug}. Can you get a perfect score? Free Roblox quiz on BloxQuiz.gg`,
+    title: `${quiz.title} — Free ${quiz.game} Quiz | BloxQuiz`,
+    description: quiz.intro
+      ? `${quiz.intro.substring(0, 150)}... Play free on BloxQuiz.gg`
+      : `Test your ${quiz.game} knowledge! ${quiz.questions.length} questions on ${cleanSlug}. Can you get a perfect score? Free Roblox quiz on BloxQuiz.gg`,
     openGraph: {
-      title: `${quiz.title} | BloxQuiz`,
-      description: `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
+      title: `${quiz.title} — Free ${quiz.game} Quiz | BloxQuiz`,
+      description: quiz.intro
+        ? quiz.intro.substring(0, 200)
+        : `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
       url: `https://www.bloxquiz.gg/quiz/${slug}`,
       siteName: "BloxQuiz",
       type: "website",
     },
     twitter: {
       card: "summary",
-      title: `${quiz.title} | BloxQuiz`,
-      description: `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
+      title: `${quiz.title} — Free ${quiz.game} Quiz | BloxQuiz`,
+      description: quiz.intro
+        ? quiz.intro.substring(0, 200)
+        : `Think you know ${quiz.game}? Take this ${quiz.difficulty} quiz and find out!`,
     },
     alternates: {
       canonical: `https://www.bloxquiz.gg/quiz/${slug}`,
@@ -133,7 +139,9 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         "@id": `https://www.bloxquiz.gg/quiz/${slug}`,
         "url": `https://www.bloxquiz.gg/quiz/${slug}`,
         "name": `${quiz.title} | BloxQuiz`,
-        "description": `Test your ${quiz.game} knowledge with this ${quiz.difficulty} quiz. ${quiz.questions.length} questions covering ${quiz.game} gameplay, mechanics and more.`,
+        "description": quiz.intro
+          ? quiz.intro.substring(0, 200)
+          : `Test your ${quiz.game} knowledge with this ${quiz.difficulty} quiz. ${quiz.questions.length} questions covering ${quiz.game} gameplay, mechanics and more.`,
         "inLanguage": "en-US",
         "isPartOf": { "@id": "https://www.bloxquiz.gg" },
       },
