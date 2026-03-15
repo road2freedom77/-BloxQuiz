@@ -26,7 +26,7 @@ async function getInitialStats() {
     const totalQuizzes = jsonCount + (generatedCount || 0);
     return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 16 };
   } catch {
-    return { quizzesPlayed: 0, players: 0, totalQuizzes: 45, gamesCovered: 16 };
+    return { quizzesPlayed: 0, players: 0, totalQuizzes: 45, gamesCovered: 19 };
   }
 }
 
