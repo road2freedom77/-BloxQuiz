@@ -24,7 +24,7 @@ async function getInitialStats() {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
     const jsonCount = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
     const totalQuizzes = jsonCount + (generatedCount || 0);
-    return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 16 };
+    return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 19 };
   } catch {
     return { quizzesPlayed: 0, players: 0, totalQuizzes: 45, gamesCovered: 19 };
   }
