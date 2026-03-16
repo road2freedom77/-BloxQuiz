@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
 import StatsClient from "./StatsClient";
 
 export const revalidate = 3600; // ISR: regenerate every hour
