@@ -83,6 +83,7 @@ export default function Nav() {
           <div className="desktop-nav" style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <a href="/browse" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Quizzes</a>
             <a href="/codes" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Codes</a>
+            <a href="/stats" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Stats</a>
             <a href="/leaderboard" style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 14, fontWeight: 700, padding: "8px 16px", borderRadius: 100 }}>Leaderboard</a>
 
             {isSignedIn && (
@@ -158,6 +159,7 @@ export default function Nav() {
           }}>
             <a href="/browse" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🎮 Quizzes</a>
             <a href="/codes" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🎁 Codes</a>
+            <a href="/stats" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>📊 Stats</a>
             <a href="/leaderboard" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>🏆 Leaderboard</a>
             {isSignedIn && (
               <a href="/profile" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: 15, fontWeight: 700, padding: "10px 0" }}>👤 My Profile</a>
