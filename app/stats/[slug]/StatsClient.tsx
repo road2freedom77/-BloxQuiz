@@ -15,6 +15,7 @@ import {
   Bar,
 } from "recharts";
 import type { GameRow, SnapshotRow, DailyStatRow } from "./page";
+import QuizCTA from "../../components/QuizCTA";
 
 interface StatsClientProps {
   game: GameRow;
@@ -24,6 +25,7 @@ interface StatsClientProps {
   approvalRate: string | null;
   peak24h: number | null;
   slug: string;
+  quizCount: number;
 }
 
 function formatNumber(n: number | null | undefined): string {
@@ -160,6 +162,7 @@ export default function StatsClient({
   approvalRate,
   peak24h,
   slug,
+  quizCount,
 }: StatsClientProps) {
   const hourlyData = useMemo(
     () =>
@@ -194,8 +197,7 @@ export default function StatsClient({
         minHeight: "100vh",
         background: "#0a0a14",
         color: "#fff",
-        fontFamily:
-          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
       {/* Hero */}
@@ -217,13 +219,9 @@ export default function StatsClient({
               alignItems: "center",
             }}
           >
-            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-              BloxQuiz
-            </Link>
+            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>BloxQuiz</Link>
             <span>/</span>
-            <Link href="/stats" style={{ color: "inherit", textDecoration: "none" }}>
-              Stats
-            </Link>
+            <Link href="/stats" style={{ color: "inherit", textDecoration: "none" }}>Stats</Link>
             <span>/</span>
             <span style={{ color: "rgba(255,255,255,0.7)" }}>{game.name}</span>
           </nav>
@@ -232,11 +230,8 @@ export default function StatsClient({
             {game.thumbnail_url && (
               <div
                 style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  flexShrink: 0,
+                  width: 80, height: 80, borderRadius: 16,
+                  overflow: "hidden", flexShrink: 0,
                   border: "2px solid rgba(255,255,255,0.1)",
                 }}
               >
@@ -250,14 +245,7 @@ export default function StatsClient({
               </div>
             )}
             <div style={{ flex: 1 }}>
-              <h1
-                style={{
-                  fontSize: 32,
-                  fontWeight: 900,
-                  margin: "0 0 6px",
-                  lineHeight: 1.1,
-                }}
-              >
+              <h1 style={{ fontSize: 32, fontWeight: 900, margin: "0 0 6px", lineHeight: 1.1 }}>
                 {game.emoji && <span style={{ marginRight: 8 }}>{game.emoji}</span>}
                 {game.name} Player Count &amp; Live Stats
               </h1>
@@ -265,13 +253,9 @@ export default function StatsClient({
                 {game.genre && (
                   <span
                     style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      padding: "3px 10px",
-                      borderRadius: 999,
-                      background: "rgba(0,180,216,0.15)",
-                      color: "#00b4d8",
-                      textTransform: "capitalize",
+                      fontSize: 12, fontWeight: 600, padding: "3px 10px",
+                      borderRadius: 999, background: "rgba(0,180,216,0.15)",
+                      color: "#00b4d8", textTransform: "capitalize",
                     }}
                   >
                     {game.genre}
@@ -285,11 +269,7 @@ export default function StatsClient({
                     href={robloxUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      fontSize: 12,
-                      color: "#00b4d8",
-                      textDecoration: "none",
-                    }}
+                    style={{ fontSize: 12, color: "#00b4d8", textDecoration: "none" }}
                   >
                     Play on Roblox ↗
                   </a>
@@ -330,36 +310,15 @@ export default function StatsClient({
             marginBottom: 40,
           }}
         >
-          <StatCard
-            label="Playing Now"
-            value={formatNumber(game.current_players)}
-            sub="concurrent players"
-            accent
-          />
-          <StatCard
-            label="24h Peak"
-            value={formatNumber(peak24h)}
-            sub="highest this period"
-          />
-          <StatCard
-            label="Total Visits"
-            value={formatVisits(game.total_visits)}
-            sub="all-time"
-          />
+          <StatCard label="Playing Now" value={formatNumber(game.current_players)} sub="concurrent players" accent />
+          <StatCard label="24h Peak" value={formatNumber(peak24h)} sub="highest this period" />
+          <StatCard label="Total Visits" value={formatVisits(game.total_visits)} sub="all-time" />
           <StatCard label="Favorites" value={formatNumber(game.favorites)} />
           {approvalRate && (
-            <StatCard
-              label="Approval"
-              value={`${approvalRate}%`}
-              sub={`${formatNumber(game.likes)} likes`}
-            />
+            <StatCard label="Approval" value={`${approvalRate}%`} sub={`${formatNumber(game.likes)} likes`} />
           )}
           {rank && (
-            <StatCard
-              label="Player Rank"
-              value={`#${rank}`}
-              sub="among tracked games"
-            />
+            <StatCard label="Player Rank" value={`#${rank}`} sub="among tracked games" />
           )}
         </div>
 
@@ -384,34 +343,14 @@ export default function StatsClient({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis
-                  dataKey="time"
-                  tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={false}
-                  interval="preserveStartEnd"
-                />
-                <YAxis
-                  tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={formatNumber}
-                  width={52}
-                />
+                <XAxis dataKey="time" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={formatNumber} width={52} />
                 <Tooltip
                   contentStyle={customTooltipStyle}
                   formatter={(v) => [formatNumber(v as number), "Players"]}
                   labelStyle={{ color: "rgba(255,255,255,0.5)", marginBottom: 4 }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="players"
-                  stroke="#00b4d8"
-                  strokeWidth={2}
-                  fill="url(#playerGrad)"
-                  dot={false}
-                  activeDot={{ r: 4, fill: "#00b4d8" }}
-                />
+                <Area type="monotone" dataKey="players" stroke="#00b4d8" strokeWidth={2} fill="url(#playerGrad)" dot={false} activeDot={{ r: 4, fill: "#00b4d8" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -432,26 +371,11 @@ export default function StatsClient({
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={dailyData} barSize={10}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={false}
-                  interval="preserveStartEnd"
-                />
-                <YAxis
-                  tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={formatNumber}
-                  width={52}
-                />
+                <XAxis dataKey="date" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={formatNumber} width={52} />
                 <Tooltip
                   contentStyle={customTooltipStyle}
-                  formatter={(v, name) => [
-                    formatNumber(v as number),
-                    name === "avg" ? "Avg Players" : "Peak Players",
-                  ]}
+                  formatter={(v, name) => [formatNumber(v as number), name === "avg" ? "Avg Players" : "Peak Players"]}
                   labelStyle={{ color: "rgba(255,255,255,0.5)", marginBottom: 4 }}
                 />
                 <Bar dataKey="avg" fill="#0077b6" radius={[4, 4, 0, 0]} />
@@ -483,6 +407,14 @@ export default function StatsClient({
           </div>
         )}
 
+        {/* Quiz CTA — placed after charts, before cross-links */}
+        <QuizCTA
+          gameName={game.name}
+          gameSlug={slug}
+          gameEmoji={game.emoji}
+          quizCount={quizCount}
+        />
+
         {/* Cross-links */}
         <div
           style={{
@@ -495,36 +427,22 @@ export default function StatsClient({
           <Link
             href={`/games/${slug}`}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              background: "#111827",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: 12,
-              padding: "16px 20px",
-              textDecoration: "none",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 14,
+              display: "flex", alignItems: "center", gap: 10,
+              background: "#111827", border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 12, padding: "16px 20px",
+              textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14,
             }}
           >
             <span style={{ fontSize: 20 }}>🧠</span>
-            <span>{game.name} Quizzes</span>
+            <span>{quizCount > 0 ? `${quizCount} ${game.name} Quizzes` : `${game.name} Quizzes`}</span>
           </Link>
           <Link
             href={`/codes/${slug}`}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              background: "#111827",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: 12,
-              padding: "16px 20px",
-              textDecoration: "none",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 14,
+              display: "flex", alignItems: "center", gap: 10,
+              background: "#111827", border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 12, padding: "16px 20px",
+              textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14,
             }}
           >
             <span style={{ fontSize: 20 }}>🎁</span>
@@ -533,17 +451,10 @@ export default function StatsClient({
           <Link
             href="/stats"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              background: "#111827",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: 12,
-              padding: "16px 20px",
-              textDecoration: "none",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 14,
+              display: "flex", alignItems: "center", gap: 10,
+              background: "#111827", border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 12, padding: "16px 20px",
+              textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14,
             }}
           >
             <span style={{ fontSize: 20 }}>📊</span>
@@ -566,12 +477,8 @@ export default function StatsClient({
                     padding: "18px 20px",
                   }}
                 >
-                  <p style={{ margin: "0 0 8px", fontWeight: 700, fontSize: 15, color: "#fff" }}>
-                    {faq.q}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.6)" }}>
-                    {faq.a}
-                  </p>
+                  <p style={{ margin: "0 0 8px", fontWeight: 700, fontSize: 15, color: "#fff" }}>{faq.q}</p>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.6)" }}>{faq.a}</p>
                 </div>
               ))}
             </div>
@@ -580,8 +487,7 @@ export default function StatsClient({
 
         {/* Footer */}
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", textAlign: "center", margin: 0 }}>
-          {game.name} stats updated hourly via the Roblox API · Last updated{" "}
-          {timeAgo(game.last_updated)} · BloxQuiz.gg
+          {game.name} stats updated hourly via the Roblox API · Last updated {timeAgo(game.last_updated)} · BloxQuiz.gg
         </p>
       </div>
     </div>

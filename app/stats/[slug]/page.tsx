@@ -49,7 +49,6 @@ async function getGame(slug: string): Promise<GameRow | null> {
     .eq("is_tracked", true)
     .single();
 
-  console.log("[getGame] slug:", slug, "| error:", error?.message ?? "none", "| found:", !!data);
   if (error || !data) return null;
   return data as GameRow;
 }
@@ -79,7 +78,6 @@ async function getAllSlugs(): Promise<string[]> {
     .from("roblox_games")
     .select("slug")
     .eq("is_tracked", true);
-  console.log("[getAllSlugs] count:", data?.length ?? 0);
   return (data ?? []).map((g: { slug: string }) => g.slug);
 }
 
@@ -96,9 +94,17 @@ async function getPlayerRank(
   return count != null ? count + 1 : null;
 }
 
+async function getQuizCount(gameName: string): Promise<number> {
+  const { count } = await supabase
+    .from("quizzes")
+    .select("id", { count: "exact", head: true })
+    .eq("game", gameName)
+    .eq("status", "published");
+  return count ?? 0;
+}
+
 export async function generateStaticParams() {
   const slugs = await getAllSlugs();
-  console.log("[generateStaticParams] slugs:", slugs);
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -160,15 +166,14 @@ export default async function StatsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  console.log("[StatsPage] rendering slug:", slug);
   const game = await getGame(slug);
-  console.log("[StatsPage] game result:", game ? game.name : "NULL");
   if (!game) notFound();
 
-  const [snapshots, dailyStats, rank] = await Promise.all([
+  const [snapshots, dailyStats, rank, quizCount] = await Promise.all([
     getRecentSnapshots(game.universe_id),
     getDailyStats(game.universe_id),
     getPlayerRank(game.universe_id, game.current_players),
+    getQuizCount(game.name),
   ]);
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
@@ -235,6 +240,7 @@ export default async function StatsPage({
         approvalRate={approvalRate}
         peak24h={peak24h}
         slug={slug}
+        quizCount={quizCount}
       />
     </>
   );
