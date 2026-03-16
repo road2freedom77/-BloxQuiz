@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 
 const placeIds = [
-  { game: "Dress to Impress", placeId: 15522576781 },
-  { game: "Kick Off", placeId: 6572776687 },
-  { game: "Grow a Garden", placeId: 126244816498 },
+  { game: "Dress to Impress", placeId: 13579651689 },
+  { game: "Grow a Garden", placeId: 15669059810 },
 ];
 
 export async function GET() {
