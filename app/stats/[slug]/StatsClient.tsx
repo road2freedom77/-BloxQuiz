@@ -470,7 +470,7 @@ export default function StatsClient({
                 />
                 <Tooltip
                   contentStyle={customTooltipStyle}
-                  formatter={(v: number) => [formatNumber(v), "Players"]}
+                  formatter={(v) => [formatNumber(v as number), "Players"]}
                   labelStyle={{ color: "rgba(255,255,255,0.5)", marginBottom: 4 }}
                 />
                 <Area
@@ -518,8 +518,8 @@ export default function StatsClient({
                 />
                 <Tooltip
                   contentStyle={customTooltipStyle}
-                  formatter={(v: number, name: string) => [
-                    formatNumber(v),
+                  formatter={(v, name) => [
+                    formatNumber(v as number),
                     name === "avg" ? "Avg Players" : "Peak Players",
                   ]}
                   labelStyle={{ color: "rgba(255,255,255,0.5)", marginBottom: 4 }}
