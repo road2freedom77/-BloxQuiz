@@ -114,8 +114,10 @@ Rules:
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
+  console.log("[auth] received:", authHeader);
+  console.log("[auth] expected:", `Bearer ${process.env.CRON_SECRET}`);
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized", received: authHeader?.slice(0, 20) }, { status: 401 });
   }
 
   // Find games missing content
