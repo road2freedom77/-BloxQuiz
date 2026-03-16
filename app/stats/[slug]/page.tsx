@@ -5,10 +5,6 @@ import StatsClient from "./StatsClient";
 export const revalidate = 3600;
 export const dynamicParams = true;
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export interface GameRow {
   universe_id: number;
   place_id: number | null;
@@ -16,7 +12,6 @@ export interface GameRow {
   name: string;
   emoji: string | null;
   genre: string | null;
-  description: string | null;
   thumbnail_url: string | null;
   current_players: number | null;
   total_visits: number | null;
@@ -44,20 +39,17 @@ export interface DailyStatRow {
   total_visits_delta: number;
 }
 
-// ---------------------------------------------------------------------------
-// Data fetching
-// ---------------------------------------------------------------------------
-
 async function getGame(slug: string): Promise<GameRow | null> {
   const { data, error } = await supabase
     .from("roblox_games")
     .select(
-      "universe_id, place_id, slug, name, emoji, genre, description, thumbnail_url, current_players, total_visits, favorites, likes, dislikes, last_updated, intro, faqs, meta_title, meta_description"
+      "universe_id, place_id, slug, name, emoji, genre, thumbnail_url, current_players, total_visits, favorites, likes, dislikes, last_updated, intro, faqs, meta_title, meta_description"
     )
     .eq("slug", slug)
     .eq("is_tracked", true)
     .single();
 
+  console.log("[getGame] slug:", slug, "| error:", error?.message ?? "none", "| found:", !!data);
   if (error || !data) return null;
   return data as GameRow;
 }
@@ -68,8 +60,7 @@ async function getRecentSnapshots(universeId: number): Promise<SnapshotRow[]> {
     .select("captured_at, concurrent_players, total_visits")
     .eq("universe_id", universeId)
     .order("captured_at", { ascending: false })
-    .limit(48); // last 48 hours of hourly snapshots
-
+    .limit(48);
   return (data as SnapshotRow[]) ?? [];
 }
 
@@ -79,8 +70,7 @@ async function getDailyStats(universeId: number): Promise<DailyStatRow[]> {
     .select("date, avg_players, peak_players, min_players, total_visits_delta")
     .eq("universe_id", universeId)
     .order("date", { ascending: false })
-    .limit(30); // last 30 days
-
+    .limit(30);
   return (data as DailyStatRow[]) ?? [];
 }
 
@@ -89,10 +79,10 @@ async function getAllSlugs(): Promise<string[]> {
     .from("roblox_games")
     .select("slug")
     .eq("is_tracked", true);
+  console.log("[getAllSlugs] count:", data?.length ?? 0);
   return (data ?? []).map((g: { slug: string }) => g.slug);
 }
 
-// Rank among all tracked games by current_players
 async function getPlayerRank(
   universeId: number,
   currentPlayers: number | null
@@ -106,18 +96,25 @@ async function getPlayerRank(
   return count != null ? count + 1 : null;
 }
 
-// ---------------------------------------------------------------------------
-// generateStaticParams
-// ---------------------------------------------------------------------------
-
 export async function generateStaticParams() {
   const slugs = await getAllSlugs();
+  console.log("[generateStaticParams] slugs:", slugs);
   return slugs.map((slug) => ({ slug }));
 }
 
-// ---------------------------------------------------------------------------
-// generateMetadata
-// ---------------------------------------------------------------------------
+function formatNumber(n: number | null): string {
+  if (!n) return "N/A";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
+  return n.toLocaleString();
+}
+
+function formatVisits(n: number | null): string {
+  if (!n) return "N/A";
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  return n.toLocaleString();
+}
 
 export async function generateMetadata({
   params,
@@ -157,35 +154,15 @@ export async function generateMetadata({
   };
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function formatNumber(n: number | null): string {
-  if (!n) return "N/A";
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
-  return n.toLocaleString();
-}
-
-function formatVisits(n: number | null): string {
-  if (!n) return "N/A";
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  return n.toLocaleString();
-}
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
-
 export default async function StatsPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  console.log("[StatsPage] rendering slug:", slug);
   const game = await getGame(slug);
+  console.log("[StatsPage] game result:", game ? game.name : "NULL");
   if (!game) notFound();
 
   const [snapshots, dailyStats, rank] = await Promise.all([
@@ -204,7 +181,6 @@ export default async function StatsPage({
     ? Math.max(...snapshots.map((s) => s.concurrent_players))
     : null;
 
-  // JSON-LD
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -234,7 +210,7 @@ export default async function StatsPage({
         ? [
             {
               "@type": "FAQPage",
-              mainEntity: game.faqs.map((faq) => ({
+              mainEntity: game.faqs.map((faq: { q: string; a: string }) => ({
                 "@type": "Question",
                 name: faq.q,
                 acceptedAnswer: { "@type": "Answer", text: faq.a },

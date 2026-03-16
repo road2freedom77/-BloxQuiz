@@ -16,10 +16,6 @@ import {
 } from "recharts";
 import type { GameRow, SnapshotRow, DailyStatRow } from "./page";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 interface StatsClientProps {
   game: GameRow;
   snapshots: SnapshotRow[];
@@ -29,10 +25,6 @@ interface StatsClientProps {
   peak24h: number | null;
   slug: string;
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function formatNumber(n: number | null | undefined): string {
   if (!n) return "—";
@@ -71,10 +63,6 @@ function formatDate(dateStr: string): string {
     day: "numeric",
   });
 }
-
-// ---------------------------------------------------------------------------
-// Subcomponents
-// ---------------------------------------------------------------------------
 
 function StatCard({
   label,
@@ -164,10 +152,6 @@ const customTooltipStyle = {
   fontSize: 13,
 };
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
-
 export default function StatsClient({
   game,
   snapshots,
@@ -177,12 +161,6 @@ export default function StatsClient({
   peak24h,
   slug,
 }: StatsClientProps) {
-  const month = new Date().toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  // Prepare chart data — reverse so oldest first
   const hourlyData = useMemo(
     () =>
       [...snapshots].reverse().map((s) => ({
@@ -220,19 +198,15 @@ export default function StatsClient({
           "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
-      {/* ------------------------------------------------------------------ */}
       {/* Hero */}
-      {/* ------------------------------------------------------------------ */}
       <div
         style={{
-          background:
-            "linear-gradient(180deg, #0f0f23 0%, #0a0a14 100%)",
+          background: "linear-gradient(180deg, #0f0f23 0%, #0a0a14 100%)",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           padding: "48px 0 36px",
         }}
       >
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
-          {/* Breadcrumb */}
           <nav
             style={{
               fontSize: 13,
@@ -247,20 +221,14 @@ export default function StatsClient({
               BloxQuiz
             </Link>
             <span>/</span>
-            <Link
-              href="/stats"
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
+            <Link href="/stats" style={{ color: "inherit", textDecoration: "none" }}>
               Stats
             </Link>
             <span>/</span>
             <span style={{ color: "rgba(255,255,255,0.7)" }}>{game.name}</span>
           </nav>
 
-          {/* Game header */}
-          <div
-            style={{ display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" }}
-          >
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" }}>
             {game.thumbnail_url && (
               <div
                 style={{
@@ -282,37 +250,18 @@ export default function StatsClient({
               </div>
             )}
             <div style={{ flex: 1 }}>
-              <div
+              <h1
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  flexWrap: "wrap",
-                  marginBottom: 6,
+                  fontSize: 32,
+                  fontWeight: 900,
+                  margin: "0 0 6px",
+                  lineHeight: 1.1,
                 }}
               >
-                <h1
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 900,
-                    margin: 0,
-                    lineHeight: 1.1,
-                  }}
-                >
-                  {game.emoji && (
-                    <span style={{ marginRight: 8 }}>{game.emoji}</span>
-                  )}
-                  {game.name} Player Count &amp; Live Stats
-                </h1>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                }}
-              >
+                {game.emoji && <span style={{ marginRight: 8 }}>{game.emoji}</span>}
+                {game.name} Player Count &amp; Live Stats
+              </h1>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                 {game.genre && (
                   <span
                     style={{
@@ -328,12 +277,7 @@ export default function StatsClient({
                     {game.genre}
                   </span>
                 )}
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "rgba(255,255,255,0.35)",
-                  }}
-                >
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
                   Updated {timeAgo(game.last_updated)}
                 </span>
                 {robloxUrl && (
@@ -345,9 +289,6 @@ export default function StatsClient({
                       fontSize: 12,
                       color: "#00b4d8",
                       textDecoration: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
                     }}
                   >
                     Play on Roblox ↗
@@ -359,11 +300,10 @@ export default function StatsClient({
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
       {/* Main content */}
-      {/* ------------------------------------------------------------------ */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 20px 80px" }}>
-        {/* Quick Answer block — GEO optimized */}
+
+        {/* Quick Answer block */}
         {game.intro && (
           <div
             style={{
@@ -375,14 +315,7 @@ export default function StatsClient({
               marginBottom: 32,
             }}
           >
-            <p
-              style={{
-                margin: 0,
-                fontSize: 15,
-                lineHeight: 1.7,
-                color: "rgba(255,255,255,0.85)",
-              }}
-            >
+            <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.85)" }}>
               {game.intro}
             </p>
           </div>
@@ -413,10 +346,7 @@ export default function StatsClient({
             value={formatVisits(game.total_visits)}
             sub="all-time"
           />
-          <StatCard
-            label="Favorites"
-            value={formatNumber(game.favorites)}
-          />
+          <StatCard label="Favorites" value={formatNumber(game.favorites)} />
           {approvalRate && (
             <StatCard
               label="Approval"
@@ -534,7 +464,7 @@ export default function StatsClient({
           </div>
         )}
 
-        {/* No data yet state */}
+        {/* No data yet */}
         {!hasHourly && !hasDaily && (
           <div
             style={{
@@ -553,7 +483,7 @@ export default function StatsClient({
           </div>
         )}
 
-        {/* Cross-links row */}
+        {/* Cross-links */}
         <div
           style={{
             display: "grid",
@@ -576,7 +506,6 @@ export default function StatsClient({
               color: "#fff",
               fontWeight: 600,
               fontSize: 14,
-              transition: "border-color 0.15s",
             }}
           >
             <span style={{ fontSize: 20 }}>🧠</span>
@@ -622,23 +551,6 @@ export default function StatsClient({
           </Link>
         </div>
 
-        {/* About section */}
-        {game.description && (
-          <div style={{ marginBottom: 40 }}>
-            <SectionHeading>About {game.name}</SectionHeading>
-            <p
-              style={{
-                margin: 0,
-                fontSize: 15,
-                lineHeight: 1.75,
-                color: "rgba(255,255,255,0.65)",
-              }}
-            >
-              {game.description}
-            </p>
-          </div>
-        )}
-
         {/* FAQ */}
         {game.faqs && game.faqs.length > 0 && (
           <div style={{ marginBottom: 40 }}>
@@ -654,24 +566,10 @@ export default function StatsClient({
                     padding: "18px 20px",
                   }}
                 >
-                  <p
-                    style={{
-                      margin: "0 0 8px",
-                      fontWeight: 700,
-                      fontSize: 15,
-                      color: "#fff",
-                    }}
-                  >
+                  <p style={{ margin: "0 0 8px", fontWeight: 700, fontSize: 15, color: "#fff" }}>
                     {faq.q}
                   </p>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 14,
-                      lineHeight: 1.65,
-                      color: "rgba(255,255,255,0.6)",
-                    }}
-                  >
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.6)" }}>
                     {faq.a}
                   </p>
                 </div>
@@ -680,15 +578,8 @@ export default function StatsClient({
           </div>
         )}
 
-        {/* Last updated footer */}
-        <p
-          style={{
-            fontSize: 12,
-            color: "rgba(255,255,255,0.25)",
-            textAlign: "center",
-            margin: 0,
-          }}
-        >
+        {/* Footer */}
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", textAlign: "center", margin: 0 }}>
           {game.name} stats updated hourly via the Roblox API · Last updated{" "}
           {timeAgo(game.last_updated)} · BloxQuiz.gg
         </p>
