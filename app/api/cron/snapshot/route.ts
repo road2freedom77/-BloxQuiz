@@ -28,12 +28,26 @@ export async function GET() {
 
     for (const batch of batches) {
       const ids = batch.join(",");
+
+      // Fetch game stats
       const res = await fetch(
         `https://games.roblox.com/v1/games?universeIds=${ids}`
       );
       const data = await res.json();
 
       if (!data.data?.length) continue;
+
+      // Fetch thumbnails for this batch
+      const thumbRes = await fetch(
+        `https://thumbnails.roblox.com/v1/games/icons?universeIds=${ids}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`
+      );
+      const thumbData = await thumbRes.json();
+
+      // Map universe_id -> thumbnail_url
+      const thumbMap: Record<number, string> = {};
+      for (const t of thumbData.data ?? []) {
+        if (t.imageUrl) thumbMap[t.targetId] = t.imageUrl;
+      }
 
       const snapshots = data.data.map((g: any) => ({
         universe_id: g.id,
@@ -56,6 +70,10 @@ export async function GET() {
             likes: g.likes ?? 0,
             dislikes: g.dislikes ?? 0,
             last_updated: new Date().toISOString(),
+            // place_id comes from the game's rootPlaceId field
+            place_id: g.rootPlaceId ?? null,
+            // Only update thumbnail if we got one
+            ...(thumbMap[g.id] ? { thumbnail_url: thumbMap[g.id] } : {}),
           })
           .eq("universe_id", g.id);
       }
