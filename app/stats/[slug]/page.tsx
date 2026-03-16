@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin as supabase } from "../../lib/supabase";
 import StatsClient from "./StatsClient";
 
-export const revalidate = 3600; // ISR: regenerate every hour
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 // ---------------------------------------------------------------------------
 // Types
