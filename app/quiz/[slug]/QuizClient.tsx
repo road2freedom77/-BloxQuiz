@@ -526,10 +526,13 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             </div>
 
             <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: 12, padding: "14px 20px", marginBottom: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Coming Soon</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players will win Robux gift cards. Keep playing to climb the leaderboard!</div>
-              <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none", display: "inline-block", marginTop: 6 }}>View Leaderboard →</a>
-            </div>
+  <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Active Now</div>
+  <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players win Roblox gift cards. Keep playing and climb the leaderboard!</div>
+  <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+    <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none" }}>View Leaderboard →</a>
+    <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "var(--text-muted)", textDecoration: "none" }}>View Rules →</a>
+  </div>
+</div>
 
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
