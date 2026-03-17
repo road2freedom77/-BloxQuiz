@@ -108,6 +108,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug, last_updated")
       .eq("is_tracked", true);
     if (games) {
+      const slugs = games.map((g: { slug: string }) => g.slug);
+
+      // Individual stats pages
       statsPages = games.flatMap((g: { slug: string; last_updated: string | null }) => [
         {
           url: `${base}/stats/${g.slug}`,
@@ -122,6 +125,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.6,
         },
       ]);
+
+      // Compare pages — all pairs
+      for (let i = 0; i < slugs.length; i++) {
+        for (let j = i + 1; j < slugs.length; j++) {
+          const [a, b] = [slugs[i], slugs[j]].sort();
+          statsPages.push({
+            url: `${base}/stats/compare/${a}-vs-${b}`,
+            lastModified: now,
+            changeFrequency: "hourly" as const,
+            priority: 0.6,
+          });
+        }
+      }
     }
   } catch (e) {}
 
