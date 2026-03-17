@@ -25,7 +25,15 @@ async function getAllQuizzes() {
     for (const file of files) {
       const content = JSON.parse(fs.readFileSync(path.join(dir, file), "utf8"));
       const slug = file.replace(".json", "");
-      quizzes.push({ slug, title: content.title, game: content.game, difficulty: content.difficulty, questions: content.questions?.length || 0, source: "static" });
+      quizzes.push({
+        slug,
+        title: content.title,
+        game: content.game,
+        difficulty: content.difficulty,
+        questions: content.questions?.length || 0,
+        source: "static",
+        status: "published",
+      });
       slugsSeen.add(slug);
     }
   } catch (e) {}
@@ -33,12 +41,23 @@ async function getAllQuizzes() {
   try {
     const { data } = await supabase
       .from("quizzes")
-      .select("slug, title, game, difficulty, questions, angle, source, published_at")
-      .order("published_at", { ascending: false });
+      .select("slug, title, game, difficulty, questions, angle, source, status, published_at")
+      .order("published_at", { ascending: false, nullsFirst: false });
+
     if (data) {
       for (const q of data) {
         if (!slugsSeen.has(q.slug)) {
-          quizzes.push({ slug: q.slug, title: q.title, game: q.game, difficulty: q.difficulty, questions: Array.isArray(q.questions) ? q.questions.length : 10, angle: q.angle, published_at: q.published_at, source: q.source || "generated" });
+          quizzes.push({
+            slug: q.slug,
+            title: q.title,
+            game: q.game,
+            difficulty: q.difficulty,
+            questions: Array.isArray(q.questions) ? q.questions.length : 10,
+            angle: q.angle,
+            status: q.status || "published",
+            published_at: q.published_at,
+            source: q.source || "generated",
+          });
           slugsSeen.add(q.slug);
         }
       }
