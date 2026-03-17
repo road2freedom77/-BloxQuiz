@@ -58,37 +58,36 @@ const ANGLE_LABELS: Record<string, string> = {
 
 function inferAngle(quiz: any): string | null {
   if (quiz.angle) return quiz.angle;
-
   const text = (quiz.title + " " + quiz.slug).toLowerCase();
-
   if (text.includes("beginner") || text.includes("basics") || text.includes("starter") ||
       text.includes("essentials") || text.includes("introduction") || text.includes("intro") ||
       text.includes("new player") || text.includes("getting started")) return "Beginner";
-
   if (text.includes("trading") || text.includes("trade") || text.includes("market") ||
       text.includes("value") || text.includes("economy") || text.includes("price")) return "Trading";
-
   if (text.includes("mechanic") || text.includes("combat") || text.includes("system") ||
       text.includes("ability") || text.includes("skill") || text.includes("technique") ||
       text.includes("move") || text.includes("build") || text.includes("awakening")) return "Mechanics";
-
   if (text.includes("expert") || text.includes("advanced") || text.includes("mastery") ||
       text.includes("ultimate") || text.includes("master") || text.includes("pro") ||
       text.includes("endgame") || text.includes("intermediate") || text.includes("knowledge")) return "Expert";
-
   if (text.includes("lore") || text.includes("story") || text.includes("history") ||
       text.includes("character") || text.includes("world") || text.includes("legend") ||
       text.includes("myth") || text.includes("origin")) return "Lore";
-
   if (text.includes("secret") || text.includes("hidden") || text.includes("easter egg") ||
       text.includes("mystery") || text.includes("unknown") || text.includes("rare") ||
       text.includes("discovery")) return "Secrets";
-
   if (text.includes("update") || text.includes("new content") || text.includes("latest") ||
       text.includes("recent") || text.includes("patch") || text.includes("season") ||
       text.includes("event")) return "Updates";
-
   return null;
+}
+
+function formatNumber(n: number | null | undefined): string {
+  if (!n) return "—";
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return n.toLocaleString();
 }
 
 function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: string }) {
@@ -121,7 +120,60 @@ function getStartQuiz(quizzes: any[]): string {
   return `/quiz/${quizzes[0].slug}`;
 }
 
-export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: any[], config: any, gameSlug: string }) {
+function StatsCard({ gameSlug, currentPlayers, totalVisits }: { gameSlug: string; currentPlayers: number | null; totalVisits: number | null }) {
+  if (!currentPlayers && !totalVisits) return null;
+  return (
+    <a
+      href={`/stats/${gameSlug}`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)",
+        border: "1px solid rgba(0,180,216,0.25)",
+        borderRadius: "var(--radius)",
+        padding: "16px 24px",
+        textDecoration: "none",
+        marginBottom: 32,
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+        {currentPlayers && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(0,180,216,0.8)", marginBottom: 2 }}>
+              Playing Now
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
+              {formatNumber(currentPlayers)}
+            </div>
+          </div>
+        )}
+        {totalVisits && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>
+              Total Visits
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>
+              {formatNumber(totalVisits)}
+            </div>
+          </div>
+        )}
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>
+        📊 View Live Stats →
+      </div>
+    </a>
+  );
+}
+
+export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
+  quizzes: any[],
+  config: any,
+  gameSlug: string,
+  statsData: { currentPlayers: number | null; totalVisits: number | null } | null,
+}) {
   const thumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
   const startQuiz = getStartQuiz(quizzes);
   const [randomSlug, setRandomSlug] = useState<string>("");
@@ -133,7 +185,6 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
     }
   }, []);
 
-  // Group quizzes by inferred angle
   const grouped: Record<string, any[]> = { Uncategorized: [] };
   for (const angle of ANGLE_ORDER) grouped[angle] = [];
   for (const quiz of quizzes) {
@@ -186,6 +237,15 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
           </div>
         </div>
       </div>
+
+      {/* Stats cross-link card */}
+      {statsData && (
+        <StatsCard
+          gameSlug={gameSlug}
+          currentPlayers={statsData.currentPlayers}
+          totalVisits={statsData.totalVisits}
+        />
+      )}
 
       {/* Intro paragraph */}
       <p style={{ fontSize: 15, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, marginBottom: 40 }}>{config.intro}</p>
@@ -279,6 +339,7 @@ export default function GamesClient({ quizzes, config, gameSlug }: { quizzes: an
           <a href="/browse" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "var(--text)" }}>🎮 Browse All Quizzes</a>
           <a href="/codes" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "var(--text)" }}>🎁 Free Roblox Codes</a>
           <a href="/leaderboard" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "var(--text)" }}>🏆 Leaderboard</a>
+          <a href={`/stats/${gameSlug}`} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "var(--text)" }}>📊 Live Stats</a>
         </div>
       </div>
 

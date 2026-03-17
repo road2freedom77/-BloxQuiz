@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { supabaseAdmin } from "../../lib/supabase";
 import GamesClient from "./GamesClient";
 
 const gameEmojis: Record<string, string> = {
@@ -372,6 +373,20 @@ async function getQuizzesForGame(displayName: string) {
   return [];
 }
 
+async function getGameStats(gameSlug: string): Promise<{ currentPlayers: number | null; totalVisits: number | null } | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("roblox_games")
+      .select("current_players, total_visits")
+      .eq("slug", gameSlug)
+      .single();
+    if (!data) return null;
+    return { currentPlayers: data.current_players, totalVisits: data.total_visits };
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
   const config = slugToGame()[game];
@@ -396,7 +411,10 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
   const config = gameMap[game];
   if (!config) notFound();
 
-  const quizzes = await getQuizzesForGame(config.displayName);
+  const [quizzes, statsData] = await Promise.all([
+    getQuizzesForGame(config.displayName),
+    getGameStats(game),
+  ]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -452,7 +470,12 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <GamesClient quizzes={quizzes} config={config} gameSlug={game} />
+      <GamesClient
+        quizzes={quizzes}
+        config={config}
+        gameSlug={game}
+        statsData={statsData}
+      />
     </>
   );
 }
