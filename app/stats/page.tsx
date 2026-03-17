@@ -82,6 +82,15 @@ const jsonLd = {
   ],
 };
 
+const popularComparisons = [
+  ["adopt-me", "🐾 Adopt Me!", "brookhaven-rp", "🏠 Brookhaven RP"],
+  ["blox-fruits", "⚔️ Blox Fruits", "murder-mystery-2", "🔫 Murder Mystery 2"],
+  ["blox-fruits", "⚔️ Blox Fruits", "adopt-me", "🐾 Adopt Me!"],
+  ["dress-to-impress", "👗 Dress to Impress", "royale-high", "👑 Royale High"],
+  ["bee-swarm-simulator", "🐝 Bee Swarm", "grow-a-garden", "🌱 Grow a Garden"],
+  ["doors", "🚪 Doors", "arsenal", "🎯 Arsenal"],
+];
+
 export default async function StatsHubPage() {
   const games = await getGames();
   const totalPlayers = games.reduce((sum, g) => sum + (g.current_players ?? 0), 0);
@@ -179,6 +188,21 @@ export default async function StatsHubPage() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Popular Comparisons */}
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginTop: 40, marginBottom: 16 }}>⚔️ Popular Comparisons</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginBottom: 20 }}>
+            {popularComparisons.map(([slugA, nameA, slugB, nameB]) => {
+              const [a, b] = [slugA, slugB].sort();
+              return (
+                <Link key={`${a}-${b}`} href={`/stats/compare/${a}-vs-${b}`} style={{ display: "flex", alignItems: "center", gap: 8, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "12px 16px", textDecoration: "none", color: "rgba(255,255,255,0.8)", fontWeight: 600, fontSize: 13 }}>
+                  <span>{nameA}</span>
+                  <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400 }}>vs</span>
+                  <span>{nameB}</span>
+                </Link>
+              );
+            })}
           </div>
 
           <p style={{ marginTop: 20, fontSize: 12, color: "rgba(255,255,255,0.25)", textAlign: "center" }}>

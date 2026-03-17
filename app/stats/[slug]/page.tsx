@@ -42,13 +42,10 @@ export interface DailyStatRow {
 async function getGame(slug: string): Promise<GameRow | null> {
   const { data, error } = await supabase
     .from("roblox_games")
-    .select(
-      "universe_id, place_id, slug, name, emoji, genre, thumbnail_url, current_players, total_visits, favorites, likes, dislikes, last_updated, intro, faqs, meta_title, meta_description"
-    )
+    .select("universe_id, place_id, slug, name, emoji, genre, thumbnail_url, current_players, total_visits, favorites, likes, dislikes, last_updated, intro, faqs, meta_title, meta_description")
     .eq("slug", slug)
     .eq("is_tracked", true)
     .single();
-
   if (error || !data) return null;
   return data as GameRow;
 }
@@ -74,17 +71,11 @@ async function getDailyStats(universeId: number): Promise<DailyStatRow[]> {
 }
 
 async function getAllSlugs(): Promise<string[]> {
-  const { data } = await supabase
-    .from("roblox_games")
-    .select("slug")
-    .eq("is_tracked", true);
+  const { data } = await supabase.from("roblox_games").select("slug").eq("is_tracked", true);
   return (data ?? []).map((g: { slug: string }) => g.slug);
 }
 
-async function getPlayerRank(
-  universeId: number,
-  currentPlayers: number | null
-): Promise<number | null> {
+async function getPlayerRank(universeId: number, currentPlayers: number | null): Promise<number | null> {
   if (!currentPlayers) return null;
   const { count } = await supabase
     .from("roblox_games")
@@ -101,6 +92,17 @@ async function getQuizCount(gameName: string): Promise<number> {
     .eq("game", gameName)
     .eq("status", "published");
   return count ?? 0;
+}
+
+async function getCompareGames(currentSlug: string): Promise<{ slug: string; name: string; emoji: string | null; current_players: number | null }[]> {
+  const { data } = await supabase
+    .from("roblox_games")
+    .select("slug, name, emoji, current_players")
+    .eq("is_tracked", true)
+    .neq("slug", currentSlug)
+    .order("current_players", { ascending: false, nullsFirst: false })
+    .limit(6);
+  return (data ?? []) as { slug: string; name: string; emoji: string | null; current_players: number | null }[];
 }
 
 export async function generateStaticParams() {
@@ -122,22 +124,14 @@ function formatVisits(n: number | null): string {
   return n.toLocaleString();
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const game = await getGame(slug);
   if (!game) return {};
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-  const title =
-    game.meta_title ||
-    `${game.name} Player Count (${month}) — Live Stats | BloxQuiz`;
-  const description =
-    game.meta_description ||
-    `${game.name} has ${formatNumber(game.current_players)} active players right now and ${formatVisits(game.total_visits)} total visits. Live player count, historical charts, and ranking vs other Roblox games. Updated hourly.`;
+  const title = game.meta_title || `${game.name} Player Count (${month}) — Live Stats | BloxQuiz`;
+  const description = game.meta_description || `${game.name} has ${formatNumber(game.current_players)} active players right now and ${formatVisits(game.total_visits)} total visits. Live player count, historical charts, and ranking vs other Roblox games. Updated hourly.`;
 
   return {
     title,
@@ -160,31 +154,24 @@ export async function generateMetadata({
   };
 }
 
-export default async function StatsPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function StatsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const game = await getGame(slug);
   if (!game) notFound();
 
-  const [snapshots, dailyStats, rank, quizCount] = await Promise.all([
+  const [snapshots, dailyStats, rank, quizCount, compareGames] = await Promise.all([
     getRecentSnapshots(game.universe_id),
     getDailyStats(game.universe_id),
     getPlayerRank(game.universe_id, game.current_players),
     getQuizCount(game.name),
+    getCompareGames(slug),
   ]);
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-  const approvalRate =
-    game.likes && game.dislikes && game.likes + game.dislikes > 0
-      ? ((game.likes / (game.likes + game.dislikes)) * 100).toFixed(1)
-      : null;
-
-  const peak24h = snapshots.length
-    ? Math.max(...snapshots.map((s) => s.concurrent_players))
+  const approvalRate = game.likes && game.dislikes && game.likes + game.dislikes > 0
+    ? ((game.likes / (game.likes + game.dislikes)) * 100).toFixed(1)
     : null;
+  const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -194,12 +181,7 @@ export default async function StatsPage({
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: "https://www.bloxquiz.gg" },
           { "@type": "ListItem", position: 2, name: "Stats", item: "https://www.bloxquiz.gg/stats" },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: `${game.name} Stats`,
-            item: `https://www.bloxquiz.gg/stats/${slug}`,
-          },
+          { "@type": "ListItem", position: 3, name: `${game.name} Stats`, item: `https://www.bloxquiz.gg/stats/${slug}` },
         ],
       },
       {
@@ -211,27 +193,20 @@ export default async function StatsPage({
         description: `Live ${game.name} player count, historical trends, and ranking vs other Roblox games.`,
         mainEntityOfPage: `https://www.bloxquiz.gg/stats/${slug}`,
       },
-      ...(game.faqs?.length
-        ? [
-            {
-              "@type": "FAQPage",
-              mainEntity: game.faqs.map((faq: { q: string; a: string }) => ({
-                "@type": "Question",
-                name: faq.q,
-                acceptedAnswer: { "@type": "Answer", text: faq.a },
-              })),
-            },
-          ]
-        : []),
+      ...(game.faqs?.length ? [{
+        "@type": "FAQPage",
+        mainEntity: game.faqs.map((faq: { q: string; a: string }) => ({
+          "@type": "Question",
+          name: faq.q,
+          acceptedAnswer: { "@type": "Answer", text: faq.a },
+        })),
+      }] : []),
     ],
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <StatsClient
         game={game}
         snapshots={snapshots}
@@ -241,6 +216,7 @@ export default async function StatsPage({
         peak24h={peak24h}
         slug={slug}
         quizCount={quizCount}
+        compareGames={compareGames}
       />
     </>
   );
