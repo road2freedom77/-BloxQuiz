@@ -149,6 +149,30 @@ export default async function StatsHubPage() {
             ))}
           </div>
 
+          {/* Browse by Genre */}
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Browse by Genre</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 40 }}>
+            {[
+              { genre: "roleplay", emoji: "🏠", label: "Roleplay" },
+              { genre: "simulator", emoji: "🌱", label: "Simulator" },
+              { genre: "rpg", emoji: "⚔️", label: "RPG" },
+              { genre: "horror", emoji: "👻", label: "Horror" },
+              { genre: "obby", emoji: "🏗️", label: "Obby" },
+              { genre: "shooter", emoji: "🔫", label: "Shooter" },
+              { genre: "fashion", emoji: "👗", label: "Fashion" },
+              { genre: "mystery", emoji: "🔪", label: "Mystery" },
+              { genre: "rhythm", emoji: "🎵", label: "Rhythm" },
+              { genre: "sports", emoji: "⚽", label: "Sports" },
+              { genre: "survival", emoji: "🌪️", label: "Survival" },
+              { genre: "tower-defense", emoji: "🛡️", label: "Tower Defense" },
+            ].map(({ genre, emoji, label }) => (
+              <Link key={genre} href={`/stats/category/${genre}`} style={{ display: "flex", alignItems: "center", gap: 8, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "12px 14px", textDecoration: "none", color: "rgba(255,255,255,0.8)", fontWeight: 600, fontSize: 13 }} className="stats-row">
+                <span style={{ fontSize: 18 }}>{emoji}</span>
+                <span>{label}</span>
+              </Link>
+            ))}
+          </div>
+
           {/* Rankings table */}
           <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Live Rankings</h2>
           <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, overflow: "hidden" }}>

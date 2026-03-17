@@ -26,10 +26,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    // Stats hub and sub-pages
     { url: `${base}/stats`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
     { url: `${base}/stats/most-played`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
     { url: `${base}/stats/most-visited`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
     { url: `${base}/stats/trending`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    // Stats category pages
+    ...["roleplay","simulator","rpg","horror","obby","shooter","fashion","mystery","rhythm","sports","survival","tower-defense"].map(genre => ({
+      url: `${base}/stats/category/${genre}`,
+      lastModified: now,
+      changeFrequency: "hourly" as const,
+      priority: 0.7,
+    })),
   ];
 
   // Codes pages from code_games table
