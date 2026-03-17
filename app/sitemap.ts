@@ -61,8 +61,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    // Stats hub
+    // Stats hub and sub-pages
     { url: `${base}/stats`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${base}/stats/most-played`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
+    { url: `${base}/stats/most-visited`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
+    { url: `${base}/stats/trending`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
   ];
 
   const jsonQuizzes: MetadataRoute.Sitemap = getAllJsonQuizSlugs().map(slug => ({

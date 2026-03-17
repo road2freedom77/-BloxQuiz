@@ -88,37 +88,13 @@ export default async function StatsHubPage() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#0a0a14",
-          color: "#fff",
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        }}
-      >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div style={{ minHeight: "100vh", background: "#0a0a14", color: "#fff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+
         {/* Hero */}
-        <div
-          style={{
-            background: "linear-gradient(180deg, #0f0f23 0%, #0a0a14 100%)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            padding: "48px 0 40px",
-          }}
-        >
+        <div style={{ background: "linear-gradient(180deg, #0f0f23 0%, #0a0a14 100%)", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "48px 0 40px" }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
-            <nav
-              style={{
-                fontSize: 13,
-                color: "rgba(255,255,255,0.4)",
-                marginBottom: 24,
-                display: "flex",
-                gap: 6,
-                alignItems: "center",
-              }}
-            >
+            <nav style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 24, display: "flex", gap: 6, alignItems: "center" }}>
               <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>BloxQuiz</Link>
               <span>/</span>
               <span style={{ color: "rgba(255,255,255,0.7)" }}>Stats</span>
@@ -128,70 +104,46 @@ export default async function StatsHubPage() {
               📊 Roblox Game Stats
             </h1>
             <p style={{ margin: "0 0 28px", fontSize: 16, color: "rgba(255,255,255,0.55)", maxWidth: 560 }}>
-              Live player counts and rankings for the most popular Roblox games.
-              Updated every hour via the Roblox API.
+              Live player counts and rankings for the most popular Roblox games. Updated every hour via the Roblox API.
             </p>
 
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              <div
-                style={{
-                  background: "linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)",
-                  borderRadius: 12,
-                  padding: "16px 24px",
-                  minWidth: 160,
-                }}
-              >
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>
-                  Total Playing Now
-                </div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", fontVariantNumeric: "tabular-nums" }}>
-                  {formatNumber(totalPlayers)}
-                </div>
+              <div style={{ background: "linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)", borderRadius: 12, padding: "16px 24px", minWidth: 160 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>Total Playing Now</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatNumber(totalPlayers)}</div>
               </div>
-              <div
-                style={{
-                  background: "#111827",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  borderRadius: 12,
-                  padding: "16px 24px",
-                  minWidth: 160,
-                }}
-              >
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 4 }}>
-                  Games Tracked
-                </div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: "#fff" }}>
-                  {games.length}
-                </div>
+              <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 24px", minWidth: 160 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 4 }}>Games Tracked</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: "#fff" }}>{games.length}</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Rankings table */}
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 20px 80px" }}>
-          <div
-            style={{
-              background: "#111827",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: 16,
-              overflow: "hidden",
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "52px 1fr 140px 140px 120px",
-                padding: "12px 20px",
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.35)",
-              }}
-            >
+
+          {/* Explore Stats nav cards */}
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Explore Stats</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 40 }}>
+            {[
+              { href: "/stats/most-played", emoji: "🎮", label: "Most Played", sub: "By concurrent players" },
+              { href: "/stats/most-visited", emoji: "👁️", label: "Most Visited", sub: "By all-time visits" },
+              { href: "/stats/trending", emoji: "📈", label: "Trending", sub: "Fastest growing games" },
+            ].map(({ href, emoji, label, sub }) => (
+              <Link key={href} href={href} style={{ display: "flex", alignItems: "center", gap: 14, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff" }} className="stats-row">
+                <span style={{ fontSize: 28 }}>{emoji}</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{label}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{sub}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Rankings table */}
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Live Rankings</h2>
+          <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, overflow: "hidden" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "52px 1fr 140px 140px 120px", padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
               <span>#</span>
               <span>Game</span>
               <span style={{ textAlign: "right" }}>Playing Now</span>
@@ -199,53 +151,17 @@ export default async function StatsHubPage() {
               <span style={{ textAlign: "right" }}>Updated</span>
             </div>
 
-            {/* Rows */}
             {games.map((game, i) => (
-              <Link
-                key={game.slug}
-                href={`/stats/${game.slug}`}
-                style={{ textDecoration: "none", color: "inherit", display: "block" }}
-              >
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "52px 1fr 140px 140px 120px",
-                    padding: "14px 20px",
-                    borderBottom: i < games.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                    alignItems: "center",
-                  }}
-                  className="stats-row"
-                >
-                  {/* Rank */}
-                  <span
-                    style={{
-                      fontSize: i < 3 ? 18 : 13,
-                      fontWeight: 800,
-                      color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(255,255,255,0.3)",
-                    }}
-                  >
+              <Link key={game.slug} href={`/stats/${game.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                <div className="stats-row" style={{ display: "grid", gridTemplateColumns: "52px 1fr 140px 140px 120px", padding: "14px 20px", borderBottom: i < games.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center" }}>
+                  <span style={{ fontSize: i < 3 ? 18 : 13, fontWeight: 800, color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(255,255,255,0.3)" }}>
                     {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`}
                   </span>
-
-                  {/* Game */}
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     {game.thumbnail_url ? (
-                      <img
-                        src={game.thumbnail_url}
-                        alt={game.name}
-                        width={40}
-                        height={40}
-                        style={{ borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
-                      />
+                      <img src={game.thumbnail_url} alt={game.name} width={40} height={40} style={{ borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
                     ) : (
-                      <div
-                        style={{
-                          width: 40, height: 40, borderRadius: 8,
-                          background: "rgba(255,255,255,0.05)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 18, flexShrink: 0,
-                        }}
-                      >
+                      <div style={{ width: 40, height: 40, borderRadius: 8, background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
                         {game.emoji ?? "🎮"}
                       </div>
                     )}
@@ -254,28 +170,12 @@ export default async function StatsHubPage() {
                         {game.emoji && <span style={{ marginRight: 6 }}>{game.emoji}</span>}
                         {game.name}
                       </div>
-                      {game.genre && (
-                        <div style={{ fontSize: 11, color: "rgba(0,180,216,0.8)", textTransform: "capitalize", marginTop: 2 }}>
-                          {game.genre}
-                        </div>
-                      )}
+                      {game.genre && <div style={{ fontSize: 11, color: "rgba(0,180,216,0.8)", textTransform: "capitalize", marginTop: 2 }}>{game.genre}</div>}
                     </div>
                   </div>
-
-                  {/* Players */}
-                  <span style={{ textAlign: "right", fontSize: 15, fontWeight: 800, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
-                    {formatNumber(game.current_players)}
-                  </span>
-
-                  {/* Visits */}
-                  <span style={{ textAlign: "right", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontVariantNumeric: "tabular-nums" }}>
-                    {formatVisits(game.total_visits)}
-                  </span>
-
-                  {/* Updated */}
-                  <span style={{ textAlign: "right", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
-                    {timeAgo(game.last_updated)}
-                  </span>
+                  <span style={{ textAlign: "right", fontSize: 15, fontWeight: 800, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(game.current_players)}</span>
+                  <span style={{ textAlign: "right", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontVariantNumeric: "tabular-nums" }}>{formatVisits(game.total_visits)}</span>
+                  <span style={{ textAlign: "right", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>{timeAgo(game.last_updated)}</span>
                 </div>
               </Link>
             ))}
@@ -287,9 +187,7 @@ export default async function StatsHubPage() {
         </div>
       </div>
 
-      <style>{`
-        .stats-row:hover { background: rgba(255,255,255,0.03); }
-      `}</style>
+      <style>{`.stats-row:hover { background: rgba(255,255,255,0.03); }`}</style>
     </>
   );
 }
