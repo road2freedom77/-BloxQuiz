@@ -423,8 +423,13 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
               {"📚 " + whatYouLearn[quiz.game]}
             </p>
           )}
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 4 }}>
+          {/* Cross-links: hub, codes, stats, browse */}
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 4, flexWrap: "wrap" }}>
             <a href={"/games/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-green)", textDecoration: "none" }}>{"More " + quiz.game + " Quizzes →"}</a>
+            <span style={{ color: "var(--text-dim)" }}>·</span>
+            <a href={"/codes/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-yellow)", textDecoration: "none" }}>{"Free Codes →"}</a>
+            <span style={{ color: "var(--text-dim)" }}>·</span>
+            <a href={"/stats/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "#00b4d8", textDecoration: "none" }}>{"Live Stats →"}</a>
             <span style={{ color: "var(--text-dim)" }}>·</span>
             <a href="/browse" style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textDecoration: "none" }}>Browse All →</a>
           </div>
@@ -549,12 +554,21 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
               <a href="/" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{"🏠 Home"}</a>
             </div>
 
+            {/* Keep Playing — now includes codes + stats */}
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, textAlign: "left" }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>Keep Playing</div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <a href={"/games/" + gameSlug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 18 }}>🎮</span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"More " + quiz.game + " Quizzes"}</span>
+                </a>
+                <a href={"/codes/" + gameSlug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 18 }}>🎁</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"Free " + quiz.game + " Codes"}</span>
+                </a>
+                <a href={"/stats/" + gameSlug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 18 }}>📊</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"Live " + quiz.game + " Stats"}</span>
                 </a>
                 <a href="/browse" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 18 }}>🏆</span>
