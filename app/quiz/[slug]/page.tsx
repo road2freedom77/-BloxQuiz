@@ -9,7 +9,7 @@ async function getQuiz(slug: string) {
       .select("*")
       .eq("slug", slug)
       .single();
-    if (data) return data;
+    if (data && data.status !== "draft") return data;
   } catch (e) {}
 
   return null;
@@ -22,6 +22,7 @@ async function getRelatedQuizzes(currentSlug: string, game: string) {
       .select("slug, title, game, difficulty, questions")
       .eq("game", game)
       .neq("slug", currentSlug)
+      .neq("status", "draft")
       .limit(6);
 
     if (data) {
