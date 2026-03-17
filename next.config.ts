@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/games/brookhaven",
+        destination: "/games/brookhaven-rp",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
