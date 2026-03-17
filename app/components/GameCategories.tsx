@@ -1,11 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { supabase } from "../lib/supabase";
+import { supabaseAdmin } from "../lib/supabase";
 
 async function getQuizCountByGame(gameName: string): Promise<number> {
   let count = 0;
-
-  // JSON count
   try {
     const dir = path.join(process.cwd(), "app/data/quizzes");
     const files = fs.readdirSync(dir);
@@ -15,8 +14,6 @@ async function getQuizCountByGame(gameName: string): Promise<number> {
       if (data.game === gameName) count++;
     }
   } catch {}
-
-  // Supabase count
   try {
     const { count: generatedCount } = await supabase
       .from("quizzes")
@@ -24,7 +21,6 @@ async function getQuizCountByGame(gameName: string): Promise<number> {
       .eq("game", gameName);
     count += generatedCount || 0;
   } catch {}
-
   return count;
 }
 
@@ -39,6 +35,25 @@ async function getTotalQuizCount(): Promise<number> {
   } catch {
     return 0;
   }
+}
+
+async function getPlayerCounts(): Promise<Record<string, number>> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("roblox_games")
+      .select("slug, current_players")
+      .eq("is_tracked", true);
+    if (!data) return {};
+    return Object.fromEntries(data.map((g: { slug: string; current_players: number | null }) => [g.slug, g.current_players ?? 0]));
+  } catch {
+    return {};
+  }
+}
+
+function formatPlayers(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return n.toLocaleString();
 }
 
 export default async function GameCategories() {
@@ -63,9 +78,10 @@ export default async function GameCategories() {
     { name: "Dress to Impress", icon: "👗", bg: "rgba(255,105,180,0.12)", badge: "✨ New", badgeColor: "#FF69B4", badgeBg: "rgba(255,105,180,0.15)", slug: "dress-to-impress" },
   ];
 
-  const [games, total] = await Promise.all([
+  const [games, total, playerCounts] = await Promise.all([
     Promise.all(gameList.map(async g => ({ ...g, quizzes: await getQuizCountByGame(g.name) }))),
     getTotalQuizCount(),
+    getPlayerCounts(),
   ]);
 
   return (
@@ -75,16 +91,26 @@ export default async function GameCategories() {
         <a href="/browse" style={{ color: "var(--neon-green)", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{"View All " + total + "+ →"}</a>
       </div>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
-        {games.map((game) => (
-          <a href={"/games/" + game.slug} key={game.name} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px 16px", textAlign: "center", cursor: "pointer", position: "relative", overflow: "hidden", textDecoration: "none", display: "block" }}>
-            {game.badge && (
-              <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, background: (game as any).badgeBg, color: (game as any).badgeColor }}>{game.badge}</span>
-            )}
-            <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 12px", background: game.bg }}>{game.icon}</div>
-            <h3 style={{ fontSize: 13, fontWeight: 800, marginBottom: 4, color: "var(--text)" }}>{game.name}</h3>
-            <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{game.quizzes} Quizzes</p>
-          </a>
-        ))}
+        {games.map((game) => {
+          const players = playerCounts[game.slug] ?? 0;
+          return (
+            <div key={game.name} style={{ position: "relative", display: "flex", flexDirection: "column" }}>
+              <a href={"/games/" + game.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: players > 0 ? "var(--radius) var(--radius) 0 0" : "var(--radius)", padding: "20px 16px 14px", textAlign: "center", cursor: "pointer", position: "relative", overflow: "hidden", textDecoration: "none", display: "block" }}>
+                {game.badge && (
+                  <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, background: (game as any).badgeBg, color: (game as any).badgeColor }}>{game.badge}</span>
+                )}
+                <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 12px", background: game.bg }}>{game.icon}</div>
+                <h3 style={{ fontSize: 13, fontWeight: 800, marginBottom: 4, color: "var(--text)" }}>{game.name}</h3>
+                <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, margin: 0 }}>{game.quizzes} Quizzes</p>
+              </a>
+              {players > 0 && (
+                <a href={"/stats/" + game.slug} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, fontSize: 11, fontWeight: 700, color: "#00b4d8", textDecoration: "none", background: "rgba(0,180,216,0.08)", border: "1px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--radius) var(--radius)", padding: "6px 8px" }}>
+                  📊 {formatPlayers(players)} playing
+                </a>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
