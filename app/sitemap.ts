@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { supabase } from "./lib/supabase";
+import { supabaseAdmin } from "./lib/supabase";
 import fs from "fs";
 import path from "path";
 
@@ -60,6 +61,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    // Stats hub
+    { url: `${base}/stats`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
   ];
 
   const jsonQuizzes: MetadataRoute.Sitemap = getAllJsonQuizSlugs().map(slug => ({
@@ -94,6 +97,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (e) {}
 
+  // Stats pages from roblox_games
+  let statsPages: MetadataRoute.Sitemap = [];
+  try {
+    const { data: games } = await supabaseAdmin
+      .from("roblox_games")
+      .select("slug, last_updated")
+      .eq("is_tracked", true);
+    if (games) {
+      statsPages = games.flatMap((g: { slug: string; last_updated: string | null }) => [
+        {
+          url: `${base}/stats/${g.slug}`,
+          lastModified: g.last_updated ? new Date(g.last_updated) : now,
+          changeFrequency: "hourly" as const,
+          priority: 0.8,
+        },
+        {
+          url: `${base}/stats/${g.slug}/history`,
+          lastModified: g.last_updated ? new Date(g.last_updated) : now,
+          changeFrequency: "daily" as const,
+          priority: 0.6,
+        },
+      ]);
+    }
+  } catch (e) {}
+
   // Merge all game slugs
   const allGameSlugs = new Set([...jsonGameSlugs, ...Array.from(supabaseGameSlugs)]);
   const gamePages: MetadataRoute.Sitemap = Array.from(allGameSlugs).map(slug => ({
@@ -112,5 +140,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...Array.from(allQuizUrls.values()),
     ...gamePages,
+    ...statsPages,
   ];
 }
