@@ -1,41 +1,6 @@
 import { MetadataRoute } from "next";
 import { supabase } from "./lib/supabase";
 import { supabaseAdmin } from "./lib/supabase";
-import fs from "fs";
-import path from "path";
-
-function getAllJsonQuizSlugs(): string[] {
-  try {
-    const dir = path.join(process.cwd(), "app/data/quizzes");
-    return fs.readdirSync(dir)
-      .filter(f => f.endsWith(".json"))
-      .map(f => f.replace(".json", ""));
-  } catch (e) {
-    return [];
-  }
-}
-
-function getAllJsonGameSlugs(): string[] {
-  try {
-    const dir = path.join(process.cwd(), "app/data/quizzes");
-    const files = fs.readdirSync(dir).filter(f => f.endsWith(".json"));
-    const games = new Set<string>();
-    for (const file of files) {
-      const content = JSON.parse(fs.readFileSync(path.join(dir, file), "utf8"));
-      if (content.game) {
-        const slug = content.game.toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-")
-          .trim();
-        games.add(slug);
-      }
-    }
-    return Array.from(games);
-  } catch (e) {
-    return [];
-  }
-}
 
 function slugifyGame(game: string): string {
   return game.toLowerCase()
@@ -53,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: base, lastModified: now, changeFrequency: "daily", priority: 1.0 },
     { url: `${base}/browse`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/leaderboard`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
-    { url: `${base}/codes`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/codes`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/roblox-username-ideas`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/champions`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/rules`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
@@ -61,26 +26,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    // Stats hub and sub-pages
     { url: `${base}/stats`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
     { url: `${base}/stats/most-played`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
     { url: `${base}/stats/most-visited`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
     { url: `${base}/stats/trending`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
   ];
 
-  const jsonQuizzes: MetadataRoute.Sitemap = getAllJsonQuizSlugs().map(slug => ({
-    url: `${base}/quiz/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+  // Codes pages from code_games table
+  let codesPages: MetadataRoute.Sitemap = [];
+  try {
+    const { data: codeGames } = await supabase
+      .from("code_games")
+      .select("slug, updated_at");
+    if (codeGames) {
+      codesPages = codeGames.map(g => ({
+        url: `${base}/codes/${g.slug}`,
+        lastModified: g.updated_at ? new Date(g.updated_at) : now,
+        changeFrequency: "daily" as const,
+        priority: 0.9,
+      }));
+    }
+  } catch (e) {}
 
-  // Game pages from JSON files
-  const jsonGameSlugs = getAllJsonGameSlugs();
-
-  // Supabase generated quizzes + game slugs
-  let supabaseQuizzes: MetadataRoute.Sitemap = [];
-  const supabaseGameSlugs = new Set<string>();
+  // Quiz pages from Supabase
+  let quizPages: MetadataRoute.Sitemap = [];
+  const gameSlugSet = new Set<string>();
 
   try {
     const { data } = await supabase
@@ -88,17 +58,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug, game, published_at")
       .eq("status", "published");
     if (data) {
-      supabaseQuizzes = data.map(q => ({
+      quizPages = data.map(q => ({
         url: `${base}/quiz/${q.slug}`,
         lastModified: new Date(q.published_at),
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));
       for (const q of data) {
-        if (q.game) supabaseGameSlugs.add(slugifyGame(q.game));
+        if (q.game) gameSlugSet.add(slugifyGame(q.game));
       }
     }
   } catch (e) {}
+
+  // Game hub pages
+  const gamePages: MetadataRoute.Sitemap = Array.from(gameSlugSet).map(slug => ({
+    url: `${base}/games/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
 
   // Stats pages from roblox_games
   let statsPages: MetadataRoute.Sitemap = [];
@@ -141,23 +119,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (e) {}
 
-  // Merge all game slugs
-  const allGameSlugs = new Set([...jsonGameSlugs, ...Array.from(supabaseGameSlugs)]);
-  const gamePages: MetadataRoute.Sitemap = Array.from(allGameSlugs).map(slug => ({
-    url: `${base}/games/${slug}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
-  // Deduplicate quizzes — supabase slugs take priority over static
-  const allQuizUrls = new Map<string, MetadataRoute.Sitemap[0]>();
-  for (const q of jsonQuizzes) allQuizUrls.set(q.url, q);
-  for (const q of supabaseQuizzes) allQuizUrls.set(q.url, q);
-
   return [
     ...staticPages,
-    ...Array.from(allQuizUrls.values()),
+    ...codesPages,
+    ...quizPages,
     ...gamePages,
     ...statsPages,
   ];
