@@ -9,6 +9,11 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
 const gameDescriptions: Record<string, string> = {
   "blox-fruits": "Blox Fruits codes give players free XP boosts, stat resets, and Beli to help progress faster through the seas. New codes are released during updates and milestones.",
   "adopt-me": "Adopt Me codes give players free Bucks to spend on eggs, pets, and items. Codes are released during seasonal events and game milestones.",
@@ -30,6 +35,20 @@ const gameDescriptions: Record<string, string> = {
   "dress-to-impress": "Dress to Impress codes give players free exclusive outfits and accessories to wear on the runway. New codes release with major updates and seasonal events.",
   "fisch": "Fisch codes give players free coins, bait, and exclusive rods to help catch rare fish faster. New codes are released during updates and game milestones.",
 };
+
+async function getGameStats(slug: string): Promise<{ currentPlayers: number | null; totalVisits: number | null } | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("roblox_games")
+      .select("current_players, total_visits")
+      .eq("slug", slug)
+      .single();
+    if (!data) return null;
+    return { currentPlayers: data.current_players, totalVisits: data.total_visits };
+  } catch (e) {
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
@@ -60,9 +79,10 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 export default async function CodesGamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
 
-  const [{ data: gameData }, { data: codesData }] = await Promise.all([
+  const [{ data: gameData }, { data: codesData }, statsData] = await Promise.all([
     supabase.from("code_games").select("*").eq("slug", game).single(),
     supabase.from("codes").select("*").eq("slug", game).order("is_new", { ascending: false }),
+    getGameStats(game),
   ]);
 
   if (!gameData) notFound();
@@ -127,6 +147,7 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
         description={description}
         activeCodes={activeCodes}
         expiredCodes={expiredCodes}
+        statsData={statsData}
       />
     </>
   );

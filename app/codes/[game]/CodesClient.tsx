@@ -41,12 +41,21 @@ const gameSlugMap: Record<string, string> = {
   "fisch": "fisch",
 };
 
-export default function CodesClient({ data, game, description, activeCodes, expiredCodes }: {
+function formatNumber(n: number | null | undefined): string {
+  if (!n) return "—";
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return n.toLocaleString();
+}
+
+export default function CodesClient({ data, game, description, activeCodes, expiredCodes, statsData }: {
   data: any,
   game: string,
   description: string,
   activeCodes: any[],
   expiredCodes: any[],
+  statsData: { currentPlayers: number | null; totalVisits: number | null } | null,
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const tips = gameTips[game] || "";
@@ -148,8 +157,8 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       )}
 
-    {/* ===== QUIZ CTA — right after active codes ===== */}
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+      {/* Quiz CTA */}
+      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <span style={{ fontSize: 32 }}>{data.icon}</span>
           <div>
@@ -166,6 +175,52 @@ export default function CodesClient({ data, game, description, activeCodes, expi
           {"🎮 Take the Quiz"}
         </a>
       </div>
+
+      {/* Stats cross-link card */}
+      {statsData && (statsData.currentPlayers || statsData.totalVisits) && (
+        <a
+          href={`/stats/${game}`}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)",
+            border: "1px solid rgba(0,180,216,0.25)",
+            borderRadius: "var(--radius)",
+            padding: "16px 24px",
+            textDecoration: "none",
+            marginBottom: 24,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {statsData.currentPlayers && (
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(0,180,216,0.8)", marginBottom: 2 }}>
+                  Playing Now
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
+                  {formatNumber(statsData.currentPlayers)}
+                </div>
+              </div>
+            )}
+            {statsData.totalVisits && (
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>
+                  Total Visits
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>
+                  {formatNumber(statsData.totalVisits)}
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>
+            📊 View Live Stats →
+          </div>
+        </a>
+      )}
 
       {/* Expiring soon notice */}
       <div style={{ background: "rgba(255,227,71,0.08)", border: "1px solid rgba(255,227,71,0.2)", borderRadius: "var(--radius-sm)", padding: "14px 20px", marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
@@ -232,12 +287,16 @@ export default function CodesClient({ data, game, description, activeCodes, expi
           {"More " + data.game + " Content"}
         </h2>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20, maxWidth: 400, margin: "0 auto 20px" }}>
-          {"Explore all " + data.game + " quizzes or browse codes for every Roblox game."}
+          {"Explore all " + data.game + " quizzes, live player stats, or browse codes for every Roblox game."}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href={"/games/" + quizSlug}
             style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
             {"🎮 " + data.game + " Quizzes"}
+          </a>
+          <a href={"/stats/" + game}
+            style={{ background: "linear-gradient(135deg, #00b4d8, #0077b6)", color: "#fff", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
+            {"📊 Live Stats"}
           </a>
           <a href="/codes"
             style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
