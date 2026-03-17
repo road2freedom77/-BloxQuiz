@@ -11,6 +11,27 @@ const games = ["All", "Blox Fruits", "Brookhaven RP", "Adopt Me!", "Tower of Hel
 const difficulties = ["All", "Easy", "Medium", "Hard"];
 const PAGE_SIZE = 12;
 
+const gameHubs = [
+  { name: "Blox Fruits", slug: "blox-fruits", emoji: "⚔️" },
+  { name: "Brookhaven RP", slug: "brookhaven-rp", emoji: "🏠" },
+  { name: "Adopt Me!", slug: "adopt-me", emoji: "🐾" },
+  { name: "Tower of Hell", slug: "tower-of-hell", emoji: "🗼" },
+  { name: "Murder Mystery 2", slug: "murder-mystery-2", emoji: "🔫" },
+  { name: "Grow a Garden", slug: "grow-a-garden", emoji: "🌱" },
+  { name: "Royale High", slug: "royale-high", emoji: "👑" },
+  { name: "Doors", slug: "doors", emoji: "🚪" },
+  { name: "Arsenal", slug: "arsenal", emoji: "🎯" },
+  { name: "Anime Fighting Simulator", slug: "anime-fighting-simulator", emoji: "🥊" },
+  { name: "Berry Avenue", slug: "berry-avenue", emoji: "🍓" },
+  { name: "Livetopia", slug: "livetopia", emoji: "🏖️" },
+  { name: "Natural Disaster Survival", slug: "natural-disaster-survival", emoji: "🌪️" },
+  { name: "Anime Defenders", slug: "anime-defenders", emoji: "🐉" },
+  { name: "Funky Friday", slug: "funky-friday", emoji: "🎵" },
+  { name: "Kick Off", slug: "kick-off", emoji: "⚽" },
+  { name: "Bee Swarm Simulator", slug: "bee-swarm-simulator", emoji: "🐝" },
+  { name: "Dress to Impress", slug: "dress-to-impress", emoji: "👗" },
+];
+
 export default function QuizzesPage() {
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,23 +75,14 @@ export default function QuizzesPage() {
     if (totalPages <= 1) return null;
     return (
       <div style={{ display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-        <button
-          onClick={() => { setPage(p => Math.max(1, p - 1)); scrollToTop(); }}
-          disabled={page === 1}
-          style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: page === 1 ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: "var(--surface)", color: page === 1 ? "var(--text-dim)" : "var(--text-muted)", opacity: page === 1 ? 0.4 : 1 }}
-        >{"← Prev"}</button>
+        <button onClick={() => { setPage(p => Math.max(1, p - 1)); scrollToTop(); }} disabled={page === 1}
+          style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: page === 1 ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: "var(--surface)", color: page === 1 ? "var(--text-dim)" : "var(--text-muted)", opacity: page === 1 ? 0.4 : 1 }}>{"← Prev"}</button>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-          <button
-            key={p}
-            onClick={() => { setPage(p); scrollToTop(); }}
-            style={{ padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: page === p ? "var(--gradient-main)" : "var(--surface)", color: page === p ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: page === p ? "var(--bg)" : "var(--text-muted)", minWidth: 40 }}
-          >{p}</button>
+          <button key={p} onClick={() => { setPage(p); scrollToTop(); }}
+            style={{ padding: "8px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: page === p ? "var(--gradient-main)" : "var(--surface)", color: page === p ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: page === p ? "var(--bg)" : "var(--text-muted)", minWidth: 40 }}>{p}</button>
         ))}
-        <button
-          onClick={() => { setPage(p => Math.min(totalPages, p + 1)); scrollToTop(); }}
-          disabled={page === totalPages}
-          style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: page === totalPages ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: "var(--surface)", color: page === totalPages ? "var(--text-dim)" : "var(--text-muted)", opacity: page === totalPages ? 0.4 : 1 }}
-        >{"Next →"}</button>
+        <button onClick={() => { setPage(p => Math.min(totalPages, p + 1)); scrollToTop(); }} disabled={page === totalPages}
+          style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: page === totalPages ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: "var(--surface)", color: page === totalPages ? "var(--text-dim)" : "var(--text-muted)", opacity: page === totalPages ? 0.4 : 1 }}>{"Next →"}</button>
       </div>
     );
   }
@@ -83,22 +95,19 @@ export default function QuizzesPage() {
       </p>
 
       <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-        <input
-          type="text"
-          placeholder="🔍 Search quizzes..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: "10px 20px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 100, color: "var(--text)", fontSize: 14, fontFamily: "var(--font-body)", fontWeight: 600, outline: "none", minWidth: 240 }}
-        />
+        <input type="text" placeholder="🔍 Search quizzes..." value={search} onChange={e => setSearch(e.target.value)}
+          style={{ padding: "10px 20px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 100, color: "var(--text)", fontSize: 14, fontFamily: "var(--font-body)", fontWeight: 600, outline: "none", minWidth: 240 }} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         {games.map(g => (
-          <button key={g} onClick={() => setGameFilter(g)} style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: gameFilter === g ? "var(--gradient-main)" : "var(--surface)", color: gameFilter === g ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: gameFilter === g ? "var(--bg)" : "var(--text-muted)" }}>{g}</button>
+          <button key={g} onClick={() => setGameFilter(g)}
+            style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: gameFilter === g ? "var(--gradient-main)" : "var(--surface)", color: gameFilter === g ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: gameFilter === g ? "var(--bg)" : "var(--text-muted)" }}>{g}</button>
         ))}
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {difficulties.map(d => (
-          <button key={d} onClick={() => setDiffFilter(d)} style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: diffFilter === d ? "var(--neon-pink)" : "var(--surface)", color: diffFilter === d ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: diffFilter === d ? "var(--bg)" : "var(--text-muted)" }}>{d}</button>
+          <button key={d} onClick={() => setDiffFilter(d)}
+            style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: diffFilter === d ? "var(--neon-pink)" : "var(--surface)", color: diffFilter === d ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: diffFilter === d ? "var(--bg)" : "var(--text-muted)" }}>{d}</button>
         ))}
       </div>
 
@@ -144,6 +153,26 @@ export default function QuizzesPage() {
           <Pagination />
         </div>
       )}
+
+      {/* Game Hubs section */}
+      <div style={{ marginTop: 64, borderTop: "1px solid var(--border)", paddingTop: 40 }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 8 }}>🎮 Browse by Game</h2>
+        <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 24 }}>
+          Each game hub has all quizzes, free codes, and live player stats in one place.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+          {gameHubs.map(({ name, slug, emoji }) => (
+            <a key={slug} href={"/games/" + slug}
+              style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px", textDecoration: "none" }}>
+              <span style={{ fontSize: 22 }}>{emoji}</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{name}</div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>View Hub →</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
