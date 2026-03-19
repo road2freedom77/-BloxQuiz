@@ -37,14 +37,22 @@ async function getTotalQuizCount(): Promise<number> {
   }
 }
 
-async function getPlayerCounts(): Promise<Record<string, number>> {
+interface GameData {
+  slug: string;
+  current_players: number | null;
+  thumbnail_url: string | null;
+}
+
+async function getGameData(): Promise<Record<string, GameData>> {
   try {
     const { data } = await supabaseAdmin
       .from("roblox_games")
-      .select("slug, current_players")
+      .select("slug, current_players, thumbnail_url")
       .eq("is_tracked", true);
     if (!data) return {};
-    return Object.fromEntries(data.map((g: { slug: string; current_players: number | null }) => [g.slug, g.current_players ?? 0]));
+    return Object.fromEntries(
+      data.map((g: GameData) => [g.slug, g])
+    );
   } catch {
     return {};
   }
@@ -78,10 +86,10 @@ export default async function GameCategories() {
     { name: "Dress to Impress", icon: "👗", bg: "rgba(255,105,180,0.12)", badge: "✨ New", badgeColor: "#FF69B4", badgeBg: "rgba(255,105,180,0.15)", slug: "dress-to-impress" },
   ];
 
-  const [games, total, playerCounts] = await Promise.all([
+  const [games, total, gameData] = await Promise.all([
     Promise.all(gameList.map(async g => ({ ...g, quizzes: await getQuizCountByGame(g.name) }))),
     getTotalQuizCount(),
-    getPlayerCounts(),
+    getGameData(),
   ]);
 
   return (
@@ -92,14 +100,28 @@ export default async function GameCategories() {
       </div>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
         {games.map((game) => {
-          const players = playerCounts[game.slug] ?? 0;
+          const data = gameData[game.slug];
+          const players = data?.current_players ?? 0;
+          const thumbUrl = data?.thumbnail_url ?? null;
+
           return (
             <div key={game.name} style={{ position: "relative", display: "flex", flexDirection: "column" }}>
               <a href={"/games/" + game.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: players > 0 ? "var(--radius) var(--radius) 0 0" : "var(--radius)", padding: "20px 16px 14px", textAlign: "center", cursor: "pointer", position: "relative", overflow: "hidden", textDecoration: "none", display: "block" }}>
                 {game.badge && (
                   <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, background: (game as any).badgeBg, color: (game as any).badgeColor }}>{game.badge}</span>
                 )}
-                <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 12px", background: game.bg }}>{game.icon}</div>
+                {/* Thumbnail or emoji icon */}
+                {thumbUrl ? (
+                  <img
+                    src={thumbUrl}
+                    alt={game.name}
+                    width={56}
+                    height={56}
+                    style={{ borderRadius: 14, objectFit: "cover", margin: "0 auto 12px", display: "block" }}
+                  />
+                ) : (
+                  <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 12px", background: game.bg }}>{game.icon}</div>
+                )}
                 <h3 style={{ fontSize: 13, fontWeight: 800, marginBottom: 4, color: "var(--text)" }}>{game.name}</h3>
                 <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, margin: 0 }}>{game.quizzes} Quizzes</p>
               </a>

@@ -373,15 +373,15 @@ async function getQuizzesForGame(displayName: string) {
   return [];
 }
 
-async function getGameStats(gameSlug: string): Promise<{ currentPlayers: number | null; totalVisits: number | null } | null> {
+async function getGameStats(gameSlug: string): Promise<{ currentPlayers: number | null; totalVisits: number | null; thumbnailUrl: string | null } | null> {
   try {
     const { data } = await supabaseAdmin
       .from("roblox_games")
-      .select("current_players, total_visits")
+      .select("current_players, total_visits, thumbnail_url")
       .eq("slug", gameSlug)
       .single();
     if (!data) return null;
-    return { currentPlayers: data.current_players, totalVisits: data.total_visits };
+    return { currentPlayers: data.current_players, totalVisits: data.total_visits, thumbnailUrl: data.thumbnail_url };
   } catch (e) {
     return null;
   }

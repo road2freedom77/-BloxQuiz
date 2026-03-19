@@ -126,44 +126,27 @@ function StatsCard({ gameSlug, currentPlayers, totalVisits }: { gameSlug: string
     <a
       href={`/stats/${gameSlug}`}
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 16,
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
         background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)",
-        border: "1px solid rgba(0,180,216,0.25)",
-        borderRadius: "var(--radius)",
-        padding: "16px 24px",
-        textDecoration: "none",
-        marginBottom: 32,
-        flexWrap: "wrap",
+        border: "1px solid rgba(0,180,216,0.25)", borderRadius: "var(--radius)",
+        padding: "16px 24px", textDecoration: "none", marginBottom: 32, flexWrap: "wrap",
       }}
     >
       <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
         {currentPlayers && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(0,180,216,0.8)", marginBottom: 2 }}>
-              Playing Now
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
-              {formatNumber(currentPlayers)}
-            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(0,180,216,0.8)", marginBottom: 2 }}>Playing Now</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(currentPlayers)}</div>
           </div>
         )}
         {totalVisits && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>
-              Total Visits
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>
-              {formatNumber(totalVisits)}
-            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>Total Visits</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>{formatNumber(totalVisits)}</div>
           </div>
         )}
       </div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>
-        📊 View Live Stats →
-      </div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>📊 View Live Stats →</div>
     </a>
   );
 }
@@ -172,9 +155,14 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
   quizzes: any[],
   config: any,
   gameSlug: string,
-  statsData: { currentPlayers: number | null; totalVisits: number | null } | null,
+  statsData: { currentPlayers: number | null; totalVisits: number | null; thumbnailUrl: string | null } | null,
 }) {
-  const thumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
+  const gradientThumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
+  const hasThumb = !!statsData?.thumbnailUrl;
+  const heroBg = hasThumb
+    ? `url(${statsData!.thumbnailUrl})`
+    : gradientThumb;
+
   const startQuiz = getStartQuiz(quizzes);
   const [randomSlug, setRandomSlug] = useState<string>("");
 
@@ -209,10 +197,31 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
       </nav>
 
       {/* Hero banner */}
-      <div style={{ borderRadius: "var(--radius)", overflow: "hidden", marginBottom: 32, background: thumb, padding: "40px 36px", position: "relative" }}>
-        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
+      <div style={{
+        borderRadius: "var(--radius)", overflow: "hidden", marginBottom: 32,
+        background: heroBg,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        padding: "40px 36px",
+        position: "relative",
+      }}>
+        {/* Dark overlay — stronger for photos, lighter for gradients */}
+        <div style={{ position: "absolute", inset: 0, background: hasThumb ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: 56, marginBottom: 12 }}>{config.emoji}</div>
+          {/* Thumbnail inset + emoji */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+            {hasThumb ? (
+              <img
+                src={statsData!.thumbnailUrl!}
+                alt={config.displayName}
+                width={72}
+                height={72}
+                style={{ borderRadius: 14, objectFit: "cover", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0 }}
+              />
+            ) : (
+              <div style={{ fontSize: 56 }}>{config.emoji}</div>
+            )}
+          </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, 4vw, 42px)", marginBottom: 8, color: "#fff" }}>
             {config.displayName} Quizzes — Test Your Roblox Knowledge
           </h1>
@@ -240,11 +249,7 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
 
       {/* Stats cross-link card */}
       {statsData && (
-        <StatsCard
-          gameSlug={gameSlug}
-          currentPlayers={statsData.currentPlayers}
-          totalVisits={statsData.totalVisits}
-        />
+        <StatsCard gameSlug={gameSlug} currentPlayers={statsData.currentPlayers} totalVisits={statsData.totalVisits} />
       )}
 
       {/* Intro paragraph */}
@@ -291,7 +296,6 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
       {/* Quiz collection */}
       <div style={{ marginBottom: 48 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 24 }}>{config.displayName + " Quiz Collection"}</h2>
-
         {quizzes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60, color: "var(--text-muted)", fontWeight: 700 }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🚧</div>
@@ -304,7 +308,7 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               <div key={angle}>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{ANGLE_LABELS[angle] + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {grouped[angle].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={thumb} emoji={config.emoji} />)}
+                  {grouped[angle].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={gradientThumb} emoji={config.emoji} />)}
                 </div>
               </div>
             ))}
@@ -312,14 +316,14 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               <div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{"🎮 More " + config.displayName + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {grouped["Uncategorized"].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={thumb} emoji={config.emoji} />)}
+                  {grouped["Uncategorized"].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={gradientThumb} emoji={config.emoji} />)}
                 </div>
               </div>
             )}
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-            {quizzes.map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={thumb} emoji={config.emoji} />)}
+            {quizzes.map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={gradientThumb} emoji={config.emoji} />)}
           </div>
         )}
       </div>
