@@ -173,6 +173,27 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     : null;
   const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
 
+  // Build a single merged FAQPage — combine game FAQs from DB with stats-specific FAQs
+  const statsStaticFaqs = [
+    {
+      q: `How many people play ${game.name} right now?`,
+      a: `${game.name} currently has ${formatNumber(game.current_players)} concurrent players. This count is updated hourly via the Roblox API.`,
+    },
+    {
+      q: `How many total visits does ${game.name} have?`,
+      a: `${game.name} has ${formatVisits(game.total_visits)} total all-time visits, reflecting its popularity since launch.`,
+    },
+    {
+      q: `How often is the ${game.name} player count updated on BloxQuiz?`,
+      a: `Player counts are fetched every hour via the Roblox API, so the data on this page is never more than 60 minutes old.`,
+    },
+  ];
+
+  const allFaqs = [
+    ...statsStaticFaqs,
+    ...(game.faqs ?? []).map((f) => ({ q: f.q, a: f.a })),
+  ];
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -193,14 +214,15 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
         description: `Live ${game.name} player count, historical trends, and ranking vs other Roblox games.`,
         mainEntityOfPage: `https://www.bloxquiz.gg/stats/${slug}`,
       },
-      ...(game.faqs?.length ? [{
+      // Single FAQPage — merges stats FAQs + game FAQs from DB
+      {
         "@type": "FAQPage",
-        mainEntity: game.faqs.map((faq: { q: string; a: string }) => ({
+        mainEntity: allFaqs.map((faq) => ({
           "@type": "Question",
           name: faq.q,
           acceptedAnswer: { "@type": "Answer", text: faq.a },
         })),
-      }] : []),
+      },
     ],
   };
 
