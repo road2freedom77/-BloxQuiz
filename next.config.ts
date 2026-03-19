@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         destination: "/games/brookhaven-rp",
         permanent: true,
       },
+        {
+        source: "/games/all-games",
+        destination: "/browse",
+        permanent: true,
+},
     ];
   },
 };
