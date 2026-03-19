@@ -173,7 +173,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     : null;
   const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
 
-  // Build a single merged FAQPage — combine game FAQs from DB with stats-specific FAQs
+  // Stats-specific FAQs with live data
   const statsStaticFaqs = [
     {
       q: `How many people play ${game.name} right now?`,
@@ -189,10 +189,14 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     },
   ];
 
-  const allFaqs = [
-    ...statsStaticFaqs,
-    ...(game.faqs ?? []).map((f) => ({ q: f.q, a: f.a })),
-  ];
+  // Merge DB FAQs — deduplicate by normalised question text to prevent doubles
+  // (the content cron generates similar questions that overlap with statsStaticFaqs)
+  const staticQuestions = new Set(statsStaticFaqs.map((f) => f.q.toLowerCase().trim()));
+  const dbFaqs = (game.faqs ?? [])
+    .map((f) => ({ q: f.q, a: f.a }))
+    .filter((f) => !staticQuestions.has(f.q.toLowerCase().trim()));
+
+  const allFaqs = [...statsStaticFaqs, ...dbFaqs];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -214,7 +218,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
         description: `Live ${game.name} player count, historical trends, and ranking vs other Roblox games.`,
         mainEntityOfPage: `https://www.bloxquiz.gg/stats/${slug}`,
       },
-      // Single FAQPage — merges stats FAQs + game FAQs from DB
+      // Single FAQPage — stats FAQs first, then unique DB FAQs (dupes filtered out)
       {
         "@type": "FAQPage",
         mainEntity: allFaqs.map((faq) => ({
