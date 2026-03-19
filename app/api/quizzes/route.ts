@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../lib/supabase";
+import { supabaseAdmin } from "../../lib/supabase";
 import fs from "fs";
 import path from "path";
 
@@ -7,7 +8,6 @@ const staticQuizzes = [
   { slug: "blox-fruits-ultimate", title: "Ultimate Blox Fruits Expert Quiz", game: "Blox Fruits", difficulty: "Hard", questions: 10, emoji: "🍎⚔️🌊", thumb: "linear-gradient(135deg, #1a0a2e, #3d1a5c)" },
   { slug: "brookhaven-secrets", title: "Brookhaven Secrets You Didn't Know", game: "Brookhaven", difficulty: "Easy", questions: 10, emoji: "🏠🚗👨‍👩‍👧", thumb: "linear-gradient(135deg, #0a1628, #1a3a5c)" },
   { slug: "adopt-me-pets", title: "Name That Pet! — Adopt Me Edition", game: "Adopt Me!", difficulty: "Medium", questions: 10, emoji: "🐶🦄🥚✨", thumb: "linear-gradient(135deg, #2a1a0a, #5c3a1a)" },
-  { slug: "which-roblox-game", title: "Which Roblox Game Are You?", game: "All Games", difficulty: "Medium", questions: 10, emoji: "🧠🎭❓", thumb: "linear-gradient(135deg, #0a2818, #1a5c3a)" },
 ];
 
 const gameEmojis: Record<string, string> = {
@@ -27,6 +27,9 @@ const gameEmojis: Record<string, string> = {
   "Anime Defenders": "🐉",
   "Funky Friday": "🎵",
   "Kick Off": "⚽",
+  "Bee Swarm Simulator": "🐝",
+  "Dress to Impress": "👗",
+  "Fisch": "🎣",
 };
 
 const gameThumbs: Record<string, string> = {
@@ -46,12 +49,40 @@ const gameThumbs: Record<string, string> = {
   "Anime Defenders": "linear-gradient(135deg, #0a0a1a, #1a1a4a)",
   "Funky Friday": "linear-gradient(135deg, #1a0a2a, #4a1a5c)",
   "Kick Off": "linear-gradient(135deg, #0a1a0a, #1a4a1a)",
+  "Bee Swarm Simulator": "linear-gradient(135deg, #1a1400, #3a2e00)",
+  "Dress to Impress": "linear-gradient(135deg, #2a0a1e, #5c1a4a)",
+  "Fisch": "linear-gradient(135deg, #0a1a2a, #0a3a5c)",
 };
+
+async function getThumbnailsBySlug(): Promise<Record<string, string>> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("roblox_games")
+      .select("name, thumbnail_url")
+      .eq("is_tracked", true);
+    if (!data) return {};
+    const map: Record<string, string> = {};
+    for (const g of data) {
+      if (g.thumbnail_url) map[g.name] = g.thumbnail_url;
+    }
+    return map;
+  } catch {
+    return {};
+  }
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get("limit") || "200");
   const game = searchParams.get("game") || null;
+
+  const [thumbnails] = await Promise.all([getThumbnailsBySlug()]);
+
+  function getThumb(gameName: string): string {
+    return thumbnails[gameName]
+      ? `url(${thumbnails[gameName]})`
+      : gameThumbs[gameName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
+  }
 
   const slugsSeen = new Set<string>();
   const allQuizzes: any[] = [];
@@ -72,7 +103,8 @@ export async function GET(request: Request) {
           difficulty: content.difficulty,
           questions: content.questions?.length || 10,
           emoji: gameEmojis[content.game] || "🎮",
-          thumb: gameThumbs[content.game] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)",
+          thumb: getThumb(content.game),
+          thumbIsImage: !!thumbnails[content.game],
           source: "json",
         });
         slugsSeen.add(slug);
@@ -85,6 +117,7 @@ export async function GET(request: Request) {
     const { data } = await supabase
       .from("quizzes")
       .select("slug, title, game, difficulty, questions, published_at")
+      .neq("status", "draft")
       .order("published_at", { ascending: false });
 
     if (data) {
@@ -97,7 +130,8 @@ export async function GET(request: Request) {
             difficulty: q.difficulty,
             questions: Array.isArray(q.questions) ? q.questions.length : 10,
             emoji: gameEmojis[q.game] || "🎮",
-            thumb: gameThumbs[q.game] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)",
+            thumb: getThumb(q.game),
+            thumbIsImage: !!thumbnails[q.game],
             source: "generated",
             published_at: q.published_at,
           });
@@ -110,7 +144,12 @@ export async function GET(request: Request) {
   // Add static quizzes not already included
   for (const q of staticQuizzes) {
     if (!slugsSeen.has(q.slug)) {
-      allQuizzes.push({ ...q, source: "static" });
+      allQuizzes.push({
+        ...q,
+        thumb: getThumb(q.game),
+        thumbIsImage: !!thumbnails[q.game],
+        source: "static",
+      });
       slugsSeen.add(q.slug);
     }
   }

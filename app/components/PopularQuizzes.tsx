@@ -27,9 +27,25 @@ export default function PopularQuizzes({ initialQuizzes }: { initialQuizzes: any
           const diff = diffColors[quiz.difficulty] || diffColors.Medium;
           return (
             <a href={"/quiz/" + quiz.slug} key={quiz.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
-              <div style={{ height: 140, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 52, background: quiz.thumb, position: "relative" }}>
-                {quiz.emoji}
+              <div style={{ height: 140, position: "relative", overflow: "hidden" }}>
+                {quiz.thumbIsImage ? (
+                  <>
+                    <img
+                      src={quiz.thumb.replace("url(", "").replace(")", "")}
+                      alt={quiz.game}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    />
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)" }} />
+                  </>
+                ) : (
+                  <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 52, background: quiz.thumb }} >
+                    {quiz.emoji}
+                  </div>
+                )}
                 <span style={{ position: "absolute", bottom: 10, right: 10, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>
+                {quiz.thumbIsImage && (
+                  <span style={{ position: "absolute", top: 10, left: 10, fontSize: 24 }}>{quiz.emoji}</span>
+                )}
               </div>
               <div style={{ padding: "16px 18px 20px" }}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
