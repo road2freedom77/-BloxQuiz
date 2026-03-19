@@ -93,10 +93,23 @@ function formatNumber(n: number | null | undefined): string {
 function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: string }) {
   const diff = diffColors[quiz.difficulty] || diffColors.Medium;
   const displayAngle = inferAngle(quiz);
+  const isImage = thumb.startsWith("url(");
+  const imgSrc = isImage ? thumb.replace("url(", "").replace(")", "") : null;
+
   return (
     <a href={`/quiz/${quiz.slug}`} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
-      <div style={{ height: 100, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, background: thumb, position: "relative" }}>
-        {emoji}
+      <div style={{ height: 100, position: "relative", overflow: "hidden" }}>
+        {isImage && imgSrc ? (
+          <>
+            <img src={imgSrc} alt={quiz.game} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", fontSize: 32 }}>{emoji}</span>
+          </>
+        ) : (
+          <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, background: thumb }}>
+            {emoji}
+          </div>
+        )}
         <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>
       </div>
       <div style={{ padding: "14px 16px 18px" }}>
@@ -123,15 +136,7 @@ function getStartQuiz(quizzes: any[]): string {
 function StatsCard({ gameSlug, currentPlayers, totalVisits }: { gameSlug: string; currentPlayers: number | null; totalVisits: number | null }) {
   if (!currentPlayers && !totalVisits) return null;
   return (
-    <a
-      href={`/stats/${gameSlug}`}
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-        background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)",
-        border: "1px solid rgba(0,180,216,0.25)", borderRadius: "var(--radius)",
-        padding: "16px 24px", textDecoration: "none", marginBottom: 32, flexWrap: "wrap",
-      }}
-    >
+    <a href={`/stats/${gameSlug}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)", border: "1px solid rgba(0,180,216,0.25)", borderRadius: "var(--radius)", padding: "16px 24px", textDecoration: "none", marginBottom: 32, flexWrap: "wrap" }}>
       <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
         {currentPlayers && (
           <div>
@@ -159,9 +164,8 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
 }) {
   const gradientThumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
   const hasThumb = !!statsData?.thumbnailUrl;
-  const heroBg = hasThumb
-    ? `url(${statsData!.thumbnailUrl})`
-    : gradientThumb;
+  const heroBg = hasThumb ? `url(${statsData!.thumbnailUrl})` : gradientThumb;
+  const cardThumb = hasThumb ? `url(${statsData!.thumbnailUrl})` : gradientThumb;
 
   const startQuiz = getStartQuiz(quizzes);
   const [randomSlug, setRandomSlug] = useState<string>("");
@@ -197,27 +201,12 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
       </nav>
 
       {/* Hero banner */}
-      <div style={{
-        borderRadius: "var(--radius)", overflow: "hidden", marginBottom: 32,
-        background: heroBg,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        padding: "40px 36px",
-        position: "relative",
-      }}>
-        {/* Dark overlay — stronger for photos, lighter for gradients */}
+      <div style={{ borderRadius: "var(--radius)", overflow: "hidden", marginBottom: 32, background: heroBg, backgroundSize: "cover", backgroundPosition: "center", padding: "40px 36px", position: "relative" }}>
         <div style={{ position: "absolute", inset: 0, background: hasThumb ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
-          {/* Thumbnail inset + emoji */}
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
             {hasThumb ? (
-              <img
-                src={statsData!.thumbnailUrl!}
-                alt={config.displayName}
-                width={72}
-                height={72}
-                style={{ borderRadius: 14, objectFit: "cover", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0 }}
-              />
+              <img src={statsData!.thumbnailUrl!} alt={config.displayName} width={72} height={72} style={{ borderRadius: 14, objectFit: "cover", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0 }} />
             ) : (
               <div style={{ fontSize: 56 }}>{config.emoji}</div>
             )}
@@ -229,28 +218,17 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
             {quizzes.length} quizzes available — test your {config.displayName} knowledge across all difficulty levels!
           </p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <a href={startQuiz}
-              style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
-              ⚡ Start Easiest Quiz
-            </a>
+            <a href={startQuiz} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>⚡ Start Easiest Quiz</a>
             {randomSlug && (
-              <a href={`/quiz/${randomSlug}`}
-                style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}>
-                🎲 Random Quiz
-              </a>
+              <a href={`/quiz/${randomSlug}`} style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}>🎲 Random Quiz</a>
             )}
-            <a href="/codes"
-              style={{ background: "rgba(255,255,255,0.1)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>
-              🎁 Free Roblox Codes
-            </a>
+            <a href="/codes" style={{ background: "rgba(255,255,255,0.1)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>🎁 Free Roblox Codes</a>
           </div>
         </div>
       </div>
 
       {/* Stats cross-link card */}
-      {statsData && (
-        <StatsCard gameSlug={gameSlug} currentPlayers={statsData.currentPlayers} totalVisits={statsData.totalVisits} />
-      )}
+      {statsData && <StatsCard gameSlug={gameSlug} currentPlayers={statsData.currentPlayers} totalVisits={statsData.totalVisits} />}
 
       {/* Intro paragraph */}
       <p style={{ fontSize: 15, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, marginBottom: 40 }}>{config.intro}</p>
@@ -308,7 +286,7 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               <div key={angle}>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{ANGLE_LABELS[angle] + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {grouped[angle].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={gradientThumb} emoji={config.emoji} />)}
+                  {grouped[angle].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} />)}
                 </div>
               </div>
             ))}
@@ -316,14 +294,14 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               <div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{"🎮 More " + config.displayName + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {grouped["Uncategorized"].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={gradientThumb} emoji={config.emoji} />)}
+                  {grouped["Uncategorized"].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} />)}
                 </div>
               </div>
             )}
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-            {quizzes.map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={gradientThumb} emoji={config.emoji} />)}
+            {quizzes.map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} />)}
           </div>
         )}
       </div>
@@ -356,8 +334,7 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               const relSlug = relatedGame.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
               const emoji = gameEmojis[relatedGame] || "🎮";
               return (
-                <a key={relatedGame} href={`/games/${relSlug}`}
-                  style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px 20px", textDecoration: "none", display: "flex", alignItems: "center", gap: 12 }}>
+                <a key={relatedGame} href={`/games/${relSlug}`} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px 20px", textDecoration: "none", display: "flex", alignItems: "center", gap: 12 }}>
                   <span style={{ fontSize: 24 }}>{emoji}</span>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{relatedGame} Quizzes</div>
