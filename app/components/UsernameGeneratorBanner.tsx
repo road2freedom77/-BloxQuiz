@@ -15,10 +15,11 @@ export default function UsernameGeneratorBanner() {
           overflow: "hidden",
           cursor: "pointer",
           flexWrap: "wrap",
+          alignContent: "flex-start",
         }}>
           <div style={{ position: "absolute", top: -40, right: 80, width: 200, height: 200, background: "radial-gradient(circle, rgba(184,76,255,0.15), transparent 70%)", pointerEvents: "none" }} />
 
-          <div style={{ display: "flex", alignItems: "center", gap: 20, position: "relative", zIndex: 1, flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 20, position: "relative", zIndex: 1, flex: 1, minWidth: 240 }}>
             <div style={{ fontSize: 48, lineHeight: 1, flexShrink: 0 }}>✨</div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1.5, color: "#B84CFF", marginBottom: 6 }}>Free Tool</div>
@@ -32,7 +33,7 @@ export default function UsernameGeneratorBanner() {
           </div>
 
           <div style={{
-            padding: "12px 28px",
+            padding: "14px 32px",
             borderRadius: 100,
             background: "linear-gradient(135deg, #B84CFF, #00F5A0)",
             color: "#0B0E17",
@@ -43,6 +44,7 @@ export default function UsernameGeneratorBanner() {
             position: "relative",
             zIndex: 1,
             flexShrink: 0,
+            alignSelf: "center",
           }}>
             Find Your Username →
           </div>
