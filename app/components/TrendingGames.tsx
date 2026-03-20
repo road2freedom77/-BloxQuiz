@@ -33,8 +33,7 @@ async function getTrendingGames(): Promise<GameRow[]> {
       ...g,
       quiz_count: countMap[g.name] ?? 0,
     }));
-  } catch (e) {
-    console.error("TrendingGames error:", e);
+  } catch {
     return [];
   }
 }
@@ -47,11 +46,7 @@ function formatPlayers(n: number) {
 
 export default async function TrendingGames() {
   const games = await getTrendingGames();
-
-  if (!games.length) {
-    console.log("TrendingGames: no games returned");
-    return <div style={{ color: "red", padding: 24 }}>No games found</div>;
-  }
+  if (!games.length) return null;
 
   return (
     <div style={{ maxWidth: 1200, margin: "40px auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
