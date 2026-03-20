@@ -100,7 +100,7 @@ export default async function GameCategories() {
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>🎮 Pick a Game</h2>
         <a href="/browse" style={{ color: "var(--neon-green)", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{"View All " + total + "+ →"}</a>
       </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 64px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
         {games.map((game) => {
           const data = gameData[game.slug];
           const players = data?.current_players ?? 0;
