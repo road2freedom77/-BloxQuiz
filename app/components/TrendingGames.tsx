@@ -46,6 +46,7 @@ function formatPlayers(n: number) {
 
 export default async function TrendingGames() {
   const games = await getTrendingGames();
+  console.log("TrendingGames games:", games);
   if (!games.length) return null;
 
   return (
