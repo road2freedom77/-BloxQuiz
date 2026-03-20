@@ -2,6 +2,7 @@ import Hero from "./components/Hero";
 import GameCategories from "./components/GameCategories";
 import PopularQuizzes from "./components/PopularQuizzes";
 import DailyChallenge from "./components/DailyChallenge";
+import TrendingGames from "./components/TrendingGames";
 import Codes from "./components/Codes";
 import EmailSignup from "./components/EmailSignup";
 import UsernameGeneratorBanner from "./components/UsernameGeneratorBanner";
@@ -65,6 +66,7 @@ export default async function Home() {
   return (
     <>
       <Hero />
+      <TrendingGames />
       <GameCategories />
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
@@ -74,4 +76,3 @@ export default async function Home() {
     </>
   );
 }
-
