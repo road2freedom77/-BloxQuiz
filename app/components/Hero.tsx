@@ -1,10 +1,34 @@
-"use client";
+import { supabase } from "../lib/supabase";
 
-export default function Hero() {
+export default async function Hero() {
+  let quizCount = 353;
+  let gameCount = 18;
+  let codeCount = 97;
+
+  try {
+    const [
+      { count: qCount },
+      { data: games },
+      { count: cCount },
+    ] = await Promise.all([
+      supabase.from("quizzes").select("*", { count: "exact", head: true }).eq("status", "published"),
+      supabase.from("quizzes").select("game"),
+      supabase.from("codes").select("*", { count: "exact", head: true }).eq("active", true),
+    ]);
+
+    const distinctGames = new Set((games ?? []).map(r => r.game)).size;
+
+    quizCount = qCount ?? quizCount;
+    gameCount = distinctGames || gameCount;
+    codeCount = cCount ?? codeCount;
+  } catch {
+    // fallback to hardcoded values above
+  }
+
   const proofBlocks = [
-    { value: "353+", label: "Quizzes Across 18 Games", color: "var(--neon-green)" },
-    { value: "97",   label: "Active Codes Updated Daily", color: "var(--neon-pink)" },
-    { value: "LIVE", label: "Player Counts from Roblox", color: "var(--neon-yellow)" },
+    { value: `${quizCount}+`, label: `Quizzes Across ${gameCount} Games` },
+    { value: `${codeCount}`,  label: "Active Codes Updated Daily" },
+    { value: "LIVE",          label: "Player Counts from Roblox" },
   ];
 
   return (
@@ -16,7 +40,7 @@ export default function Hero() {
     }}>
       {/* Badges */}
       <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>● 353+ Quizzes</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>● {quizCount}+ Quizzes</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,60,172,0.12)", color: "var(--neon-pink)" }}>● Daily Challenges</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,227,71,0.12)", color: "var(--neon-yellow)" }}>● Free Codes</span>
       </div>
@@ -59,7 +83,7 @@ export default function Hero() {
 
       {/* Proof Blocks */}
       <div style={{ display: "flex", justifyContent: "center", gap: 40, flexWrap: "wrap" }}>
-        {proofBlocks.map(({ value, label, color }) => (
+        {proofBlocks.map(({ value, label }) => (
           <div key={label} style={{ textAlign: "center" }}>
             <div style={{
               fontFamily: "var(--font-display)", fontSize: 32,
