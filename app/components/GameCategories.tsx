@@ -18,7 +18,8 @@ async function getQuizCountByGame(gameName: string): Promise<number> {
     const { count: generatedCount } = await supabase
       .from("quizzes")
       .select("*", { count: "exact", head: true })
-      .eq("game", gameName);
+      .eq("game", gameName)
+      .eq("status", "published");
     count += generatedCount || 0;
   } catch {}
   return count;
@@ -28,10 +29,11 @@ async function getTotalQuizCount(): Promise<number> {
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
     const jsonCount = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
-    const { count: generatedCount } = await supabase
+    const { count: publishedCount } = await supabase
       .from("quizzes")
-      .select("*", { count: "exact", head: true });
-    return jsonCount + (generatedCount || 0);
+      .select("*", { count: "exact", head: true })
+      .eq("status", "published");
+    return jsonCount + (publishedCount || 0);
   } catch {
     return 0;
   }
@@ -95,7 +97,7 @@ export default async function GameCategories() {
   return (
     <div id="games" style={{ position: "relative", zIndex: 1 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>{"🎮 Pick a Game"}</h2>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>🎮 Pick a Game</h2>
         <a href="/browse" style={{ color: "var(--neon-green)", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{"View All " + total + "+ →"}</a>
       </div>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
@@ -110,7 +112,6 @@ export default async function GameCategories() {
                 {game.badge && (
                   <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, background: (game as any).badgeBg, color: (game as any).badgeColor }}>{game.badge}</span>
                 )}
-                {/* Thumbnail or emoji icon */}
                 {thumbUrl ? (
                   <img
                     src={thumbUrl}
