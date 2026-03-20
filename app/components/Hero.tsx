@@ -20,7 +20,6 @@ export default async function Hero() {
 
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
     const jsonCount = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
-
     const distinctGames = new Set((games ?? []).map(r => r.game)).size;
 
     quizCount = (qCount ?? 0) + jsonCount;
@@ -43,12 +42,14 @@ export default async function Hero() {
       textAlign: "center",
       position: "relative", zIndex: 1
     }}>
+      {/* Badges */}
       <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(0,245,160,0.12)", color: "var(--neon-green)" }}>● {quizCount}+ Quizzes</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,60,172,0.12)", color: "var(--neon-pink)" }}>● Daily Challenges</span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 100, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, background: "rgba(255,227,71,0.12)", color: "var(--neon-yellow)" }}>● Free Codes</span>
       </div>
 
+      {/* Headline */}
       <h1 style={{
         fontFamily: "var(--font-display)",
         fontSize: "clamp(40px, 6vw, 74px)",
@@ -60,11 +61,13 @@ export default async function Hero() {
         <span style={{ background: "var(--gradient-fire)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Roblox?</span>
       </h1>
 
+      {/* Subheading */}
       <p style={{ fontSize: 18, color: "var(--text-muted)", maxWidth: 540, margin: "0 auto 36px", fontWeight: 600 }}>
         Test your knowledge on Blox Fruits, Brookhaven, Adopt Me & more. Play quizzes, earn XP, and see live player counts.
       </p>
 
-      <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
+      {/* CTAs */}
+      <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 40 }}>
         <a href="/quiz/random" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "var(--gradient-main)",
@@ -82,15 +85,18 @@ export default async function Hero() {
         }}>🎮 Browse All Quizzes</a>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
+      {/* Proof Blocks */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 32, rowGap: 8, flexWrap: "wrap" }}>
         {proofBlocks.map(({ value, label }) => (
-          <div key={label} style={{ textAlign: "center" }}>
+          <div key={label} style={{ textAlign: "center", minWidth: 100 }}>
             <div style={{
-              fontFamily: "var(--font-display)", fontSize: 32,
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(22px, 5vw, 32px)",
               background: "var(--gradient-main)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              lineHeight: 1.1,
             }}>{value}</div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>{label}</div>
+            <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>{label}</div>
           </div>
         ))}
       </div>
