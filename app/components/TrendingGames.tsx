@@ -6,6 +6,7 @@ interface GameRow {
   slug: string;
   emoji: string;
   current_players: number;
+  thumbnail_url: string | null;
   quiz_count: number;
 }
 
@@ -14,7 +15,7 @@ async function getTrendingGames(): Promise<GameRow[]> {
     const [{ data: games }, { data: quizCounts }] = await Promise.all([
       supabase
         .from("roblox_games")
-        .select("universe_id, name, slug, emoji, current_players")
+        .select("universe_id, name, slug, emoji, current_players, thumbnail_url")
         .eq("is_tracked", true)
         .order("current_players", { ascending: false })
         .limit(8),
@@ -88,8 +89,21 @@ export default async function TrendingGames() {
             flexDirection: "column",
             gap: 12,
           }}>
-            <div style={{ fontSize: 36, lineHeight: 1 }}>{game.emoji || "🎮"}</div>
+            {/* Thumbnail or emoji fallback */}
+            {game.thumbnail_url ? (
+              <img
+                src={game.thumbnail_url}
+                alt={game.name}
+                width={80}
+                height={80}
+                style={{ borderRadius: 12, objectFit: "cover", width: 80, height: 80 }}
+              />
+            ) : (
+              <div style={{ fontSize: 36, lineHeight: 1 }}>{game.emoji || "🎮"}</div>
+            )}
+
             <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.3 }}>{game.name}</div>
+
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{
                 width: 8,
@@ -103,6 +117,7 @@ export default async function TrendingGames() {
                 {formatPlayers(game.current_players)} playing
               </span>
             </div>
+
             <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700, marginTop: "auto" }}>
               {game.quiz_count > 0 ? `${game.quiz_count} quiz${game.quiz_count !== 1 ? "zes" : ""}` : "Coming soon"}
             </div>
