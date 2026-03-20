@@ -1,30 +1,44 @@
+/* ============================================
+   FaithBlitz — globals.css
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg: #0B0E17;
-  --bg-card: #141929;
-  --bg-card-hover: #1A2038;
-  --surface: #1E2540;
-  --border: #2A3155;
-  --text: #E8EAF6;
-  --text-muted: #8B92B0;
-  --text-dim: #5C6490;
-  --neon-green: #00F5A0;
-  --neon-blue: #00D9FF;
-  --neon-pink: #FF3CAC;
-  --neon-yellow: #FFE347;
-  --neon-orange: #FF8A47;
-  --neon-purple: #B84CFF;
-  --gradient-main: linear-gradient(135deg, #00F5A0, #00D9FF);
-  --gradient-fire: linear-gradient(135deg, #FF3CAC, #FF8A47);
-  --gradient-gold: linear-gradient(135deg, #FFE347, #FF8A47);
-  --gradient-purple: linear-gradient(135deg, #B84CFF, #00D9FF);
-  --radius: 16px;
+  --bg: #faf8f4;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8f5ef;
+  --surface: #f0ebe0;
+  --border: #e8e2d6;
+  --text: #1c1c1c;
+  --text-muted: #5a5a5a;
+  --text-dim: #8a8a8a;
+  --navy: #0f1a2e;
+  --navy-light: #162040;
+  --navy-dark: #0a1220;
+  --gold: #c9a84c;
+  --gold-light: #d4b65e;
+  --gold-dark: #b8963a;
+  --gold-muted: rgba(201,168,76,0.1);
+  --cream: #faf8f4;
+  --sand: #f0ebe0;
+  --correct: #3a7d44;
+  --correct-bg: #e8f5e9;
+  --correct-border: #66BB6A;
+  --wrong: #c0392b;
+  --wrong-bg: #fff3f0;
+  --wrong-border: #EF5350;
+  --gradient-main: linear-gradient(135deg, #c9a84c, #d4b65e);
+  --gradient-hero: linear-gradient(170deg, #0a1220 0%, #0f1a2e 50%, #162040 100%);
+  --radius: 14px;
   --radius-sm: 10px;
   --radius-xs: 6px;
-  --font-display: 'Lilita One', cursive;
-  --font-body: 'Nunito', sans-serif;
-  --shadow-glow-green: 0 0 30px rgba(0,245,160,0.15);
-  --shadow-glow-pink: 0 0 30px rgba(255,60,172,0.15);
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+  --shadow-gold: 0 3px 14px rgba(201,168,76,0.3);
+  --shadow-gold-hover: 0 5px 20px rgba(201,168,76,0.4);
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.03);
+  --shadow-card-hover: 0 6px 24px rgba(0,0,0,0.06);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,26 +49,173 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
-}
-
-body::before {
-  content: '';
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background:
-    radial-gradient(ellipse at 20% 20%, rgba(0,245,160,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(255,60,172,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(0,217,255,0.03) 0%, transparent 60%);
-  pointer-events: none; z-index: 0;
-}
-
-body::after {
-  content: '';
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none; z-index: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 section, nav, footer { position: relative; z-index: 1; }
+
+/* Gold gradient button */
+.btn-gold {
+  background: var(--gradient-main);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-gold);
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-gold-hover);
+}
+.btn-gold.full { width: 100%; }
+
+/* Ghost button */
+.btn-ghost {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 8px;
+  background: rgba(250,248,244,0.06);
+  color: var(--cream);
+  border: 1px solid rgba(250,248,244,0.12);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-ghost:hover { background: rgba(250,248,244,0.1); }
+
+/* Card base */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Quiz option button */
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+}
+.option-btn:hover:not(.locked) {
+  border-color: var(--gold);
+  background: var(--bg-card-hover);
+}
+.option-btn.correct {
+  background: var(--correct-bg);
+  border-color: var(--correct-border);
+  color: #2E7D32;
+  font-weight: 700;
+}
+.option-btn.wrong {
+  background: var(--wrong-bg);
+  border-color: var(--wrong-border);
+  color: #C62828;
+  font-weight: 700;
+}
+
+/* Option circle */
+.option-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.option-circle.correct { background: var(--correct-border); color: #fff; }
+.option-circle.wrong { background: var(--wrong-border); color: #fff; }
+
+/* Progress bar */
+.progress-track {
+  height: 5px;
+  background: var(--sand);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-main);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* Difficulty badges */
+.badge {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.badge-easy { color: var(--correct); background: var(--correct-bg); }
+.badge-medium { color: #e67e22; background: #fff3e0; }
+.badge-hard { color: var(--wrong); background: var(--wrong-bg); }
+
+/* Category tag */
+.tag-cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: rgba(15,26,46,0.06);
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* Scripture reference box */
+.scripture-box {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border-radius: var(--radius-sm);
+  background: rgba(15,26,46,0.03);
+  border: 1px solid rgba(15,26,46,0.07);
+}
+.scripture-box .ref {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.scripture-box p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--sand); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border); }

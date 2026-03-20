@@ -20,6 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/leaderboard`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
     { url: `${base}/codes`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/roblox-username-ideas`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/roblox-display-name-generator`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/roblox-bio-generator`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },  
     { url: `${base}/champions`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/rules`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
