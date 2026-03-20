@@ -130,7 +130,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!game) return {};
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-  const title = game.meta_title || `${game.name} Player Count (${month}) — Live Stats | BloxQuiz`;
+  const title = game.meta_title || `${game.name} Player Count — ${formatNumber(game.current_players)} Playing Now (${month}) | BloxQuiz`;
   const description = game.meta_description || `${game.name} has ${formatNumber(game.current_players)} active players right now and ${formatVisits(game.total_visits)} total visits. Live player count, historical charts, and ranking vs other Roblox games. Updated hourly.`;
 
   return {
