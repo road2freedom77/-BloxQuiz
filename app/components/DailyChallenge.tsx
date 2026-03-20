@@ -14,12 +14,6 @@ export default function DailyChallenge({ initialDaily }: { initialDaily: any }) 
     month: "short", day: "numeric", year: "numeric"
   });
 
-  const stats = [
-    [daily?.stats?.playedToday?.toLocaleString() ?? "0", "Played Today"],
-    [daily?.stats?.avgScore ?? "0", "Avg Score"],
-    [`${daily?.stats?.perfectPct ?? 0}%`, "Perfect Score"],
-  ];
-
   function goToChallenge() {
     if (daily?.slug) window.location.href = "/quiz/" + daily.slug;
   }
@@ -29,40 +23,29 @@ export default function DailyChallenge({ initialDaily }: { initialDaily: any }) 
       <div style={{
         background: "var(--bg-card)", border: "1px solid var(--border)",
         borderRadius: "var(--radius)", padding: 40,
-        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40,
-        alignItems: "center", position: "relative", overflow: "hidden"
+        position: "relative", overflow: "hidden"
       }}>
         <div style={{ position: "absolute", top: "-60%", right: "-20%", width: 400, height: 400, background: "radial-gradient(circle, rgba(255,60,172,0.08), transparent 70%)", pointerEvents: "none" }} />
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--neon-pink)", marginBottom: 12 }}>
-            {"⚡ Daily Challenge — "}{formattedDate}
-          </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginBottom: 10 }}>
-            {daily ? "Today: " + daily.title : "Loading today's challenge..."}
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 24 }}>
-            {daily
-              ? "A " + daily.difficulty + " quiz about " + daily.game + ". Can you get a perfect score? New challenge drops every day at midnight!"
-              : "Get ready to test your Roblox knowledge..."}
-          </p>
-          <button onClick={goToChallenge} style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 16,
-            padding: "16px 36px", borderRadius: 100, border: "none",
-            cursor: "pointer", fontFamily: "var(--font-body)",
-            WebkitTextFillColor: "var(--bg)", boxShadow: "0 4px 20px rgba(0,245,160,0.25)"
-          }}>
-            {"🎯 Take Today's Challenge"}
-          </button>
+        <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--neon-pink)", marginBottom: 12 }}>
+          ⚡ Daily Challenge — {formattedDate}
         </div>
-        <div style={{ display: "flex", gap: 24 }}>
-          {stats.map(([num, label]) => (
-            <div key={label} style={{ textAlign: "center", padding: "16px 24px", background: "var(--surface)", borderRadius: "var(--radius-sm)" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--neon-yellow)" }}>{num}</div>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 700, textTransform: "uppercase" }}>{label}</div>
-            </div>
-          ))}
-        </div>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginBottom: 10 }}>
+          {daily ? "Today: " + daily.title : "Loading today's challenge..."}
+        </h2>
+        <p style={{ color: "var(--text-muted)", fontWeight: 600, marginBottom: 24 }}>
+          {daily
+            ? `A ${daily.difficulty} quiz about ${daily.game}. Can you get a perfect score? New challenge drops every day at midnight!`
+            : "Get ready to test your Roblox knowledge..."}
+        </p>
+        <button onClick={goToChallenge} style={{
+          display: "inline-flex", alignItems: "center", gap: 8,
+          background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 16,
+          padding: "16px 36px", borderRadius: 100, border: "none",
+          cursor: "pointer", fontFamily: "var(--font-body)",
+          WebkitTextFillColor: "var(--bg)", boxShadow: "0 4px 20px rgba(0,245,160,0.25)"
+        }}>
+          🎯 Take Today's Challenge
+        </button>
       </div>
     </div>
   );

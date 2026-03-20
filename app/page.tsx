@@ -3,32 +3,13 @@ import GameCategories from "./components/GameCategories";
 import PopularQuizzes from "./components/PopularQuizzes";
 import DailyChallenge from "./components/DailyChallenge";
 import Codes from "./components/Codes";
-import Leaderboard from "./components/Leaderboard";
 import EmailSignup from "./components/EmailSignup";
 import UsernameGeneratorBanner from "./components/UsernameGeneratorBanner";
 import { supabase } from "./lib/supabase";
 import fs from "fs";
 import path from "path";
 
-async function getInitialStats() {
-  try {
-    const { count: quizzesPlayed } = await supabase
-      .from("plays")
-      .select("*", { count: "exact", head: true });
-    const { count: players } = await supabase
-      .from("users")
-      .select("*", { count: "exact", head: true });
-    const { count: generatedCount } = await supabase
-      .from("quizzes")
-      .select("*", { count: "exact", head: true });
-    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const jsonCount = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
-    const totalQuizzes = jsonCount + (generatedCount || 0);
-    return { quizzesPlayed: quizzesPlayed || 0, players: players || 0, totalQuizzes, gamesCovered: 18 };
-  } catch {
-    return { quizzesPlayed: 0, players: 0, totalQuizzes: 45, gamesCovered: 18 };
-  }
-}
+const DAILY_CHALLENGE_THRESHOLD = 50;
 
 async function getInitialQuizzes() {
   try {
@@ -51,26 +32,6 @@ async function getInitialQuizzes() {
   }
 }
 
-async function getInitialLeaderboard() {
-  try {
-    const { data } = await supabase
-      .from("users")
-      .select("id, username, xp")
-      .order("xp", { ascending: false })
-      .limit(10);
-    return (data || []).map((u, i) => ({
-      rank: i + 1,
-      user_id: u.id,
-      username: u.username,
-      xp: u.xp,
-      quizzes_played: 0,
-      total_score: u.xp,
-    }));
-  } catch {
-    return [];
-  }
-}
-
 async function getInitialDaily() {
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
@@ -86,7 +47,6 @@ async function getInitialDaily() {
       game: data.game,
       difficulty: data.difficulty,
       date: today,
-      stats: { playedToday: 0, avgScore: 0, perfectPct: 0 }
     };
   } catch {
     return null;
@@ -94,22 +54,22 @@ async function getInitialDaily() {
 }
 
 export default async function Home() {
-  const [initialStats, initialQuizzes, initialLeaderboard, initialDaily] = await Promise.all([
-    getInitialStats(),
+  const [initialQuizzes, initialDaily, { count: totalPlays }] = await Promise.all([
     getInitialQuizzes(),
-    getInitialLeaderboard(),
     getInitialDaily(),
+    supabase.from("plays").select("*", { count: "exact", head: true }),
   ]);
+
+  const showDailyChallenge = (totalPlays ?? 0) >= DAILY_CHALLENGE_THRESHOLD;
 
   return (
     <>
-      <Hero initialStats={initialStats} />
+      <Hero />
       <GameCategories />
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
-      <DailyChallenge initialDaily={initialDaily} />
+      {showDailyChallenge && <DailyChallenge initialDaily={initialDaily} />}
       <Codes />
-      <Leaderboard initialLeaderboard={initialLeaderboard} />
       <EmailSignup />
     </>
   );
