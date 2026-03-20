@@ -82,7 +82,7 @@ export default async function Hero() {
         }}>🎮 Browse All Quizzes</a>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 40, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
         {proofBlocks.map(({ value, label }) => (
           <div key={label} style={{ textAlign: "center" }}>
             <div style={{
