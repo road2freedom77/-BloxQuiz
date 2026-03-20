@@ -33,7 +33,8 @@ async function getTrendingGames(): Promise<GameRow[]> {
       ...g,
       quiz_count: countMap[g.name] ?? 0,
     }));
-  } catch {
+  } catch (e) {
+    console.error("TrendingGames error:", e);
     return [];
   }
 }
@@ -46,8 +47,11 @@ function formatPlayers(n: number) {
 
 export default async function TrendingGames() {
   const games = await getTrendingGames();
-  console.log("TrendingGames games:", games);
-  if (!games.length) return null;
+
+  if (!games.length) {
+    console.log("TrendingGames: no games returned");
+    return <div style={{ color: "red", padding: 24 }}>No games found</div>;
+  }
 
   return (
     <div style={{ maxWidth: 1200, margin: "40px auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
@@ -75,22 +79,20 @@ export default async function TrendingGames() {
         scrollbarWidth: "none",
       }}>
         {games.map(game => (
-          
-            <a key={game.universe_id} href={`/games/${game.slug}`} style={{
-              scrollSnapAlign: "start",
-              minWidth: 200,
-              flex: "0 0 200px",
-              background: "var(--bg-card)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius)",
-              padding: "20px 16px",
-              textDecoration: "none",
-              color: "inherit",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
+          <a key={game.universe_id} href={`/games/${game.slug}`} style={{
+            scrollSnapAlign: "start",
+            minWidth: 200,
+            flex: "0 0 200px",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius)",
+            padding: "20px 16px",
+            textDecoration: "none",
+            color: "inherit",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}>
             <div style={{ fontSize: 36, lineHeight: 1 }}>{game.emoji || "🎮"}</div>
             <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.3 }}>{game.name}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
