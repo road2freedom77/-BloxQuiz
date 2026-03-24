@@ -167,6 +167,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   const [copiedLink, setCopiedLink] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState<{ weighted: number, streakBonus: number, newStreak: number, capped: boolean } | null>(null);
   const [playedSlugs, setPlayedSlugs] = useState<Set<string>>(new Set());
+  const [percentile, setPercentile] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const q = quiz.questions[current];
@@ -203,7 +204,11 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       total_questions: quiz.questions.length,
     });
 
-    if (!user) return;
+    if (!user) {
+      // Still compute percentile for signed-out users
+      await computePercentile(finalScore);
+      return;
+    }
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -274,9 +279,28 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       await supabase.rpc("increment_xp", { user_id: user.id, amount: xpGained });
     }
 
-    // Mark current quiz as played locally so badge shows immediately
     setPlayedSlugs(prev => new Set([...prev, slug]));
     setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped });
+    await computePercentile(finalScore);
+  }
+
+  async function computePercentile(finalScore: number) {
+    const { data: allScores } = await supabase
+      .from("scores")
+      .select("score, total_questions")
+      .eq("quiz_slug", slug);
+
+    if (allScores && allScores.length >= 3) {
+      const myPct = finalScore / quiz.questions.length;
+      const beaten = allScores.filter((s: any) =>
+        s.total_questions > 0 && (s.score / s.total_questions) < myPct
+      ).length;
+      setPercentile(Math.round((beaten / allScores.length) * 100));
+    } else {
+      // Fallback — difficulty-based estimate until enough data accumulates
+      const fallbacks: Record<string, number> = { Easy: 42, Medium: 61, Hard: 74 };
+      setPercentile(fallbacks[quiz.difficulty] || 50);
+    }
   }
 
   function selectAnswer(idx: number) {
@@ -402,6 +426,8 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
     setShared(true);
   }
 
+  const nextQuiz = relatedQuizzes.find(rq => !playedSlugs.has(rq.slug));
+
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
       <canvas ref={canvasRef} style={{ display: "none" }} />
@@ -497,7 +523,18 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 72, marginBottom: 16 }}>{getResultLabel().emoji}</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score + "/" + quiz.questions.length}</div>
-            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>{getResultLabel().label}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{getResultLabel().label}</div>
+
+            {/* Percentile */}
+            {percentile !== null && (
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)", marginBottom: 20 }}>
+                You scored better than{" "}
+                <span style={{ color: percentile >= 70 ? "var(--neon-green)" : percentile >= 40 ? "var(--neon-yellow)" : "var(--neon-pink)", fontWeight: 900 }}>
+                  {percentile}% of players
+                </span>
+                {" "}on this quiz
+              </div>
+            )}
 
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
               {!user ? (
@@ -561,13 +598,26 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
               <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>Share your score card on TikTok, Discord or Reddit!</p>
             </div>
 
+            {/* Next quiz + action row */}
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
-              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); setEarnedPoints(null); }}
-                style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+              {nextQuiz ? (
+                <a href={"/quiz/" + nextQuiz.slug}
+                  style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, WebkitTextFillColor: "var(--bg)" }}>
+                  <span>▶</span>
+                  <span>{"Next " + quiz.game + " Quiz"}</span>
+                </a>
+              ) : (
+                <a href={"/games/" + gameSlug}
+                  style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, WebkitTextFillColor: "var(--bg)" }}>
+                  <span>🎮</span>
+                  <span>{"All " + quiz.game + " Quizzes"}</span>
+                </a>
+              )}
+              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); setEarnedPoints(null); setPercentile(null); }}
+                style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--text)" }}>
                 {"🔄 Play Again"}
               </button>
               <a href="/quiz/random" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{"⚡ Random Quiz"}</a>
-              <a href="/" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{"🏠 Home"}</a>
             </div>
 
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, textAlign: "left" }}>
