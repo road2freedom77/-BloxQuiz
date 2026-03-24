@@ -1,16 +1,16 @@
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin } from "../lib/supabase";
 import LeaderboardClient from "./LeaderboardClient";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata = {
   title: "Leaderboard — Top Roblox Quiz Players | BloxQuiz",
   description: "See the top Roblox quiz players on BloxQuiz.gg. Compete for Roblox gift cards up to $20. Season 1 active now — top 3 players win real prizes!",
-  alternates: { canonical: "https://www.bloxquiz.gg/leaderboard" }
+  alternates: { canonical: "https://www.bloxquiz.gg/leaderboard" },
 };
 
 async function getCurrentSeason() {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from("seasons")
     .select("*")
     .order("start_date", { ascending: false })
@@ -20,9 +20,9 @@ async function getCurrentSeason() {
 }
 
 async function getAllTimeLeaderboard() {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from("users")
-    .select("id, username, xp, streak, monthly_score, badges")
+    .select("id, username, xp, streak, badges")
     .order("xp", { ascending: false })
     .limit(50);
 
@@ -32,7 +32,6 @@ async function getAllTimeLeaderboard() {
     username: u.username,
     xp: u.xp || 0,
     streak: u.streak || 0,
-    monthly_score: u.monthly_score || 0,
     badges: u.badges || [],
   }));
 }
@@ -40,22 +39,32 @@ async function getAllTimeLeaderboard() {
 async function getSeasonLeaderboard() {
   const currentMonth = new Date().toISOString().substring(0, 7);
 
-  const { data } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("scores")
-    .select("user_id, weighted_score, score, total_questions, month")
+    .select("user_id, weighted_score, score, total_questions, quiz_slug, completed_at")
     .eq("month", currentMonth)
-    .eq("is_first_attempt", true);
+    .order("completed_at", { ascending: true }); // oldest first for dedup
 
-  if (!data || data.length === 0) return [];
+  if (error || !data || data.length === 0) return [];
 
+  // Deduplicate — keep only first attempt per user+quiz combo
+  const seen = new Set<string>();
+  const firstAttempts = data.filter(row => {
+    const key = `${row.user_id}:${row.quiz_slug}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Aggregate per user
   const userMap: Record<string, {
-    total_score: number,
-    quizzes: number,
-    correct: number,
-    total_questions: number,
+    total_score: number;
+    quizzes: number;
+    correct: number;
+    total_questions: number;
   }> = {};
 
-  for (const row of data) {
+  for (const row of firstAttempts) {
     if (!userMap[row.user_id]) {
       userMap[row.user_id] = { total_score: 0, quizzes: 0, correct: 0, total_questions: 0 };
     }
@@ -65,8 +74,11 @@ async function getSeasonLeaderboard() {
     userMap[row.user_id].total_questions += row.total_questions || 0;
   }
 
+  // Fetch user details
   const userIds = Object.keys(userMap);
-  const { data: users } = await supabase
+  if (userIds.length === 0) return [];
+
+  const { data: users } = await supabaseAdmin
     .from("users")
     .select("id, username, streak, is_flagged")
     .in("id", userIds);
