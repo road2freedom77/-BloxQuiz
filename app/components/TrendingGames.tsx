@@ -4,8 +4,8 @@ interface GameRow {
   universe_id: number;
   name: string;
   slug: string;
-  emoji: string;
-  current_players: number;
+  emoji: string | null;
+  current_players: number | null;
   thumbnail_url: string | null;
   quiz_count: number;
 }
@@ -17,7 +17,7 @@ async function getTrendingGames(): Promise<GameRow[]> {
         .from("roblox_games")
         .select("universe_id, name, slug, emoji, current_players, thumbnail_url")
         .eq("is_tracked", true)
-        .order("current_players", { ascending: false })
+        .order("current_players", { ascending: false, nullsFirst: false })
         .limit(8),
       supabase
         .from("quizzes")
@@ -39,9 +39,10 @@ async function getTrendingGames(): Promise<GameRow[]> {
   }
 }
 
-function formatPlayers(n: number) {
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+function formatPlayers(n: number | null) {
+  if (!n) return "0";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return n.toLocaleString();
 }
 
@@ -89,15 +90,8 @@ export default async function TrendingGames() {
             flexDirection: "column",
             gap: 12,
           }}>
-            {/* Thumbnail or emoji fallback */}
             {game.thumbnail_url ? (
-              <img
-                src={game.thumbnail_url}
-                alt={game.name}
-                width={80}
-                height={80}
-                style={{ borderRadius: 12, objectFit: "cover", width: 80, height: 80 }}
-              />
+              <img src={game.thumbnail_url} alt={game.name} width={80} height={80} style={{ borderRadius: 12, objectFit: "cover", width: 80, height: 80 }} />
             ) : (
               <div style={{ fontSize: 36, lineHeight: 1 }}>{game.emoji || "🎮"}</div>
             )}
@@ -105,14 +99,7 @@ export default async function TrendingGames() {
             <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.3 }}>{game.name}</div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "var(--neon-green)",
-                boxShadow: "0 0 6px var(--neon-green)",
-                display: "inline-block",
-              }} />
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--neon-green)", boxShadow: "0 0 6px var(--neon-green)", display: "inline-block" }} />
               <span style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-green)" }}>
                 {formatPlayers(game.current_players)} playing
               </span>
