@@ -216,7 +216,7 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
         {/* Quiz CTA */}
         <QuizCTA gameName={game.name} gameSlug={slug} gameEmoji={game.emoji} quizCount={quizCount} />
 
-        {/* Cross-links */}
+         {/* Cross-links */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 40 }}>
           <Link href={`/games/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
             <span style={{ fontSize: 20 }}>🧠</span>
@@ -225,6 +225,10 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
           <Link href={`/codes/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
             <span style={{ fontSize: 20 }}>🎁</span>
             <span>{game.name} Codes</span>
+          </Link>
+          <Link href={`/stats/${slug}/history`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+            <span style={{ fontSize: 20 }}>📅</span>
+            <span>{game.name} History</span>
           </Link>
           <Link href="/stats" style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
             <span style={{ fontSize: 20 }}>📊</span>
