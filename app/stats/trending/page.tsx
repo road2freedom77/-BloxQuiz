@@ -3,20 +3,6 @@ import { supabaseAdmin } from "../../lib/supabase";
 
 export const revalidate = 3600;
 
-export const metadata = {
-  title: "Trending Roblox Games 2026 — Fastest Growing by Player Count | BloxQuiz",
-  description:
-    "The fastest growing Roblox games right now ranked by player count growth. See which games are gaining the most players this week. Updated daily.",
-  alternates: { canonical: "https://www.bloxquiz.gg/stats/trending" },
-  openGraph: {
-    title: "Trending Roblox Games 2026 — Fastest Growing | BloxQuiz",
-    description: "The fastest growing Roblox games ranked by player count growth. Updated daily.",
-    url: "https://www.bloxquiz.gg/stats/trending",
-    siteName: "BloxQuiz",
-    type: "website",
-  },
-};
-
 interface GameRow {
   slug: string;
   name: string;
@@ -52,14 +38,6 @@ function formatNumber(n: number | null | undefined): string {
   return n.toLocaleString();
 }
 
-function formatVisits(n: number | null | undefined): string {
-  if (!n) return "—";
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
-  return n.toLocaleString();
-}
-
 async function getTrendingGames(): Promise<TrendingGame[]> {
   const [{ data: games }, { data: dailyStats }] = await Promise.all([
     supabaseAdmin
@@ -70,12 +48,11 @@ async function getTrendingGames(): Promise<TrendingGame[]> {
       .from("game_daily_stats")
       .select("universe_id, date, avg_players, peak_players, total_visits_delta")
       .order("date", { ascending: false })
-      .limit(200), // last ~5-6 days for all 18 games
+      .limit(200),
   ]);
 
   if (!games || !dailyStats) return [];
 
-  // Group daily stats by universe_id
   const statsByGame: Record<number, DailyStatRow[]> = {};
   for (const stat of dailyStats as DailyStatRow[]) {
     if (!statsByGame[stat.universe_id]) statsByGame[stat.universe_id] = [];
@@ -86,7 +63,7 @@ async function getTrendingGames(): Promise<TrendingGame[]> {
 
   for (const game of games as GameRow[]) {
     const stats = statsByGame[game.universe_id] ?? [];
-    if (stats.length < 2) continue; // need at least 2 days
+    if (stats.length < 2) continue;
 
     const today = stats[0];
     const yesterday = stats[1];
@@ -106,8 +83,23 @@ async function getTrendingGames(): Promise<TrendingGame[]> {
     });
   }
 
-  // Sort by absolute player delta descending
   return trending.sort((a, b) => b.playerDelta - a.playerDelta);
+}
+
+export async function generateMetadata() {
+  const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+  return {
+    title: `Trending Roblox Games ${month} — Fastest Growing by Player Count | BloxQuiz`,
+    description: `The fastest growing Roblox games in ${month} ranked by player count growth. See which games are gaining the most players right now. Updated daily.`,
+    alternates: { canonical: "https://www.bloxquiz.gg/stats/trending" },
+    openGraph: {
+      title: `Trending Roblox Games ${month} — Fastest Growing | BloxQuiz`,
+      description: `The fastest growing Roblox games in ${month} ranked by player count growth. Updated daily.`,
+      url: "https://www.bloxquiz.gg/stats/trending",
+      siteName: "BloxQuiz",
+      type: "website",
+    },
+  };
 }
 
 export default async function TrendingPage() {
@@ -167,7 +159,7 @@ export default async function TrendingPage() {
             </nav>
 
             <h1 style={{ fontSize: 36, fontWeight: 900, margin: "0 0 10px", lineHeight: 1.1 }}>
-              📈 Trending Roblox Games {new Date().getFullYear()}
+              📈 Trending Roblox Games {month}
             </h1>
             <p style={{ margin: "0 0 28px", fontSize: 16, color: "rgba(255,255,255,0.55)", maxWidth: 600 }}>
               {topGame && topGame.playerDelta > 0
@@ -268,3 +260,4 @@ export default async function TrendingPage() {
     </>
   );
 }
+

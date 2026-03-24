@@ -3,20 +3,6 @@ import { supabaseAdmin } from "../../lib/supabase";
 
 export const revalidate = 3600;
 
-export const metadata = {
-  title: "Most Visited Roblox Games 2026 — All-Time Visit Rankings | BloxQuiz",
-  description:
-    "The most visited Roblox games of all time ranked by total visits. See which games have accumulated the most plays in Roblox history. Updated hourly.",
-  alternates: { canonical: "https://www.bloxquiz.gg/stats/most-visited" },
-  openGraph: {
-    title: "Most Visited Roblox Games 2026 — All-Time Visit Rankings | BloxQuiz",
-    description: "The most visited Roblox games of all time ranked by total visits. Updated hourly.",
-    url: "https://www.bloxquiz.gg/stats/most-visited",
-    siteName: "BloxQuiz",
-    type: "website",
-  },
-};
-
 interface GameRow {
   slug: string;
   name: string;
@@ -58,6 +44,22 @@ async function getGames(): Promise<GameRow[]> {
     .eq("is_tracked", true)
     .order("total_visits", { ascending: false, nullsFirst: false });
   return (data as GameRow[]) ?? [];
+}
+
+export async function generateMetadata() {
+  const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+  return {
+    title: `Most Visited Roblox Games ${month} — All-Time Visit Rankings | BloxQuiz`,
+    description: `The most visited Roblox games of all time ranked by total visits in ${month}. See which games have accumulated the most plays in Roblox history. Updated hourly.`,
+    alternates: { canonical: "https://www.bloxquiz.gg/stats/most-visited" },
+    openGraph: {
+      title: `Most Visited Roblox Games ${month} — All-Time Visit Rankings | BloxQuiz`,
+      description: `The most visited Roblox games of all time ranked by total visits in ${month}. Updated hourly.`,
+      url: "https://www.bloxquiz.gg/stats/most-visited",
+      siteName: "BloxQuiz",
+      type: "website",
+    },
+  };
 }
 
 export default async function MostVisitedPage() {
@@ -115,7 +117,7 @@ export default async function MostVisitedPage() {
             </nav>
 
             <h1 style={{ fontSize: 36, fontWeight: 900, margin: "0 0 10px", lineHeight: 1.1 }}>
-              👁️ Most Visited Roblox Games {new Date().getFullYear()}
+              👁️ Most Visited Roblox Games {month}
             </h1>
             <p style={{ margin: "0 0 28px", fontSize: 16, color: "rgba(255,255,255,0.55)", maxWidth: 600 }}>
               {topGame
