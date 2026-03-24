@@ -6,17 +6,17 @@ export const revalidate = 3600;
 export const dynamicParams = false;
 
 const GENRES: Record<string, { label: string; emoji: string; description: string }> = {
-  roleplay:      { label: "Roleplay", emoji: "🏠", description: "The most popular Roblox roleplay games ranked by live player count. Social, open-world, and life-sim experiences." },
-  simulator:     { label: "Simulator", emoji: "🌱", description: "Top Roblox simulator games by concurrent players. Farming, collecting, and progression-based experiences." },
-  rpg:           { label: "RPG", emoji: "⚔️", description: "The most played Roblox RPG games right now. Adventure, combat, and character progression games." },
-  horror:        { label: "Horror", emoji: "👻", description: "Most popular Roblox horror games ranked by player count. Survival, entity, and scary experiences." },
-  obby:          { label: "Obby", emoji: "🏗️", description: "Top Roblox obby games by concurrent players. Obstacle courses, parkour, and platformer challenges." },
-  shooter:       { label: "Shooter", emoji: "🔫", description: "Most played Roblox shooter games right now. FPS, team-based, and competitive combat experiences." },
-  fashion:       { label: "Fashion", emoji: "👗", description: "Top Roblox fashion games by player count. Dress-up, styling, and creative expression experiences." },
-  mystery:       { label: "Mystery", emoji: "🔪", description: "Most popular Roblox mystery games ranked by live players. Social deduction and hidden role experiences." },
-  rhythm:        { label: "Rhythm", emoji: "🎵", description: "Top Roblox rhythm games by concurrent players. Music, timing, and beat-based gameplay experiences." },
-  sports:        { label: "Sports", emoji: "⚽", description: "Most played Roblox sports games right now. Football, competitive, and athletic gameplay experiences." },
-  survival:      { label: "Survival", emoji: "🌪️", description: "Top Roblox survival games by player count. Disaster, escape, and endurance-based experiences." },
+  roleplay:        { label: "Roleplay", emoji: "🏠", description: "The most popular Roblox roleplay games ranked by live player count. Social, open-world, and life-sim experiences." },
+  simulator:       { label: "Simulator", emoji: "🌱", description: "Top Roblox simulator games by concurrent players. Farming, collecting, and progression-based experiences." },
+  rpg:             { label: "RPG", emoji: "⚔️", description: "The most played Roblox RPG games right now. Adventure, combat, and character progression games." },
+  horror:          { label: "Horror", emoji: "👻", description: "Most popular Roblox horror games ranked by player count. Survival, entity, and scary experiences." },
+  obby:            { label: "Obby", emoji: "🏗️", description: "Top Roblox obby games by concurrent players. Obstacle courses, parkour, and platformer challenges." },
+  shooter:         { label: "Shooter", emoji: "🔫", description: "Most played Roblox shooter games right now. FPS, team-based, and competitive combat experiences." },
+  fashion:         { label: "Fashion", emoji: "👗", description: "Top Roblox fashion games by player count. Dress-up, styling, and creative expression experiences." },
+  mystery:         { label: "Mystery", emoji: "🔪", description: "Most popular Roblox mystery games ranked by live players. Social deduction and hidden role experiences." },
+  rhythm:          { label: "Rhythm", emoji: "🎵", description: "Top Roblox rhythm games by concurrent players. Music, timing, and beat-based gameplay experiences." },
+  sports:          { label: "Sports", emoji: "⚽", description: "Most played Roblox sports games right now. Football, competitive, and athletic gameplay experiences." },
+  survival:        { label: "Survival", emoji: "🌪️", description: "Top Roblox survival games by player count. Disaster, escape, and endurance-based experiences." },
   "tower-defense": { label: "Tower Defense", emoji: "🛡️", description: "Most popular Roblox tower defense games ranked by live player count. Strategic unit placement and wave defense." },
 };
 
@@ -71,14 +71,13 @@ export async function generateMetadata({ params }: { params: Promise<{ genre: st
   const { genre } = await params;
   const info = GENRES[genre];
   if (!info) return {};
-
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
   return {
-    title: `Best Roblox ${info.label} Games ${new Date().getFullYear()} — Live Player Rankings | BloxQuiz`,
+    title: `Best Roblox ${info.label} Games ${month} — Live Player Rankings | BloxQuiz`,
     description: `Top Roblox ${info.label.toLowerCase()} games ranked by live concurrent players in ${month}. ${info.description}`,
     alternates: { canonical: `https://www.bloxquiz.gg/stats/category/${genre}` },
     openGraph: {
-      title: `Best Roblox ${info.label} Games — Live Rankings | BloxQuiz`,
+      title: `Best Roblox ${info.label} Games ${month} — Live Rankings | BloxQuiz`,
       description: info.description,
       url: `https://www.bloxquiz.gg/stats/category/${genre}`,
       siteName: "BloxQuiz",
@@ -96,8 +95,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ genre
   const topGame = games[0];
   const totalPlayers = games.reduce((sum, g) => sum + (g.current_players ?? 0), 0);
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-  const year = new Date().getFullYear();
-
   const otherGenres = Object.entries(GENRES).filter(([g]) => g !== genre);
 
   const jsonLd = {
@@ -150,7 +147,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ genre
             </nav>
 
             <h1 style={{ fontSize: 36, fontWeight: 900, margin: "0 0 10px", lineHeight: 1.1 }}>
-              {info.emoji} Best Roblox {info.label} Games {year}
+              {info.emoji} Best Roblox {info.label} Games {month}
             </h1>
             <p style={{ margin: "0 0 28px", fontSize: 16, color: "rgba(255,255,255,0.55)", maxWidth: 600 }}>
               {topGame
@@ -161,9 +158,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ genre
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
               {totalPlayers > 0 && (
                 <div style={{ background: "linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)", borderRadius: 12, padding: "16px 24px", minWidth: 160 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>
-                    Total {info.label} Players
-                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>Total {info.label} Players</div>
                   <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatNumber(totalPlayers)}</div>
                 </div>
               )}
