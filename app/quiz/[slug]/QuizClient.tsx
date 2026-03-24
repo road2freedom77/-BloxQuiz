@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { useUser } from "@clerk/nextjs";
 
@@ -166,6 +166,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   const [shared, setShared] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState<{ weighted: number, streakBonus: number, newStreak: number, capped: boolean } | null>(null);
+  const [playedSlugs, setPlayedSlugs] = useState<Set<string>>(new Set());
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const q = quiz.questions[current];
@@ -178,6 +179,17 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   function slugify(text: string) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   }
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("scores")
+      .select("quiz_slug")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) setPlayedSlugs(new Set(data.map((r: any) => r.quiz_slug)));
+      });
+  }, [user?.id]);
 
   async function saveScore(finalScore: number) {
     const today = new Date().toISOString().split("T")[0];
@@ -262,6 +274,8 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       await supabase.rpc("increment_xp", { user_id: user.id, amount: xpGained });
     }
 
+    // Mark current quiz as played locally so badge shows immediately
+    setPlayedSlugs(prev => new Set([...prev, slug]));
     setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped });
   }
 
@@ -423,7 +437,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
               {"📚 " + whatYouLearn[quiz.game]}
             </p>
           )}
-          {/* Cross-links: hub, codes, stats, browse */}
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 4, flexWrap: "wrap" }}>
             <a href={"/games/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-green)", textDecoration: "none" }}>{"More " + quiz.game + " Quizzes →"}</a>
             <span style={{ color: "var(--text-dim)" }}>·</span>
@@ -526,13 +539,13 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             </div>
 
             <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: 12, padding: "14px 20px", marginBottom: 24 }}>
-  <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Active Now</div>
-  <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players win Roblox gift cards. Keep playing and climb the leaderboard!</div>
-  <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-    <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none" }}>View Leaderboard →</a>
-    <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "var(--text-muted)", textDecoration: "none" }}>View Rules →</a>
-  </div>
-</div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Active Now</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players win Roblox gift cards. Keep playing and climb the leaderboard!</div>
+              <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+                <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none" }}>View Leaderboard →</a>
+                <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "var(--text-muted)", textDecoration: "none" }}>View Rules →</a>
+              </div>
+            </div>
 
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
@@ -557,7 +570,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
               <a href="/" style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{"🏠 Home"}</a>
             </div>
 
-            {/* Keep Playing — now includes codes + stats */}
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, textAlign: "left" }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>Keep Playing</div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -613,11 +625,15 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
             {relatedQuizzes.map((rq) => {
               const rdiff = diffColors[rq.difficulty] || diffColors.Medium;
+              const played = playedSlugs.has(rq.slug);
               return (
-                <a key={rq.slug} href={"/quiz/" + rq.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 16, textDecoration: "none", display: "block" }}>
+                <a key={rq.slug} href={"/quiz/" + rq.slug} style={{ background: "var(--bg-card)", border: "1px solid " + (played ? "rgba(0,245,160,0.25)" : "var(--border)"), borderRadius: "var(--radius-sm)", padding: 16, textDecoration: "none", display: "block" }}>
                   <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: rdiff.bg, color: rdiff.color }}>{rq.difficulty}</span>
                     <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{rq.questions + " Q's"}</span>
+                    {played && (
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,245,160,0.1)", color: "var(--neon-green)", border: "1px solid rgba(0,245,160,0.3)" }}>✅ Played</span>
+                    )}
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", lineHeight: 1.3 }}>{rq.title}</div>
                 </a>

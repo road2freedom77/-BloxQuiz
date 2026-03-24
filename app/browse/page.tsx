@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { supabase } from "../lib/supabase";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -33,7 +35,9 @@ const gameHubs = [
 ];
 
 export default function QuizzesPage() {
+  const { user } = useUser();
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [playedSlugs, setPlayedSlugs] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [gameFilter, setGameFilter] = useState("All");
   const [diffFilter, setDiffFilter] = useState("All");
@@ -54,6 +58,18 @@ export default function QuizzesPage() {
         setLoading(false);
       });
   }, []);
+
+  // Fetch played slugs for signed-in user
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("scores")
+      .select("quiz_slug")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) setPlayedSlugs(new Set(data.map(r => r.quiz_slug)));
+      });
+  }, [user?.id]);
 
   useEffect(() => { setPage(1); }, [gameFilter, diffFilter, search]);
 
@@ -128,11 +144,16 @@ export default function QuizzesPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
           {paginated.map((quiz) => {
             const diff = diffColors[quiz.difficulty] || diffColors.Medium;
+            const played = playedSlugs.has(quiz.slug);
             return (
-              <a href={"/quiz/" + quiz.slug} key={quiz.slug} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
+              <a href={"/quiz/" + quiz.slug} key={quiz.slug} style={{ background: "var(--bg-card)", border: "1px solid " + (played ? "rgba(0,245,160,0.25)" : "var(--border)"), borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block", position: "relative" }}>
                 <div style={{ height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, background: quiz.thumb, position: "relative" }}>
                   {quiz.emoji}
-                  <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>
+                  {played ? (
+                    <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,245,160,0.15)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)", border: "1px solid rgba(0,245,160,0.3)" }}>✅ PLAYED</span>
+                  ) : (
+                    <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>
+                  )}
                 </div>
                 <div style={{ padding: "14px 16px 18px" }}>
                   <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>

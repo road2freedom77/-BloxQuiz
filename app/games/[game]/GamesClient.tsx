@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { supabase } from "../../lib/supabase";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -90,14 +92,14 @@ function formatNumber(n: number | null | undefined): string {
   return n.toLocaleString();
 }
 
-function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: string }) {
+function QuizCard({ quiz, thumb, emoji, played }: { quiz: any, thumb: string, emoji: string, played: boolean }) {
   const diff = diffColors[quiz.difficulty] || diffColors.Medium;
   const displayAngle = inferAngle(quiz);
   const isImage = thumb.startsWith("url(");
   const imgSrc = isImage ? thumb.replace("url(", "").replace(")", "") : null;
 
   return (
-    <a href={`/quiz/${quiz.slug}`} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
+    <a href={`/quiz/${quiz.slug}`} style={{ background: "var(--bg-card)", border: "1px solid " + (played ? "rgba(0,245,160,0.25)" : "var(--border)"), borderRadius: "var(--radius)", overflow: "hidden", cursor: "pointer", textDecoration: "none", display: "block" }}>
       <div style={{ height: 100, position: "relative", overflow: "hidden" }}>
         {isImage && imgSrc ? (
           <>
@@ -110,7 +112,11 @@ function QuizCard({ quiz, thumb, emoji }: { quiz: any, thumb: string, emoji: str
             {emoji}
           </div>
         )}
-        <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>
+        {played ? (
+          <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,245,160,0.15)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)", border: "1px solid rgba(0,245,160,0.3)" }}>✅ PLAYED</span>
+        ) : (
+          <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)" }}>▶ PLAY</span>
+        )}
       </div>
       <div style={{ padding: "14px 16px 18px" }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
@@ -162,6 +168,8 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
   gameSlug: string,
   statsData: { currentPlayers: number | null; totalVisits: number | null; thumbnailUrl: string | null } | null,
 }) {
+  const { user } = useUser();
+  const [playedSlugs, setPlayedSlugs] = useState<Set<string>>(new Set());
   const gradientThumb = gameThumbs[config.displayName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
   const hasThumb = !!statsData?.thumbnailUrl;
   const heroBg = hasThumb ? `url(${statsData!.thumbnailUrl})` : gradientThumb;
@@ -176,6 +184,18 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
       setRandomSlug(random.slug);
     }
   }, []);
+
+  // Fetch played slugs for signed-in user
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("scores")
+      .select("quiz_slug")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) setPlayedSlugs(new Set(data.map(r => r.quiz_slug)));
+      });
+  }, [user?.id]);
 
   const grouped: Record<string, any[]> = { Uncategorized: [] };
   for (const angle of ANGLE_ORDER) grouped[angle] = [];
@@ -286,7 +306,9 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               <div key={angle}>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{ANGLE_LABELS[angle] + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {grouped[angle].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} />)}
+                  {grouped[angle].map(quiz => (
+                    <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} played={playedSlugs.has(quiz.slug)} />
+                  ))}
                 </div>
               </div>
             ))}
@@ -294,14 +316,18 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
               <div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 16 }}>{"🎮 More " + config.displayName + " Quizzes"}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {grouped["Uncategorized"].map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} />)}
+                  {grouped["Uncategorized"].map(quiz => (
+                    <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} played={playedSlugs.has(quiz.slug)} />
+                  ))}
                 </div>
               </div>
             )}
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-            {quizzes.map(quiz => <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} />)}
+            {quizzes.map(quiz => (
+              <QuizCard key={quiz.slug} quiz={quiz} thumb={cardThumb} emoji={config.emoji} played={playedSlugs.has(quiz.slug)} />
+            ))}
           </div>
         )}
       </div>
