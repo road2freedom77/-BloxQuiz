@@ -1,125 +1,140 @@
 import { MetadataRoute } from "next";
-import { supabase } from "./lib/supabase";
 import { supabaseAdmin } from "./lib/supabase";
 
+const BASE = "https://www.bloxquiz.gg";
+const MIN_PLAYERS_FOR_COMPARE = 5000;
+const MAX_COMPARE_GAMES = 45;
+
 function slugifyGame(game: string): string {
-  return game.toLowerCase()
+  return game
+    .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .trim();
 }
 
+const STATIC_GENRES = [
+  "roleplay", "simulator", "rpg", "horror", "obby",
+  "shooter", "fashion", "mystery", "rhythm", "sports",
+  "survival", "tower-defense",
+];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = "https://www.bloxquiz.gg";
   const now = new Date();
 
+  // ─── Static pages ────────────────────────────────────────────────
   const staticPages: MetadataRoute.Sitemap = [
-    { url: base, lastModified: now, changeFrequency: "daily", priority: 1.0 },
-    { url: `${base}/browse`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/leaderboard`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
-    { url: `${base}/codes`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/roblox-username-ideas`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/roblox-display-name-generator`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/roblox-bio-generator`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },  
-    { url: `${base}/champions`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/rules`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${base}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${base}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    // Stats hub and sub-pages
-    { url: `${base}/stats`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
-    { url: `${base}/stats/most-played`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
-    { url: `${base}/stats/most-visited`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
-    { url: `${base}/stats/trending`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: BASE,                                      lastModified: now, changeFrequency: "daily",   priority: 1.0 },
+    { url: `${BASE}/browse`,                          lastModified: now, changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE}/leaderboard`,                     lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
+    { url: `${BASE}/codes`,                           lastModified: now, changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE}/stats`,                           lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
+    { url: `${BASE}/stats/most-played`,               lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
+    { url: `${BASE}/stats/most-visited`,              lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
+    { url: `${BASE}/stats/trending`,                  lastModified: now, changeFrequency: "daily",   priority: 0.8 },
+    { url: `${BASE}/roblox-username-ideas`,           lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-display-name-generator`,   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-bio-generator`,            lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/champions`,                       lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/rules`,                           lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE}/about`,                           lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${BASE}/privacy`,                         lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/terms`,                           lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/contact`,                         lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     // Stats category pages
-    ...["roleplay","simulator","rpg","horror","obby","shooter","fashion","mystery","rhythm","sports","survival","tower-defense"].map(genre => ({
-      url: `${base}/stats/category/${genre}`,
+    ...STATIC_GENRES.map(genre => ({
+      url: `${BASE}/stats/category/${genre}`,
       lastModified: now,
       changeFrequency: "hourly" as const,
       priority: 0.7,
     })),
   ];
 
-  // Codes pages from code_games table
+  // ─── Codes pages ─────────────────────────────────────────────────
   let codesPages: MetadataRoute.Sitemap = [];
   try {
-    const { data: codeGames } = await supabase
+    const { data: codeGames } = await supabaseAdmin
       .from("code_games")
       .select("slug, updated_at");
     if (codeGames) {
       codesPages = codeGames.map(g => ({
-        url: `${base}/codes/${g.slug}`,
+        url: `${BASE}/codes/${g.slug}`,
         lastModified: g.updated_at ? new Date(g.updated_at) : now,
         changeFrequency: "daily" as const,
         priority: 0.9,
       }));
     }
-  } catch (e) {}
+  } catch (_) {}
 
-  // Quiz pages from Supabase
+  // ─── Quiz + game hub pages ────────────────────────────────────────
   let quizPages: MetadataRoute.Sitemap = [];
-  const gameSlugSet = new Set<string>();
-
+  let gameHubPages: MetadataRoute.Sitemap = [];
   try {
-    const { data } = await supabase
+    const { data: quizzes } = await supabaseAdmin
       .from("quizzes")
       .select("slug, game, published_at")
       .eq("status", "published");
-    if (data) {
-      quizPages = data.map(q => ({
-        url: `${base}/quiz/${q.slug}`,
+    if (quizzes) {
+      quizPages = quizzes.map(q => ({
+        url: `${BASE}/quiz/${q.slug}`,
         lastModified: new Date(q.published_at),
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));
-      for (const q of data) {
-        if (q.game) gameSlugSet.add(slugifyGame(q.game));
-      }
+
+      const uniqueGameSlugs = new Set(
+        quizzes.filter(q => q.game).map(q => slugifyGame(q.game))
+      );
+      gameHubPages = Array.from(uniqueGameSlugs).map(slug => ({
+        url: `${BASE}/games/${slug}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }));
     }
-  } catch (e) {}
+  } catch (_) {}
 
-  // Game hub pages
-  const gamePages: MetadataRoute.Sitemap = Array.from(gameSlugSet).map(slug => ({
-    url: `${base}/games/${slug}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
-  // Stats pages from roblox_games
+  // ─── Stats pages (individual + history) ──────────────────────────
   let statsPages: MetadataRoute.Sitemap = [];
-  try {
-    const { data: games } = await supabaseAdmin
-      .from("roblox_games")
-      .select("slug, last_updated")
-      .eq("is_tracked", true);
-    if (games) {
-      const slugs = games.map((g: { slug: string }) => g.slug);
+  let comparePages: MetadataRoute.Sitemap = [];
 
-      // Individual stats pages
-      statsPages = games.flatMap((g: { slug: string; last_updated: string | null }) => [
+  try {
+    const { data: allGames } = await supabaseAdmin
+      .from("roblox_games")
+      .select("slug, last_updated, current_players")
+      .eq("is_tracked", true)
+      .order("current_players", { ascending: false });
+
+    if (allGames) {
+      // Individual stats + history for all tracked games
+      statsPages = allGames.flatMap(g => [
         {
-          url: `${base}/stats/${g.slug}`,
+          url: `${BASE}/stats/${g.slug}`,
           lastModified: g.last_updated ? new Date(g.last_updated) : now,
           changeFrequency: "hourly" as const,
           priority: 0.8,
         },
         {
-          url: `${base}/stats/${g.slug}/history`,
+          url: `${BASE}/stats/${g.slug}/history`,
           lastModified: g.last_updated ? new Date(g.last_updated) : now,
           changeFrequency: "daily" as const,
           priority: 0.6,
         },
       ]);
 
-      // Compare pages — all pairs
-      for (let i = 0; i < slugs.length; i++) {
-        for (let j = i + 1; j < slugs.length; j++) {
-          const [a, b] = [slugs[i], slugs[j]].sort();
-          statsPages.push({
-            url: `${base}/stats/compare/${a}-vs-${b}`,
+      // Compare pages — top 45 games with 5K+ concurrent players only
+      // Generates ~990 high-signal pairs, avoids crawl budget waste
+      const comparePool = allGames
+        .filter(g => (g.current_players ?? 0) >= MIN_PLAYERS_FOR_COMPARE)
+        .slice(0, MAX_COMPARE_GAMES)
+        .map(g => g.slug);
+
+      for (let i = 0; i < comparePool.length; i++) {
+        for (let j = i + 1; j < comparePool.length; j++) {
+          const [a, b] = [comparePool[i], comparePool[j]].sort();
+          comparePages.push({
+            url: `${BASE}/stats/compare/${a}-vs-${b}`,
             lastModified: now,
             changeFrequency: "hourly" as const,
             priority: 0.6,
@@ -127,13 +142,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
       }
     }
-  } catch (e) {}
+  } catch (_) {}
 
   return [
-    ...staticPages,
-    ...codesPages,
-    ...quizPages,
-    ...gamePages,
-    ...statsPages,
+    ...staticPages,   // ~29 URLs
+    ...codesPages,    // ~89 URLs
+    ...quizPages,     // ~230 URLs
+    ...gameHubPages,  // ~30 URLs
+    ...statsPages,    // ~190 URLs (95 games × 2)
+    ...comparePages,  // up to ~990 URLs
   ];
+  // Target total: ~1,558 URLs with quality control on every segment
 }
