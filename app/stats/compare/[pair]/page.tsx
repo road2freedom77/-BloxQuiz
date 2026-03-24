@@ -44,7 +44,6 @@ function timeAgo(iso: string | null): string {
 }
 
 function parsePair(pair: string): [string, string] | null {
-  // Find the -vs- separator — slugs themselves contain hyphens so we need exact match
   const idx = pair.indexOf("-vs-");
   if (idx === -1) return null;
   const slugA = pair.slice(0, idx);
@@ -62,26 +61,6 @@ async function getGame(slug: string): Promise<GameRow | null> {
     .single();
   if (error || !data) return null;
   return data as GameRow;
-}
-
-async function getAllSlugs(): Promise<string[]> {
-  const { data } = await supabaseAdmin
-    .from("roblox_games")
-    .select("slug")
-    .eq("is_tracked", true);
-  return (data ?? []).map((g: { slug: string }) => g.slug);
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllSlugs();
-  const pairs: { pair: string }[] = [];
-  for (let i = 0; i < slugs.length; i++) {
-    for (let j = i + 1; j < slugs.length; j++) {
-      const [a, b] = [slugs[i], slugs[j]].sort();
-      pairs.push({ pair: `${a}-vs-${b}` });
-    }
-  }
-  return pairs;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ pair: string }> }) {
@@ -178,7 +157,6 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div style={{ minHeight: "100vh", background: "#0a0a14", color: "#fff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
 
-        {/* Hero */}
         <div style={{ background: "linear-gradient(180deg, #0f0f23 0%, #0a0a14 100%)", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "48px 0 40px" }}>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 20px" }}>
             <nav style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 24, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
@@ -204,8 +182,6 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
         </div>
 
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "36px 20px 80px" }}>
-
-          {/* Quick Answer block */}
           <div style={{ background: "linear-gradient(135deg, #0f1629 0%, #111827 100%)", border: "1px solid rgba(0,180,216,0.2)", borderLeft: "3px solid #00b4d8", borderRadius: 12, padding: "20px 24px", marginBottom: 32 }}>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.85)" }}>
               {gameA.name} currently has {formatNumber(gameA.current_players)} active players compared to {gameB.name}'s {formatNumber(gameB.current_players)}.
@@ -214,7 +190,6 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
             </p>
           </div>
 
-          {/* Game header cards */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
             {[gameA, gameB].map((game) => (
               <Link key={game.slug} href={`/stats/${game.slug}`} style={{ textDecoration: "none" }}>
@@ -222,15 +197,9 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
                   {game.thumbnail_url && (
                     <img src={game.thumbnail_url} alt={game.name} width={64} height={64} style={{ borderRadius: 12, objectFit: "cover", marginBottom: 12 }} />
                   )}
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 4 }}>
-                    {game.emoji} {game.name}
-                  </div>
-                  {game.genre && (
-                    <div style={{ fontSize: 11, color: "#00b4d8", textTransform: "capitalize", marginBottom: 8 }}>{game.genre}</div>
-                  )}
-                  <div style={{ fontSize: 24, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
-                    {formatNumber(game.current_players)}
-                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{game.emoji} {game.name}</div>
+                  {game.genre && <div style={{ fontSize: 11, color: "#00b4d8", textTransform: "capitalize", marginBottom: 8 }}>{game.genre}</div>}
+                  <div style={{ fontSize: 24, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(game.current_players)}</div>
                   <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>playing now</div>
                   <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 8 }}>View Full Stats →</div>
                 </div>
@@ -238,32 +207,19 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
             ))}
           </div>
 
-          {/* Comparison table */}
           <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "24px 28px", marginBottom: 32 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 20 }}>Head-to-Head Comparison</h2>
-
             <StatRow label="Playing Now" valueA={gameA.current_players} valueB={gameB.current_players} />
             <StatRow label="Total Visits" valueA={gameA.total_visits} valueB={gameB.total_visits} />
             <StatRow label="Favorites" valueA={gameA.favorites} valueB={gameB.favorites} />
-            {(approvalA || approvalB) && (
-              <StatRow label="Approval %" valueA={approvalA} valueB={approvalB} />
-            )}
+            {(approvalA || approvalB) && <StatRow label="Approval %" valueA={approvalA} valueB={approvalB} />}
           </div>
 
-          {/* Cross-links to individual stats pages */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 40 }}>
-            <Link href={`/stats/${gameA.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>📊</span><span>{gameA.name} Full Stats</span>
-            </Link>
-            <Link href={`/stats/${gameB.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>📊</span><span>{gameB.name} Full Stats</span>
-            </Link>
-            <Link href={`/games/${gameA.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>🧠</span><span>{gameA.name} Quizzes</span>
-            </Link>
-            <Link href={`/games/${gameB.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>🧠</span><span>{gameB.name} Quizzes</span>
-            </Link>
+            <Link href={`/stats/${gameA.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}><span>📊</span><span>{gameA.name} Full Stats</span></Link>
+            <Link href={`/stats/${gameB.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}><span>📊</span><span>{gameB.name} Full Stats</span></Link>
+            <Link href={`/games/${gameA.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}><span>🧠</span><span>{gameA.name} Quizzes</span></Link>
+            <Link href={`/games/${gameB.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}><span>🧠</span><span>{gameB.name} Quizzes</span></Link>
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
