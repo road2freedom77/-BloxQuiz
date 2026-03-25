@@ -1,9 +1,7 @@
 import { supabase } from "../lib/supabase";
-import fs from "fs";
-import path from "path";
 
 export default async function Hero() {
-  let quizCount = 309;
+  let quizCount = 350;
   let gameCount = 20;
   let codeCount = 97;
 
@@ -18,11 +16,9 @@ export default async function Hero() {
       supabase.from("codes").select("*", { count: "exact", head: true }).eq("active", true),
     ]);
 
-    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const jsonCount = fs.readdirSync(quizzesDir).filter(f => f.endsWith(".json")).length;
     const distinctGames = new Set((games ?? []).map(r => r.game)).size;
 
-    quizCount = (qCount ?? 0) + jsonCount;
+    quizCount = qCount ?? 350;
     gameCount = distinctGames || gameCount;
     codeCount = cCount ?? codeCount;
   } catch {
