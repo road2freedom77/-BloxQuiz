@@ -48,13 +48,32 @@ async function getGames(): Promise<GameRow[]> {
 
 export async function generateMetadata() {
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
+  const { data: topGame } = await supabaseAdmin
+    .from("roblox_games")
+    .select("name, current_players")
+    .eq("is_tracked", true)
+    .order("current_players", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .single();
+
+  const topName = topGame?.name ?? "Adopt Me!";
+  const topCount = topGame?.current_players
+    ? topGame.current_players >= 1_000_000
+      ? `${(topGame.current_players / 1_000_000).toFixed(1)}M`
+      : `${Math.round(topGame.current_players / 1_000)}K`
+    : "500K+";
+
+  const title = `Most Played Roblox Games (${month}) — #1 is ${topName} with ${topCount} Players | BloxQuiz`;
+  const description = `The most played Roblox games right now ranked by live concurrent players in ${month}. ${topName} leads with ${topCount} active players. Updated hourly with real player counts.`;
+
   return {
-    title: `Most Played Roblox Games ${month} — Live Player Count Rankings | BloxQuiz`,
-    description: `The most played Roblox games right now ranked by live concurrent players in ${month}. Updated hourly with real player counts, total visits, and historical data.`,
+    title,
+    description,
     alternates: { canonical: "https://www.bloxquiz.gg/stats/most-played" },
     openGraph: {
-      title: `Most Played Roblox Games ${month} — Live Player Count Rankings | BloxQuiz`,
-      description: `The most played Roblox games ranked by live concurrent players in ${month}. Updated hourly.`,
+      title,
+      description,
       url: "https://www.bloxquiz.gg/stats/most-played",
       siteName: "BloxQuiz",
       type: "website",

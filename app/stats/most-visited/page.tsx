@@ -48,13 +48,32 @@ async function getGames(): Promise<GameRow[]> {
 
 export async function generateMetadata() {
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
+  const { data: topGame } = await supabaseAdmin
+    .from("roblox_games")
+    .select("name, total_visits")
+    .eq("is_tracked", true)
+    .order("total_visits", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .single();
+
+  const topName = topGame?.name ?? "Brookhaven RP";
+  const topVisits = topGame?.total_visits
+    ? topGame.total_visits >= 1_000_000_000
+      ? `${(topGame.total_visits / 1_000_000_000).toFixed(1)}B`
+      : `${(topGame.total_visits / 1_000_000).toFixed(1)}M`
+    : "80B+";
+
+  const title = `Most Visited Roblox Games (${month}) — ${topName} Leads with ${topVisits} Visits | BloxQuiz`;
+  const description = `The most visited Roblox games of all time ranked by total visits in ${month}. ${topName} leads with ${topVisits} total visits. Updated hourly with real visit counts.`;
+
   return {
-    title: `Most Visited Roblox Games ${month} — All-Time Visit Rankings | BloxQuiz`,
-    description: `The most visited Roblox games of all time ranked by total visits in ${month}. See which games have accumulated the most plays in Roblox history. Updated hourly.`,
+    title,
+    description,
     alternates: { canonical: "https://www.bloxquiz.gg/stats/most-visited" },
     openGraph: {
-      title: `Most Visited Roblox Games ${month} — All-Time Visit Rankings | BloxQuiz`,
-      description: `The most visited Roblox games of all time ranked by total visits in ${month}. Updated hourly.`,
+      title,
+      description,
       url: "https://www.bloxquiz.gg/stats/most-visited",
       siteName: "BloxQuiz",
       type: "website",

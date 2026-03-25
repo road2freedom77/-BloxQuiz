@@ -43,7 +43,7 @@ async function getDailyStats(universeId: number): Promise<DailyStatRow[]> {
     .select("date, avg_players, peak_players, min_players, total_visits_delta")
     .eq("universe_id", universeId)
     .order("date", { ascending: false })
-    .limit(90); // 90 days of history
+    .limit(90);
   return (data as DailyStatRow[]) ?? [];
 }
 
@@ -53,6 +53,12 @@ async function getAllSlugs(): Promise<string[]> {
     .select("slug")
     .eq("is_tracked", true);
   return (data ?? []).map((g: { slug: string }) => g.slug);
+}
+
+function formatAvg(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return n.toLocaleString();
 }
 
 export async function generateStaticParams() {
@@ -66,13 +72,36 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!game) return {};
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
+  // Fetch avg daily players for the title
+  const { data: dailyData } = await supabaseAdmin
+    .from("game_daily_stats")
+    .select("avg_players")
+    .eq("universe_id", game.universe_id)
+    .order("date", { ascending: false })
+    .limit(30);
+
+  const avgDaily = dailyData && dailyData.length > 0
+    ? Math.round(dailyData.reduce((sum: number, d: { avg_players: number }) => sum + d.avg_players, 0) / dailyData.length)
+    : null;
+
+  const avgStr = avgDaily ? formatAvg(avgDaily) : null;
+
+  const title = avgStr
+    ? `${game.name} Player Count History — Avg ${avgStr}/Day (${month}) | BloxQuiz`
+    : `${game.name} Player Count History (${month}) — 90 Day Chart | BloxQuiz`;
+
+  const description = avgStr
+    ? `${game.name} averages ${avgStr} players per day. Full 90-day player count history with daily averages, peaks, and visit growth. Updated daily.`
+    : `${game.name} player count history over the last 90 days. Daily average, peak, and minimum player counts with visit growth data. Updated daily.`;
+
   return {
-    title: `${game.name} Player Count History (${month}) — 90 Day Chart | BloxQuiz`,
-    description: `${game.name} player count history over the last 90 days. Daily average, peak, and minimum player counts with visit growth data. Updated daily.`,
+    title,
+    description,
     alternates: { canonical: `https://www.bloxquiz.gg/stats/${slug}/history` },
     openGraph: {
-      title: `${game.name} Player Count History | BloxQuiz`,
-      description: `90-day player count history for ${game.name}. Daily averages, peaks, and visit growth.`,
+      title,
+      description,
       url: `https://www.bloxquiz.gg/stats/${slug}/history`,
       siteName: "BloxQuiz",
       type: "website",
