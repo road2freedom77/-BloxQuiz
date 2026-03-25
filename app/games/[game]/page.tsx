@@ -307,6 +307,10 @@ const gameSlugMap: Record<string, string> = {
   "Fisch": "fisch",
 };
 
+function slugToDisplayName(slug: string): string {
+  return slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
 function inferAngleServer(title: string, slug: string): string | null {
   const text = (title + " " + slug).toLowerCase();
   if (text.includes("beginner") || text.includes("basics") || text.includes("starter") ||
@@ -350,6 +354,23 @@ function slugToGame(): Record<string, any> {
   return result;
 }
 
+function buildFallbackConfig(slug: string) {
+  const displayName = slugToDisplayName(slug);
+  return {
+    displayName,
+    emoji: "🎮",
+    title: `${displayName} Quizzes — Test Your Roblox Knowledge | BloxQuiz`,
+    description: `Think you know ${displayName}? Take free Roblox trivia quizzes on BloxQuiz.gg. Multiple difficulty levels available.`,
+    intro: `Test your ${displayName} knowledge with free trivia quizzes on BloxQuiz. New quizzes are being added regularly — check back soon!`,
+    whatIs: "",
+    whatTests: "",
+    topics: [],
+    whyPlay: "",
+    faqs: [],
+    related: [],
+  };
+}
+
 async function getQuizzesForGame(displayName: string) {
   try {
     const { data } = await supabase
@@ -389,8 +410,7 @@ async function getGameStats(gameSlug: string): Promise<{ currentPlayers: number 
 
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const config = slugToGame()[game];
-  if (!config) return {};
+  const config = slugToGame()[game] ?? buildFallbackConfig(game);
   return {
     title: config.title,
     description: config.description,
@@ -407,9 +427,7 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 
 export default async function GamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
-  const gameMap = slugToGame();
-  const config = gameMap[game];
-  if (!config) notFound();
+  const config = slugToGame()[game] ?? buildFallbackConfig(game);
 
   const [quizzes, statsData] = await Promise.all([
     getQuizzesForGame(config.displayName),
