@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin as supabase } from "../../lib/supabase";
 import StatsClient from "./StatsClient";
+import GameCrossLinks from "../../components/GameCrossLinks";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -105,6 +106,14 @@ async function getCompareGames(currentSlug: string): Promise<{ slug: string; nam
   return (data ?? []) as { slug: string; name: string; emoji: string | null; current_players: number | null }[];
 }
 
+async function hasCodes(slug: string): Promise<boolean> {
+  const { count } = await supabase
+    .from("code_games")
+    .select("slug", { count: "exact", head: true })
+    .eq("slug", slug);
+  return (count ?? 0) > 0;
+}
+
 export async function generateStaticParams() {
   const slugs = await getAllSlugs();
   return slugs.map((slug) => ({ slug }));
@@ -159,12 +168,13 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   const game = await getGame(slug);
   if (!game) notFound();
 
-  const [snapshots, dailyStats, rank, quizCount, compareGames] = await Promise.all([
+  const [snapshots, dailyStats, rank, quizCount, compareGames, codesExist] = await Promise.all([
     getRecentSnapshots(game.universe_id),
     getDailyStats(game.universe_id),
     getPlayerRank(game.universe_id, game.current_players),
     getQuizCount(game.name),
     getCompareGames(slug),
+    hasCodes(slug),
   ]);
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
@@ -173,7 +183,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     : null;
   const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
 
-  // Stats-specific FAQs with live data
   const statsStaticFaqs = [
     {
       q: `How many people play ${game.name} right now?`,
@@ -189,8 +198,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     },
   ];
 
-  // Merge DB FAQs — deduplicate by normalised question text to prevent doubles
-  // (the content cron generates similar questions that overlap with statsStaticFaqs)
   const staticQuestions = new Set(statsStaticFaqs.map((f) => f.q.toLowerCase().trim()));
   const dbFaqs = (game.faqs ?? [])
     .map((f) => ({ q: f.q, a: f.a }))
@@ -218,7 +225,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
         description: `Live ${game.name} player count, historical trends, and ranking vs other Roblox games.`,
         mainEntityOfPage: `https://www.bloxquiz.gg/stats/${slug}`,
       },
-      // Single FAQPage — stats FAQs first, then unique DB FAQs (dupes filtered out)
       {
         "@type": "FAQPage",
         mainEntity: allFaqs.map((faq) => ({
@@ -233,6 +239,16 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px 0" }}>
+        <GameCrossLinks
+          slug={slug}
+          gameName={game.name}
+          hasQuizzes={quizCount > 0}
+          hasCodes={codesExist}
+          hasStats={true}
+          activeTab="stats"
+        />
+      </div>
       <StatsClient
         game={game}
         snapshots={snapshots}

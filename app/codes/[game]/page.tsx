@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import CodesClient from "./CodesClient";
+import GameCrossLinks from "../../components/GameCrossLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,28 @@ const gameDescriptions: Record<string, string> = {
   "bee-swarm-simulator": "Bee Swarm Simulator codes give players free bees, gumdrops, tickets, and boosts to help grow their hive faster. New codes drop during game milestones and seasonal events.",
   "dress-to-impress": "Dress to Impress codes give players free exclusive outfits and accessories to wear on the runway. New codes release with major updates and seasonal events.",
   "fisch": "Fisch codes give players free coins, bait, and exclusive rods to help catch rare fish faster. New codes are released during updates and game milestones.",
+  "king-legacy": "King Legacy codes give players free gems, stat resets, and EXP boosts to help progress through the seas faster. New codes drop during major updates.",
+  "shindo-life": "Shindo Life codes give players free spins and RELL Coins to unlock new bloodlines and abilities. Codes release regularly from the developers.",
+  "grand-piece-online": "Grand Piece Online codes give players free EXP and drop boosts to help grind faster. New codes drop during updates and milestones.",
+  "demon-slayer-rpg-2": "Demon Slayer RPG 2 codes give players free resets and EXP boosts to help reroll stats and progress faster. Codes drop with major updates.",
+  "blade-ball": "Blade Ball codes give players free wheel spins, luck boosts, and exclusive sword skins. New codes release frequently with updates.",
+  "blue-lock-rivals": "Blue Lock: Rivals codes give players free style spins, flow spins, and ego tokens to unlock new abilities. Codes drop during updates and milestones.",
+  "jujutsu-infinite": "Jujutsu Infinite codes give players free spins to unlock new techniques and abilities. Codes release during community milestones.",
+  "jujutsu-shenanigans": "Jujutsu Shenanigans codes give players free achievements and exclusive emotes. Codes are released during updates and special events.",
+  "type-soul": "Type Soul codes give players free rerolls to change their abilities and stats. Codes drop frequently from the developers.",
+  "fruit-battlegrounds": "Fruit Battlegrounds codes give players free gems and titles to customize their experience. New codes release during updates.",
+  "untitled-boxing-game": "Untitled Boxing Game codes give players free spins and cash to upgrade their fighter. Codes drop during updates and milestones.",
+  "sols-rng": "Sol's RNG codes give players free potion chests and luck boosts to roll rare auras. New codes release with every major update.",
+  "tower-defense-simulator": "Tower Defense Simulator codes give players free EXP, coins, and exclusive skins. Codes drop during seasonal events and milestones.",
+  "all-star-tower-defense": "All Star Tower Defense codes give players free stardust and gems to summon new units. Codes release during updates and collaborations.",
+  "toilet-tower-defense": "Toilet Tower Defense codes give players free coins and boosts to upgrade their defenses. New codes drop with major updates.",
+  "anime-vanguards": "Anime Vanguards codes give players free gems, trait rerolls, and memoria shards to strengthen their units. Codes release frequently.",
+  "da-hood": "Da Hood codes give players free DHC (Da Hood Cash) to spend on weapons and gear. New codes drop during seasonal events.",
+  "evade": "Evade codes give players free points and tokens to unlock cosmetics and upgrades. Codes release during updates and community events.",
+  "dandys-world": "Dandy's World codes give players free Ichor to spend on cosmetics and upgrades. New codes drop during updates.",
+  "murder-party": "Murder Party codes give players free gems and exclusive cosmetics. Codes release during seasonal events and milestones.",
+  "build-a-boat-for-treasure": "Build A Boat For Treasure codes give players free gold and exclusive blocks to build better boats. Codes drop during updates.",
+  "driving-empire": "Driving Empire codes give players free cash, tuning kits, and exclusive vehicles. New codes release frequently with updates.",
 };
 
 async function getGameStats(slug: string): Promise<{ currentPlayers: number | null; totalVisits: number | null } | null> {
@@ -47,6 +70,25 @@ async function getGameStats(slug: string): Promise<{ currentPlayers: number | nu
     return { currentPlayers: data.current_players, totalVisits: data.total_visits };
   } catch (e) {
     return null;
+  }
+}
+
+async function getQuizCount(slug: string): Promise<number> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("roblox_games")
+      .select("name")
+      .eq("slug", slug)
+      .single();
+    if (!data) return 0;
+    const { count } = await supabaseAdmin
+      .from("quizzes")
+      .select("id", { count: "exact", head: true })
+      .eq("game", data.name)
+      .eq("status", "published");
+    return count ?? 0;
+  } catch (e) {
+    return 0;
   }
 }
 
@@ -79,10 +121,11 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 export default async function CodesGamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
 
-  const [{ data: gameData }, { data: codesData }, statsData] = await Promise.all([
+  const [{ data: gameData }, { data: codesData }, statsData, quizCount] = await Promise.all([
     supabase.from("code_games").select("*").eq("slug", game).single(),
     supabase.from("codes").select("*").eq("slug", game).order("is_new", { ascending: false }),
     getGameStats(game),
+    getQuizCount(game),
   ]);
 
   if (!gameData) notFound();
@@ -109,29 +152,29 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
     "@graph": [
       {
         "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
-          { "@type": "ListItem", "position": 2, "name": "Roblox Codes", "item": "https://www.bloxquiz.gg/codes" },
-          { "@type": "ListItem", "position": 3, "name": `${data.game} Codes`, "item": `https://www.bloxquiz.gg/codes/${game}` },
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://www.bloxquiz.gg" },
+          { "@type": "ListItem", position: 2, name: "Roblox Codes", item: "https://www.bloxquiz.gg/codes" },
+          { "@type": "ListItem", position: 3, name: `${data.game} Codes`, item: `https://www.bloxquiz.gg/codes/${game}` },
         ],
       },
       {
         "@type": "FAQPage",
-        "mainEntity": [
+        mainEntity: [
           {
             "@type": "Question",
-            "name": `How do I redeem ${data.game} codes?`,
-            "acceptedAnswer": { "@type": "Answer", "text": data.howToRedeem },
+            name: `How do I redeem ${data.game} codes?`,
+            acceptedAnswer: { "@type": "Answer", text: data.howToRedeem },
           },
           {
             "@type": "Question",
-            "name": `How many active ${data.game} codes are there?`,
-            "acceptedAnswer": { "@type": "Answer", "text": `There are currently ${activeCodes.length} active ${data.game} codes. This page is updated regularly with the latest working codes.` },
+            name: `How many active ${data.game} codes are there?`,
+            acceptedAnswer: { "@type": "Answer", text: `There are currently ${activeCodes.length} active ${data.game} codes. This page is updated regularly with the latest working codes.` },
           },
           {
             "@type": "Question",
-            "name": `Do ${data.game} codes expire?`,
-            "acceptedAnswer": { "@type": "Answer", "text": `Yes, ${data.game} codes expire. Redeem them as soon as possible to avoid missing out on free rewards.` },
+            name: `Do ${data.game} codes expire?`,
+            acceptedAnswer: { "@type": "Answer", text: `Yes, ${data.game} codes expire. Redeem them as soon as possible to avoid missing out on free rewards.` },
           },
         ],
       },
@@ -141,6 +184,16 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px 0" }}>
+        <GameCrossLinks
+          slug={game}
+          gameName={data.game}
+          hasQuizzes={quizCount > 0}
+          hasCodes={true}
+          hasStats={true}
+          activeTab="codes"
+        />
+      </div>
       <CodesClient
         data={data}
         game={game}

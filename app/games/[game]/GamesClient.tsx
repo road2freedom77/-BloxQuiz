@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "../../lib/supabase";
+import GameCrossLinks from "../../components/GameCrossLinks";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -162,11 +163,12 @@ function StatsCard({ gameSlug, currentPlayers, totalVisits }: { gameSlug: string
   );
 }
 
-export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
+export default function GamesClient({ quizzes, config, gameSlug, statsData, hasCodes }: {
   quizzes: any[],
   config: any,
   gameSlug: string,
   statsData: { currentPlayers: number | null; totalVisits: number | null; thumbnailUrl: string | null } | null,
+  hasCodes?: boolean,
 }) {
   const { user } = useUser();
   const [playedSlugs, setPlayedSlugs] = useState<Set<string>>(new Set());
@@ -185,7 +187,6 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
     }
   }, []);
 
-  // Fetch played slugs for signed-in user
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -210,7 +211,7 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
       {/* Breadcrumbs */}
-      <nav aria-label="breadcrumb" style={{ marginBottom: 20 }}>
+      <nav aria-label="breadcrumb" style={{ marginBottom: 16 }}>
         <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>
           <li><a href="/" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Home</a></li>
           <li>›</li>
@@ -219,6 +220,16 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData }: {
           <li style={{ color: "var(--text)" }}>{config.displayName} Quizzes</li>
         </ol>
       </nav>
+
+      {/* Cross-links */}
+      <GameCrossLinks
+        slug={gameSlug}
+        gameName={config.displayName}
+        hasQuizzes={true}
+        hasCodes={hasCodes ?? false}
+        hasStats={true}
+        activeTab="quiz"
+      />
 
       {/* Hero banner */}
       <div style={{ borderRadius: "var(--radius)", overflow: "hidden", marginBottom: 32, background: heroBg, backgroundSize: "cover", backgroundPosition: "center", padding: "40px 36px", position: "relative" }}>
