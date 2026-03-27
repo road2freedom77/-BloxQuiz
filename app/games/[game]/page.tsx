@@ -515,52 +515,52 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
   ]);
 
   const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
-          { "@type": "ListItem", "position": 2, "name": "Roblox Games", "item": "https://www.bloxquiz.gg/browse" },
-          { "@type": "ListItem", "position": 3, "name": `${config.displayName} Quizzes`, "item": `https://www.bloxquiz.gg/games/${game}` },
-        ]
-      },
-      {
-        "@type": "CollectionPage",
-        "@id": `https://www.bloxquiz.gg/games/${game}`,
-        "url": `https://www.bloxquiz.gg/games/${game}`,
-        "name": `${config.displayName} Quizzes | BloxQuiz`,
-        "description": config.description,
-        "inLanguage": "en-US",
-        "hasPart": quizzes.slice(0, 10).map(q => ({
-          "@type": "Quiz",
-          "name": q.title,
-          "url": `https://www.bloxquiz.gg/quiz/${q.slug}`,
-        })),
-      },
-      {
-        "@type": "ItemList",
-        "name": `${config.displayName} Quizzes`,
-        "itemListElement": quizzes.slice(0, 10).map((q, i) => ({
-          "@type": "ListItem",
-          "position": i + 1,
-          "name": q.title,
-          "url": `https://www.bloxquiz.gg/quiz/${q.slug}`,
-        })),
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": (config.faqs || []).map((faq: any) => ({
-          "@type": "Question",
-          "name": faq.q,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": faq.a,
-          }
-        }))
-      }
-    ]
-  };
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
+        { "@type": "ListItem", "position": 2, "name": "Roblox Games", "item": "https://www.bloxquiz.gg/browse" },
+        { "@type": "ListItem", "position": 3, "name": `${config.displayName} Quizzes`, "item": `https://www.bloxquiz.gg/games/${game}` },
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": `https://www.bloxquiz.gg/games/${game}`,
+      "url": `https://www.bloxquiz.gg/games/${game}`,
+      "name": `${config.displayName} Quizzes | BloxQuiz`,
+      "description": config.description,
+      "inLanguage": "en-US",
+      "hasPart": quizzes.slice(0, 10).map(q => ({
+        "@type": "Quiz",
+        "name": q.title,
+        "url": `https://www.bloxquiz.gg/quiz/${q.slug}`,
+      })),
+    },
+    {
+      "@type": "ItemList",
+      "name": `${config.displayName} Quizzes`,
+      "itemListElement": quizzes.slice(0, 10).map((q, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "name": q.title,
+        "url": `https://www.bloxquiz.gg/quiz/${q.slug}`,
+      })),
+    },
+    ...(config.faqs && config.faqs.length > 0 ? [{
+      "@type": "FAQPage",
+      "mainEntity": config.faqs.map((faq: any) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.a,
+        }
+      }))
+    }] : []),
+  ]
+};
 
   return (
     <>
