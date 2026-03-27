@@ -183,6 +183,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     : null;
   const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
 
+  // Build merged FAQ list — static first, then unique DB faqs
   const statsStaticFaqs = [
     {
       q: `How many people play ${game.name} right now?`,
@@ -259,6 +260,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
         slug={slug}
         quizCount={quizCount}
         compareGames={compareGames}
+        allFaqs={allFaqs}
       />
     </>
   );

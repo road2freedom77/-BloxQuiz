@@ -27,6 +27,7 @@ interface StatsClientProps {
   slug: string;
   quizCount: number;
   compareGames: { slug: string; name: string; emoji: string | null; current_players: number | null }[];
+  allFaqs: { q: string; a: string }[];
 }
 
 function formatNumber(n: number | null | undefined): string {
@@ -99,7 +100,7 @@ const customTooltipStyle = {
   fontSize: 13,
 };
 
-export default function StatsClient({ game, snapshots, dailyStats, rank, approvalRate, peak24h, slug, quizCount, compareGames }: StatsClientProps) {
+export default function StatsClient({ game, snapshots, dailyStats, rank, approvalRate, peak24h, slug, quizCount, compareGames, allFaqs }: StatsClientProps) {
   const hourlyData = useMemo(() => [...snapshots].reverse().map((s) => ({ time: formatHour(s.captured_at), players: s.concurrent_players })), [snapshots]);
   const dailyData = useMemo(() => [...dailyStats].reverse().map((d) => ({ date: formatDate(d.date), avg: d.avg_players, peak: d.peak_players, visitsGained: d.total_visits_delta })), [dailyStats]);
 
@@ -216,7 +217,7 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
         {/* Quiz CTA */}
         <QuizCTA gameName={game.name} gameSlug={slug} gameEmoji={game.emoji} quizCount={quizCount} />
 
-         {/* Cross-links */}
+        {/* Cross-links */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 40 }}>
           <Link href={`/games/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
             <span style={{ fontSize: 20 }}>🧠</span>
@@ -260,12 +261,12 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
           </div>
         )}
 
-        {/* FAQ */}
-        {game.faqs && game.faqs.length > 0 && (
+        {/* FAQ — uses allFaqs passed from server to match JSON-LD exactly */}
+        {allFaqs.length > 0 && (
           <div style={{ marginBottom: 40 }}>
             <SectionHeading>❓ Frequently Asked Questions</SectionHeading>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {game.faqs.map((faq, i) => (
+              {allFaqs.map((faq, i) => (
                 <div key={i} style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "18px 20px" }}>
                   <p style={{ margin: "0 0 8px", fontWeight: 700, fontSize: 15, color: "#fff" }}>{faq.q}</p>
                   <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.6)" }}>{faq.a}</p>
