@@ -102,24 +102,24 @@ export default function RootLayout({
     >
       <html lang="en">
         <head>
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-X1WQ0GMZDN"
-            strategy="afterInteractive"
-          />
-          <Script id="google-analytics" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-X1WQ0GMZDN');
-            `}
-          </Script>
-            <Script
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4722330934533465"
+  <Script
+    src="https://www.googletagmanager.com/gtag/js?id=G-X1WQ0GMZDN"
     strategy="afterInteractive"
-    crossOrigin="anonymous"
   />
-        </head>
+  <Script id="google-analytics" strategy="afterInteractive">
+    {`
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-X1WQ0GMZDN');
+    `}
+  </Script>
+  <script
+    async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4722330934533465"
+    crossOrigin="anonymous"
+  ></script>
+</head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`}>
           <Nav />
           {children}
