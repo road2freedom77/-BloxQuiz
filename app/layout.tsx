@@ -114,6 +114,11 @@ export default function RootLayout({
               gtag('config', 'G-X1WQ0GMZDN');
             `}
           </Script>
+            <Script
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4722330934533465"
+    strategy="afterInteractive"
+    crossOrigin="anonymous"
+  />
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`}>
           <Nav />
