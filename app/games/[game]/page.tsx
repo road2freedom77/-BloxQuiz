@@ -3,6 +3,8 @@ import { supabase } from "../../lib/supabase";
 import { supabaseAdmin } from "../../lib/supabase";
 import GamesClient from "./GamesClient";
 
+const COMMAND_CENTER_SLUGS = ["blox-fruits", "brookhaven-rp", "murder-mystery-2"];
+
 const gameEmojis: Record<string, string> = {
   "Blox Fruits": "⚔️",
   "Brookhaven RP": "🏠",
@@ -305,9 +307,6 @@ const gameSlugMap: Record<string, string> = {
   "Bee Swarm Simulator": "bee-swarm-simulator",
   "Dress to Impress": "dress-to-impress",
   "Fisch": "fisch",
-  // Add these entries to the existing gameSlugMap in app/games/[game]/page.tsx
-// Paste inside the existing gameSlugMap object, after the last entry ("Fisch": "fisch")
-
   "RIVALS": "rivals",
   "The Strongest Battlegrounds": "the-strongest-battlegrounds",
   "Jujutsu Shenanigans": "jujutsu-shenanigans",
@@ -420,9 +419,9 @@ function slugToGame(): Record<string, any> {
     result[slug] = {
       displayName: gameName,
       emoji: gameEmojis[gameName] || "🎮",
-      title: `${gameName} Quizzes — Test Your Roblox Knowledge | BloxQuiz`,
-      description: `Think you know ${gameName}? Take free Roblox trivia quizzes covering mechanics, lore, trading, and secrets. Multiple difficulty levels on BloxQuiz.gg`,
-      intro: data?.intro || `Test your ${gameName} knowledge with free trivia quizzes on BloxQuiz.`,
+      title: gameName + " Quizzes — Test Your Roblox Knowledge | BloxQuiz",
+      description: "Think you know " + gameName + "? Take free Roblox trivia quizzes covering mechanics, lore, trading, and secrets. Multiple difficulty levels on BloxQuiz.gg",
+      intro: data?.intro || "Test your " + gameName + " knowledge with free trivia quizzes on BloxQuiz.",
       whatIs: data?.whatIs || "",
       whatTests: data?.whatTests || "",
       topics: data?.topics || [],
@@ -439,9 +438,9 @@ function buildFallbackConfig(slug: string) {
   return {
     displayName,
     emoji: "🎮",
-    title: `${displayName} Quizzes — Test Your Roblox Knowledge | BloxQuiz`,
-    description: `Think you know ${displayName}? Take free Roblox trivia quizzes on BloxQuiz.gg. Multiple difficulty levels available.`,
-    intro: `Test your ${displayName} knowledge with free trivia quizzes on BloxQuiz. New quizzes are being added regularly — check back soon!`,
+    title: displayName + " Quizzes — Test Your Roblox Knowledge | BloxQuiz",
+    description: "Think you know " + displayName + "? Take free Roblox trivia quizzes on BloxQuiz.gg. Multiple difficulty levels available.",
+    intro: "Test your " + displayName + " knowledge with free trivia quizzes on BloxQuiz. New quizzes are being added regularly — check back soon!",
     whatIs: "",
     whatTests: "",
     topics: [],
@@ -470,7 +469,6 @@ async function getQuizzesForGame(displayName: string) {
       }));
     }
   } catch (e) {}
-
   return [];
 }
 
@@ -488,17 +486,43 @@ async function getGameStats(gameSlug: string): Promise<{ currentPlayers: number 
   }
 }
 
+async function getHistoryInsights(slug: string) {
+  try {
+    const { data } = await supabaseAdmin
+      .from("game_history_insights_14d")
+      .select("trend_label, trend_pct_7d, volatility_label, avg_players_7d, weekend_lift_pct")
+      .eq("slug", slug)
+      .single();
+    return data ?? null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function getActiveCodes(slug: string): Promise<number> {
+  try {
+    const { count } = await supabaseAdmin
+      .from("codes")
+      .select("*", { count: "exact", head: true })
+      .eq("slug", slug)
+      .eq("active", true);
+    return count ?? 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
   const config = slugToGame()[game] ?? buildFallbackConfig(game);
   return {
     title: config.title,
     description: config.description,
-    alternates: { canonical: `https://www.bloxquiz.gg/games/${game}` },
+    alternates: { canonical: "https://www.bloxquiz.gg/games/" + game },
     openGraph: {
       title: config.title,
       description: config.description,
-      url: `https://www.bloxquiz.gg/games/${game}`,
+      url: "https://www.bloxquiz.gg/games/" + game,
       siteName: "BloxQuiz",
       type: "website",
     },
@@ -508,59 +532,62 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 export default async function GamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
   const config = slugToGame()[game] ?? buildFallbackConfig(game);
+  const isCommandCenter = COMMAND_CENTER_SLUGS.includes(game);
 
-  const [quizzes, statsData] = await Promise.all([
+  const [quizzes, statsData, insights, activeCodes] = await Promise.all([
     getQuizzesForGame(config.displayName),
     getGameStats(game),
+    isCommandCenter ? getHistoryInsights(game) : Promise.resolve(null),
+    isCommandCenter ? getActiveCodes(game) : Promise.resolve(0),
   ]);
 
   const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
-        { "@type": "ListItem", "position": 2, "name": "Roblox Games", "item": "https://www.bloxquiz.gg/browse" },
-        { "@type": "ListItem", "position": 3, "name": `${config.displayName} Quizzes`, "item": `https://www.bloxquiz.gg/games/${game}` },
-      ]
-    },
-    {
-      "@type": "CollectionPage",
-      "@id": `https://www.bloxquiz.gg/games/${game}`,
-      "url": `https://www.bloxquiz.gg/games/${game}`,
-      "name": `${config.displayName} Quizzes | BloxQuiz`,
-      "description": config.description,
-      "inLanguage": "en-US",
-      "hasPart": quizzes.slice(0, 10).map(q => ({
-        "@type": "Quiz",
-        "name": q.title,
-        "url": `https://www.bloxquiz.gg/quiz/${q.slug}`,
-      })),
-    },
-    {
-      "@type": "ItemList",
-      "name": `${config.displayName} Quizzes`,
-      "itemListElement": quizzes.slice(0, 10).map((q, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "name": q.title,
-        "url": `https://www.bloxquiz.gg/quiz/${q.slug}`,
-      })),
-    },
-    ...(config.faqs && config.faqs.length > 0 ? [{
-      "@type": "FAQPage",
-      "mainEntity": config.faqs.map((faq: any) => ({
-        "@type": "Question",
-        "name": faq.q,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.a,
-        }
-      }))
-    }] : []),
-  ]
-};
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.bloxquiz.gg" },
+          { "@type": "ListItem", "position": 2, "name": "Roblox Games", "item": "https://www.bloxquiz.gg/browse" },
+          { "@type": "ListItem", "position": 3, "name": config.displayName + " Quizzes", "item": "https://www.bloxquiz.gg/games/" + game },
+        ]
+      },
+      {
+        "@type": "CollectionPage",
+        "@id": "https://www.bloxquiz.gg/games/" + game,
+        "url": "https://www.bloxquiz.gg/games/" + game,
+        "name": config.displayName + " Quizzes | BloxQuiz",
+        "description": config.description,
+        "inLanguage": "en-US",
+        "hasPart": quizzes.slice(0, 10).map(q => ({
+          "@type": "Quiz",
+          "name": q.title,
+          "url": "https://www.bloxquiz.gg/quiz/" + q.slug,
+        })),
+      },
+      {
+        "@type": "ItemList",
+        "name": config.displayName + " Quizzes",
+        "itemListElement": quizzes.slice(0, 10).map((q, i) => ({
+          "@type": "ListItem",
+          "position": i + 1,
+          "name": q.title,
+          "url": "https://www.bloxquiz.gg/quiz/" + q.slug,
+        })),
+      },
+      ...(config.faqs && config.faqs.length > 0 ? [{
+        "@type": "FAQPage",
+        "mainEntity": config.faqs.map((faq: any) => ({
+          "@type": "Question",
+          "name": faq.q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.a,
+          }
+        }))
+      }] : []),
+    ]
+  };
 
   return (
     <>
@@ -573,6 +600,8 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
         config={config}
         gameSlug={game}
         statsData={statsData}
+        insights={insights}
+        activeCodes={activeCodes}
       />
     </>
   );
