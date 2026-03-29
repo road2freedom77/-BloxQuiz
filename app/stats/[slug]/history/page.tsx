@@ -26,6 +26,26 @@ interface DailyStatRow {
   total_visits_delta: number;
 }
 
+interface HistoryInsights {
+  days_tracked: number;
+  avg_players_7d: number | null;
+  avg_players_14d: number | null;
+  avg_players_30d: number | null;
+  peak_day: string | null;
+  peak_players: number | null;
+  lowest_day: string | null;
+  lowest_players: number | null;
+  visits_gained_7d: number | null;
+  visits_gained_14d: number | null;
+  avg_weekend: number | null;
+  avg_weekday: number | null;
+  weekend_lift_pct: number | null;
+  trend_pct_7d: number | null;
+  trend_label: string | null;
+  volatility_score: number | null;
+  volatility_label: string | null;
+}
+
 async function getGame(slug: string): Promise<GameRow | null> {
   const { data, error } = await supabaseAdmin
     .from("roblox_games")
@@ -47,6 +67,15 @@ async function getDailyStats(universeId: number): Promise<DailyStatRow[]> {
   return (data as DailyStatRow[]) ?? [];
 }
 
+async function getHistoryInsights(slug: string): Promise<HistoryInsights | null> {
+  const { data } = await supabaseAdmin
+    .from("game_history_insights_14d")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+  return data as HistoryInsights | null;
+}
+
 async function getAllSlugs(): Promise<string[]> {
   const { data } = await supabaseAdmin
     .from("roblox_games")
@@ -55,10 +84,16 @@ async function getAllSlugs(): Promise<string[]> {
   return (data ?? []).map((g: { slug: string }) => g.slug);
 }
 
-function formatAvg(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+function formatNum(n: number | null): string {
+  if (n === null || n === undefined) return "—";
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000) return Math.round(n / 1_000) + "K";
   return n.toLocaleString();
+}
+
+function formatDate(d: string | null): string {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric" });
 }
 
 export async function generateStaticParams() {
@@ -73,7 +108,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
 
-  // Fetch avg daily players for the title
   const { data: dailyData } = await supabaseAdmin
     .from("game_daily_stats")
     .select("avg_players")
@@ -85,24 +119,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ? Math.round(dailyData.reduce((sum: number, d: { avg_players: number }) => sum + d.avg_players, 0) / dailyData.length)
     : null;
 
-  const avgStr = avgDaily ? formatAvg(avgDaily) : null;
+  const avgStr = avgDaily ? formatNum(avgDaily) : null;
 
   const title = avgStr
-    ? `${game.name} Player Count History — Avg ${avgStr}/Day (${month}) | BloxQuiz`
-    : `${game.name} Player Count History (${month}) — 90 Day Chart | BloxQuiz`;
+    ? game.name + " Player Count History — Avg " + avgStr + "/Day (" + month + ") | BloxQuiz"
+    : game.name + " Player Count History (" + month + ") — 90 Day Chart | BloxQuiz";
 
   const description = avgStr
-    ? `${game.name} averages ${avgStr} players per day. Full 90-day player count history with daily averages, peaks, and visit growth. Updated daily.`
-    : `${game.name} player count history over the last 90 days. Daily average, peak, and minimum player counts with visit growth data. Updated daily.`;
+    ? game.name + " averages " + avgStr + " players per day. Full 90-day player count history with daily averages, peaks, and visit growth. Updated daily."
+    : game.name + " player count history over the last 90 days. Daily average, peak, and minimum player counts with visit growth data. Updated daily.";
 
   return {
     title,
     description,
-    alternates: { canonical: `https://www.bloxquiz.gg/stats/${slug}/history` },
+    alternates: { canonical: "https://www.bloxquiz.gg/stats/" + slug + "/history" },
     openGraph: {
       title,
       description,
-      url: `https://www.bloxquiz.gg/stats/${slug}/history`,
+      url: "https://www.bloxquiz.gg/stats/" + slug + "/history",
       siteName: "BloxQuiz",
       type: "website",
       ...(game.thumbnail_url ? { images: [{ url: game.thumbnail_url }] } : {}),
@@ -110,13 +144,36 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+function trendColor(label: string | null): string {
+  if (label === "Rising") return "#00f5a0";
+  if (label === "Cooling Off") return "#ff6b6b";
+  return "#a0aec0";
+}
+
+function trendArrow(label: string | null): string {
+  if (label === "Rising") return "↑";
+  if (label === "Cooling Off") return "↓";
+  return "→";
+}
+
+function volatilityColor(label: string | null): string {
+  if (label === "Volatile") return "#ffd166";
+  if (label === "Moderate") return "#00b4d8";
+  return "#00f5a0";
+}
+
 export default async function StatsHistoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const game = await getGame(slug);
   if (!game) notFound();
 
-  const dailyStats = await getDailyStats(game.universe_id);
+  const [dailyStats, insights] = await Promise.all([
+    getDailyStats(game.universe_id),
+    getHistoryInsights(slug),
+  ]);
+
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+  const isMature = (insights?.days_tracked ?? 0) >= 14;
 
   const peakDay = dailyStats.length
     ? dailyStats.reduce((max, d) => d.peak_players > max.peak_players ? d : max, dailyStats[0])
@@ -136,18 +193,18 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: "https://www.bloxquiz.gg" },
           { "@type": "ListItem", position: 2, name: "Stats", item: "https://www.bloxquiz.gg/stats" },
-          { "@type": "ListItem", position: 3, name: `${game.name} Stats`, item: `https://www.bloxquiz.gg/stats/${slug}` },
-          { "@type": "ListItem", position: 4, name: "Player Count History", item: `https://www.bloxquiz.gg/stats/${slug}/history` },
+          { "@type": "ListItem", position: 3, name: game.name + " Stats", item: "https://www.bloxquiz.gg/stats/" + slug },
+          { "@type": "ListItem", position: 4, name: "Player Count History", item: "https://www.bloxquiz.gg/stats/" + slug + "/history" },
         ],
       },
       {
         "@type": "Article",
-        headline: `${game.name} Player Count History — ${month}`,
+        headline: game.name + " Player Count History — " + month,
         dateModified: game.last_updated ?? new Date().toISOString(),
         author: { "@type": "Organization", name: "BloxQuiz" },
         publisher: { "@type": "Organization", name: "BloxQuiz" },
-        description: `Historical player count data for ${game.name} including daily averages, peaks, and visit growth over the past 90 days.`,
-        mainEntityOfPage: `https://www.bloxquiz.gg/stats/${slug}/history`,
+        description: "Historical player count data for " + game.name + " including daily averages, peaks, and visit growth over the past 90 days.",
+        mainEntityOfPage: "https://www.bloxquiz.gg/stats/" + slug + "/history",
       },
     ],
   };
@@ -165,7 +222,7 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
               <span>/</span>
               <Link href="/stats" style={{ color: "inherit", textDecoration: "none" }}>Stats</Link>
               <span>/</span>
-              <Link href={`/stats/${slug}`} style={{ color: "inherit", textDecoration: "none" }}>{game.name}</Link>
+              <Link href={"/stats/" + slug} style={{ color: "inherit", textDecoration: "none" }}>{game.name}</Link>
               <span>/</span>
               <span style={{ color: "rgba(255,255,255,0.7)" }}>History</span>
             </nav>
@@ -195,10 +252,65 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
           <div style={{ background: "linear-gradient(135deg, #0f1629 0%, #111827 100%)", border: "1px solid rgba(0,180,216,0.2)", borderLeft: "3px solid #00b4d8", borderRadius: 12, padding: "20px 24px", marginBottom: 32 }}>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.85)" }}>
               {dailyStats.length > 0
-                ? `${game.name} has averaged ${avgOverPeriod?.toLocaleString() ?? "—"} concurrent players per day over the past ${dailyStats.length} days${peakDay ? `, with a peak of ${peakDay.peak_players.toLocaleString()} players on ${new Date(peakDay.date).toLocaleDateString("en-US", { month: "long", day: "numeric" })}` : ""}. The game gained ${totalVisitsGained.toLocaleString()} total visits during this period. BloxQuiz collects hourly snapshots and aggregates them into daily stats.`
-                : `BloxQuiz tracks ${game.name} player counts hourly. Daily aggregate data will appear here after the first full day of tracking.`}
+                ? game.name + " has averaged " + (avgOverPeriod?.toLocaleString() ?? "—") + " concurrent players per day over the past " + dailyStats.length + " days" + (peakDay ? ", with a peak of " + peakDay.peak_players.toLocaleString() + " players on " + new Date(peakDay.date).toLocaleDateString("en-US", { month: "long", day: "numeric" }) : "") + ". The game gained " + totalVisitsGained.toLocaleString() + " total visits during this period. BloxQuiz collects hourly snapshots and aggregates them into daily stats."
+                : "BloxQuiz tracks " + game.name + " player counts hourly. Daily aggregate data will appear here after the first full day of tracking."}
             </p>
           </div>
+
+          {/* INSIGHT BLOCK — above chart, only for mature pages */}
+          {isMature && insights && (
+            <div style={{ background: "#0f1629", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "24px", marginBottom: 32 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <span style={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)" }}>7-Day Trend Analysis</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
+                {/* Trend */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Trend</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: trendColor(insights.trend_label) }}>
+                    {trendArrow(insights.trend_label)} {insights.trend_label ?? "—"}
+                  </div>
+                  {insights.trend_pct_7d !== null && (
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
+                      {insights.trend_pct_7d > 0 ? "+" : ""}{insights.trend_pct_7d}% vs prior 3 days
+                    </div>
+                  )}
+                </div>
+                {/* Volatility */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Volatility</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: volatilityColor(insights.volatility_label) }}>
+                    {insights.volatility_label ?? "—"}
+                  </div>
+                  {insights.volatility_score !== null && (
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
+                      Score: {insights.volatility_score}
+                    </div>
+                  )}
+                </div>
+                {/* 7d avg */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>7-Day Avg</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{formatNum(insights.avg_players_7d)}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>players/day</div>
+                </div>
+                {/* Weekend lift */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Weekend Lift</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: (insights.weekend_lift_pct ?? 0) > 5 ? "#00f5a0" : "#a0aec0" }}>
+                    {insights.weekend_lift_pct !== null ? (insights.weekend_lift_pct > 0 ? "+" : "") + insights.weekend_lift_pct + "%" : "—"}
+                  </div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>vs weekdays</div>
+                </div>
+                {/* Visits 7d */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Visits (7d)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{formatNum(insights.visits_gained_7d)}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>new visits</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Summary stat cards */}
           {dailyStats.length > 0 && (
@@ -217,7 +329,7 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
               )}
               <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 24px" }}>
                 <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 4 }}>Visits Gained</div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{totalVisitsGained >= 1_000_000 ? `${(totalVisitsGained / 1_000_000).toFixed(1)}M` : totalVisitsGained >= 1_000 ? `${Math.round(totalVisitsGained / 1_000)}K` : totalVisitsGained.toLocaleString()}</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatNum(totalVisitsGained)}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>last {dailyStats.length} days</div>
               </div>
               <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 24px" }}>
@@ -229,6 +341,51 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
 
           {/* Charts */}
           <StatsHistoryClient dailyStats={dailyStats} gameName={game.name} />
+
+          {/* INSIGHT BLOCK — below chart, only for mature pages */}
+          {isMature && insights && (
+            <div style={{ background: "#0f1629", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "24px", marginTop: 32 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>Deeper Insights</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
+                {/* Biggest spike */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Biggest Spike Day</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#00f5a0" }}>{formatDate(insights.peak_day)}</div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{formatNum(insights.peak_players)} avg players</div>
+                </div>
+                {/* Biggest drop */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Lowest Day</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#ff6b6b" }}>{formatDate(insights.lowest_day)}</div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{formatNum(insights.lowest_players)} avg players</div>
+                </div>
+                {/* Weekend pattern */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Weekend vs Weekday</div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
+                    <span style={{ color: "#fff", fontWeight: 700 }}>Weekend: </span>{formatNum(insights.avg_weekend)}<br />
+                    <span style={{ color: "#fff", fontWeight: 700 }}>Weekday: </span>{formatNum(insights.avg_weekday)}
+                  </div>
+                  {(insights.weekend_lift_pct ?? 0) > 5 && (
+                    <div style={{ fontSize: 12, color: "#00f5a0", marginTop: 4 }}>
+                      {game.name} gets a meaningful weekend boost
+                    </div>
+                  )}
+                  {(insights.weekend_lift_pct ?? 0) <= 0 && (
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>
+                      No significant weekend lift
+                    </div>
+                  )}
+                </div>
+                {/* 14d visits */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Visits Gained (14d)</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{formatNum(insights.visits_gained_14d)}</div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>new visits in 2 weeks</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Daily data table */}
           {dailyStats.length > 0 && (
@@ -255,7 +412,7 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
                         <td style={{ padding: "10px 16px", textAlign: "right", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>{d.peak_players.toLocaleString()}</td>
                         <td style={{ padding: "10px 16px", textAlign: "right", fontWeight: 600, color: "rgba(255,255,255,0.5)", fontVariantNumeric: "tabular-nums" }}>{d.min_players.toLocaleString()}</td>
                         <td style={{ padding: "10px 16px", textAlign: "right", fontWeight: 600, color: "rgba(255,255,255,0.5)", fontVariantNumeric: "tabular-nums" }}>
-                          {d.total_visits_delta >= 1_000_000 ? `${(d.total_visits_delta / 1_000_000).toFixed(1)}M` : d.total_visits_delta >= 1_000 ? `${Math.round(d.total_visits_delta / 1_000)}K` : d.total_visits_delta.toLocaleString()}
+                          {formatNum(d.total_visits_delta)}
                         </td>
                       </tr>
                     ))}
@@ -267,17 +424,17 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
 
           {/* Cross-links */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 40 }}>
-            <Link href={`/stats/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>📊</span><span>{game.name} Live Stats</span>
+            <Link href={"/stats/" + slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+              <span>{"📊"}</span><span>{game.name} Live Stats</span>
             </Link>
-            <Link href={`/games/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>🧠</span><span>{game.name} Quizzes</span>
+            <Link href={"/games/" + slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+              <span>{"🧠"}</span><span>{game.name} Quizzes</span>
             </Link>
-            <Link href={`/codes/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>🎁</span><span>{game.name} Codes</span>
+            <Link href={"/codes/" + slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+              <span>{"🎁"}</span><span>{game.name} Codes</span>
             </Link>
             <Link href="/stats" style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-              <span>📈</span><span>All Game Stats</span>
+              <span>{"📈"}</span><span>All Game Stats</span>
             </Link>
           </div>
 
