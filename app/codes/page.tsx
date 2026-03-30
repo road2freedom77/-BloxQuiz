@@ -1,5 +1,5 @@
 // app/codes/page.tsx
-import { supabase } from '@/app/lib/supabase'
+import { supabaseAdmin } from '@/app/lib/supabase'
 import CodesHubClient from './CodesHubClient'
 
 export const dynamic = 'force-dynamic'
@@ -19,17 +19,17 @@ export const metadata = {
 
 const faqs = [
   { q: 'Do Roblox codes expire?', a: 'Yes — most Roblox codes are time-limited and expire after a few days or weeks. Some codes expire after a certain number of uses. Always redeem codes as soon as possible to avoid missing out.' },
-  { q: 'Are these codes free?', a: 'Yes — all codes listed on BloxQuiz are completely free. You never need to pay to use a Roblox code. If a site asks you to pay for codes, it\'s a scam.' },
-  { q: "Why isn't my code working?", a: 'Codes are case sensitive — make sure you type them exactly as shown. The code may also have expired or already been redeemed on your account. Check the active/expired status on each game\'s page.' },
+  { q: 'Are these codes free?', a: "Yes — all codes listed on BloxQuiz are completely free. You never need to pay to use a Roblox code. If a site asks you to pay for codes, it's a scam." },
+  { q: "Why isn't my code working?", a: "Codes are case sensitive — make sure you type them exactly as shown. The code may also have expired or already been redeemed on your account. Check the active/expired status on each game's page." },
   { q: 'How often are new codes released?', a: 'New codes are typically released during game updates, milestones, collaborations, or special events. Follow game developers on Twitter/X and Discord for the fastest code announcements.' },
   { q: 'Can I use the same code twice?', a: 'No — each code can only be redeemed once per account. Attempting to use a code you\'ve already redeemed will show an error.' },
 ]
 
 export default async function CodesPage() {
   const [{ data: games }, { data: codes }, { data: recentCodes }] = await Promise.all([
-    supabase.from('code_games').select('*').order('game'),
-    supabase.from('codes').select('*').order('is_new', { ascending: false }),
-    supabase
+    supabaseAdmin.from('code_games').select('*').order('game'),
+    supabaseAdmin.from('codes').select('*').order('is_new', { ascending: false }),
+    supabaseAdmin
       .from('codes')
       .select('code, reward, game, slug, active, is_new, updated_at')
       .order('updated_at', { ascending: false })
@@ -102,8 +102,15 @@ export default async function CodesPage() {
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--neon-blue)' }}>🎮 {allCodes.length} Games Covered</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-muted)' }}>🔄 Updated Daily</span>
       </div>
-      <div style={{ fontSize: 13, color: 'var(--text-dim)', fontWeight: 600, marginBottom: 32 }}>
+      <div style={{ fontSize: 13, color: 'var(--text-dim)', fontWeight: 600, marginBottom: 24 }}>
         🕐 Last updated: {lastUpdatedStr} — codes verified and refreshed
+      </div>
+
+      {/* Freshness nav — server rendered */}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
+        <a href="/codes/new" style={{ background: 'rgba(0,245,160,0.08)', border: '1px solid rgba(0,245,160,0.2)', borderRadius: 100, padding: '8px 18px', textDecoration: 'none', fontSize: 13, fontWeight: 800, color: 'var(--neon-green)' }}>🆕 New Codes</a>
+        <a href="/codes/recently-updated" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 100, padding: '8px 18px', textDecoration: 'none', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)' }}>🔄 Recently Updated</a>
+        <a href="/codes/expired" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 100, padding: '8px 18px', textDecoration: 'none', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)' }}>💀 Expired Codes</a>
       </div>
 
       {/* How to redeem */}
