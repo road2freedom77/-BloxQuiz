@@ -18,6 +18,12 @@ export default function CodesHubClient({
 
   return (
     <>
+    {/* Freshness nav */}
+<div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 24 }}>
+  <a href="/codes/new" style={{ background: "rgba(0,245,160,0.08)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 100, padding: "8px 18px", textDecoration: "none", fontSize: 13, fontWeight: 800, color: "var(--neon-green)" }}>{"🆕 New Codes"}</a>
+  <a href="/codes/recently-updated" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "8px 18px", textDecoration: "none", fontSize: 13, fontWeight: 800, color: "var(--text-muted)" }}>{"🔄 Recently Updated"}</a>
+  <a href="/codes/expired" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "8px 18px", textDecoration: "none", fontSize: 13, fontWeight: 800, color: "var(--text-muted)" }}>{"💀 Expired Codes"}</a>
+</div>
       {/* Recent activity module */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "22px 24px", marginBottom: 32 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>{"🆕 Recently Updated"}</div>
