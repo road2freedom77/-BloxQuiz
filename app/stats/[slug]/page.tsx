@@ -203,12 +203,18 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   // Rank based on authoritative currentPlayers
   const rank = await getPlayerRank(game.universe_id, currentPlayers);
 
+  // Generate intro dynamically from authoritative numbers.
+  // The DB intro field has hardcoded player counts that go stale —
+  // override it so hero copy always matches KPI cards exactly.
+  const generatedIntro = `${game.name} currently has ${formatNumber(currentPlayers)} concurrent players and ${formatVisits(totalVisits)} total visits${rank ? `, ranking #${rank} among tracked Roblox games` : ""}. BloxQuiz tracks ${game.name} player counts hourly so you always have the latest data.`;
+
   // Wire authoritative values into game object so StatsClient has one source
   const gameWithLiveData: GameRow = {
     ...game,
     current_players: currentPlayers,
     total_visits: totalVisits,
     last_updated: lastUpdated,
+    intro: generatedIntro,
   };
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
@@ -233,9 +239,16 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   ];
 
   const staticQuestions = new Set(statsStaticFaqs.map((f) => f.q.toLowerCase().trim()));
+  // Also deduplicate by key phrases to catch near-duplicate DB faqs
+  const staticKeywords = ["how many people play", "how many total visits", "how often", "player count updated", "concurrent players"];
   const dbFaqs = (game.faqs ?? [])
     .map((f) => ({ q: f.q, a: f.a }))
-    .filter((f) => !staticQuestions.has(f.q.toLowerCase().trim()));
+    .filter((f) => {
+      const lower = f.q.toLowerCase().trim();
+      if (staticQuestions.has(lower)) return false;
+      if (staticKeywords.some((kw) => lower.includes(kw))) return false;
+      return true;
+    });
 
   const allFaqs = [...statsStaticFaqs, ...dbFaqs];
 
