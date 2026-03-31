@@ -115,9 +115,9 @@ function SubmitQuizTab() {
     if (!title.trim()) { setError("Title is required."); return; }
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      if (!q.q.trim()) { setError(`Question ${i + 1} is empty.`); return; }
+      if (!q.q.trim()) { setError("Question " + (i + 1) + " is empty."); return; }
       for (let j = 0; j < 4; j++) {
-        if (!q.a[j].trim()) { setError(`Question ${i + 1}, Answer ${["A","B","C","D"][j]} is empty.`); return; }
+        if (!q.a[j].trim()) { setError("Question " + (i + 1) + ", Answer " + ["A","B","C","D"][j] + " is empty."); return; }
       }
     }
     setSubmitting(true); setError(null); setSuccess(null);
@@ -156,12 +156,12 @@ function SubmitQuizTab() {
         {questions.map((q, i) => (
           <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 20 }}>
             <div style={{ fontSize: 12, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Question {i + 1}</div>
-            <div style={{ marginBottom: 12 }}><input value={q.q} onChange={e => updateQuestion(i, "q", e.target.value)} placeholder={`Question ${i + 1}...`} style={inputStyle} /></div>
+            <div style={{ marginBottom: 12 }}><input value={q.q} onChange={e => updateQuestion(i, "q", e.target.value)} placeholder={"Question " + (i + 1) + "..."} style={inputStyle} /></div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {q.a.map((ans: string, j: number) => (
                 <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <button onClick={() => updateQuestion(i, "correct", j)} style={{ width: 30, height: 30, borderRadius: "50%", border: "2px solid " + (q.correct === j ? "var(--neon-green)" : "var(--border)"), background: q.correct === j ? "rgba(0,245,160,0.15)" : "var(--surface)", color: q.correct === j ? "var(--neon-green)" : "var(--text-dim)", fontSize: 12, fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>{["A","B","C","D"][j]}</button>
-                  <input value={ans} onChange={e => updateAnswer(i, j, e.target.value)} placeholder={`Answer ${["A","B","C","D"][j]}...`} style={{ ...inputStyle, border: "1.5px solid " + (q.correct === j ? "var(--neon-green)" : "var(--border)") }} />
+                  <input value={ans} onChange={e => updateAnswer(i, j, e.target.value)} placeholder={"Answer " + ["A","B","C","D"][j] + "..."} style={{ ...inputStyle, border: "1.5px solid " + (q.correct === j ? "var(--neon-green)" : "var(--border)") }} />
                 </div>
               ))}
             </div>
@@ -174,7 +174,7 @@ function SubmitQuizTab() {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {faqs.map((faq, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <input value={faq.question} onChange={e => updateFaq(i, "question", e.target.value)} placeholder={`FAQ ${i + 1} question...`} style={inputStyle} />
+              <input value={faq.question} onChange={e => updateFaq(i, "question", e.target.value)} placeholder={"FAQ " + (i + 1) + " question..."} style={inputStyle} />
               <textarea value={faq.answer} onChange={e => updateFaq(i, "answer", e.target.value)} placeholder="Answer..." rows={2} style={{ ...inputStyle, resize: "vertical" }} />
             </div>
           ))}
@@ -194,6 +194,11 @@ function siloStrength(count: number): { label: string, color: string, bg: string
   if (count >= 8) return { label: "📈 Growing", color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" };
   if (count >= 4) return { label: "⚠️ Weak", color: "#FF8A47", bg: "rgba(255,138,71,0.1)" };
   return { label: "🔴 Thin", color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" };
+}
+
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export default function AdminClient({
@@ -248,12 +253,12 @@ export default function AdminClient({
   const [notifyingWinners, setNotifyingWinners] = useState(false);
   const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
 
-  // Draft edit state
-  const [editingDraft, setEditingDraft] = useState<string | null>(null);
-  const [draftEditData, setDraftEditData] = useState<{ questions: any[], loadError?: string } | null>(null);
-  const [loadingDraft, setLoadingDraft] = useState<string | null>(null);
-  const [savingDraft, setSavingDraft] = useState(false);
-  const [draftSaveSuccess, setDraftSaveSuccess] = useState<string | null>(null);
+  // Draft/edit state
+  const [editingQuiz, setEditingQuiz] = useState<string | null>(null);
+  const [quizEditData, setQuizEditData] = useState<{ questions: any[], loadError?: string } | null>(null);
+  const [loadingQuiz, setLoadingQuiz] = useState<string | null>(null);
+  const [savingQuiz, setSavingQuiz] = useState(false);
+  const [quizSaveSuccess, setQuizSaveSuccess] = useState<string | null>(null);
 
   const games = ["All", ...Array.from(new Set(quizList.map(q => q.game)))];
   const difficultyOrder: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
@@ -318,7 +323,7 @@ export default function AdminClient({
     try {
       const res = await fetch("/api/quiz/publish", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug }) });
       const data = await res.json();
-      if (data.success) setQuizList(prev => prev.map(q => q.slug === slug ? { ...q, status: "published" } : q));
+      if (data.success) setQuizList(prev => prev.map(q => q.slug === slug ? { ...q, status: "published", published_at: new Date().toISOString() } : q));
     } catch (e) { console.error("Publish failed", e); }
   }
 
@@ -332,7 +337,7 @@ export default function AdminClient({
   async function startEdit(f: any) {
     if (editingFlag === f.id) { setEditingFlag(null); setEditData(null); return; }
     try {
-      const res = await fetch(`/api/quiz/get?slug=${f.quiz_slug}`);
+      const res = await fetch("/api/quiz/get?slug=" + f.quiz_slug);
       const data = await res.json();
       const q = data.questions[f.question_index];
       setEditData({ question: q.q, answers: [...q.a], correct: q.correct });
@@ -350,57 +355,57 @@ export default function AdminClient({
     else alert("Save failed: " + data.error);
   }
 
-  // Draft edit functions
-  async function loadDraftForEdit(slug: string) {
-    if (editingDraft === slug) { setEditingDraft(null); setDraftEditData(null); return; }
-    setLoadingDraft(slug);
+  // Quiz edit functions (works for both drafts and published)
+  async function loadQuizForEdit(slug: string) {
+    if (editingQuiz === slug) { setEditingQuiz(null); setQuizEditData(null); return; }
+    setLoadingQuiz(slug);
     try {
-      const res = await fetch(`/api/quiz/get?slug=${slug}`);
+      const res = await fetch("/api/quiz/get?slug=" + slug);
       const data = await res.json();
       if (!data.questions) throw new Error("No questions found");
-      setDraftEditData({ questions: data.questions.map((q: any) => ({ q: q.q, a: [...q.a], correct: q.correct })) });
-      setEditingDraft(slug);
+      setQuizEditData({ questions: data.questions.map((q: any) => ({ q: q.q, a: [...q.a], correct: q.correct })) });
+      setEditingQuiz(slug);
     } catch (e) {
-      setDraftEditData({ questions: [], loadError: "Failed to load quiz data." });
-      setEditingDraft(slug);
+      setQuizEditData({ questions: [], loadError: "Failed to load quiz data." });
+      setEditingQuiz(slug);
     }
-    setLoadingDraft(null);
+    setLoadingQuiz(null);
   }
 
-  function updateDraftQuestion(qi: number, field: string, value: any) {
-    if (!draftEditData) return;
-    setDraftEditData(prev => ({
+  function updateQuizQuestion(qi: number, field: string, value: any) {
+    if (!quizEditData) return;
+    setQuizEditData(prev => ({
       ...prev!,
       questions: prev!.questions.map((q, i) => i === qi ? { ...q, [field]: value } : q),
     }));
   }
 
-  function updateDraftAnswer(qi: number, ai: number, value: string) {
-    if (!draftEditData) return;
-    setDraftEditData(prev => ({
+  function updateQuizAnswer(qi: number, ai: number, value: string) {
+    if (!quizEditData) return;
+    setQuizEditData(prev => ({
       ...prev!,
       questions: prev!.questions.map((q, i) => i === qi ? { ...q, a: q.a.map((a: string, j: number) => j === ai ? value : a) } : q),
     }));
   }
 
-  async function saveDraftEdit(slug: string, andPublish: boolean) {
-    if (!draftEditData) return;
-    setSavingDraft(true);
+  async function saveQuizEdit(slug: string, andPublish: boolean) {
+    if (!quizEditData) return;
+    setSavingQuiz(true);
     try {
       const res = await fetch("/api/quiz/save-draft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, questions: draftEditData.questions, publish: andPublish }),
+        body: JSON.stringify({ slug, questions: quizEditData.questions, publish: andPublish }),
       });
       const data = await res.json();
       if (data.success) {
         if (andPublish) {
-          setQuizList(prev => prev.map(q => q.slug === slug ? { ...q, status: "published" } : q));
-          setEditingDraft(null);
-          setDraftEditData(null);
+          setQuizList(prev => prev.map(q => q.slug === slug ? { ...q, status: "published", published_at: new Date().toISOString() } : q));
+          setEditingQuiz(null);
+          setQuizEditData(null);
         } else {
-          setDraftSaveSuccess(slug);
-          setTimeout(() => setDraftSaveSuccess(null), 2000);
+          setQuizSaveSuccess(slug);
+          setTimeout(() => setQuizSaveSuccess(null), 2000);
         }
       } else {
         alert("Save failed: " + data.error);
@@ -408,7 +413,7 @@ export default function AdminClient({
     } catch (e) {
       alert("Save failed.");
     }
-    setSavingDraft(false);
+    setSavingQuiz(false);
   }
 
   async function disqualifyUser(userId: string) {
@@ -487,7 +492,7 @@ export default function AdminClient({
         {(["overview", "seasons", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-            {t === "flags" && flags.length > 0 ? `flags (${flags.length})` : t === "seasons" ? "🏆 Seasons" : t === "submit" ? "✍️ Submit Quiz" : t}
+            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "submit" ? "✍️ Submit Quiz" : t}
           </button>
         ))}
       </div>
@@ -784,7 +789,7 @@ export default function AdminClient({
                       <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: silo.strength.bg, color: silo.strength.color }}>{silo.strength.label}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text-muted)" }}>{silo.count} / 15 quizzes</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text-muted)" }}>{silo.count + " / 15 quizzes"}</span>
                       <a href={"/games/" + silo.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View Hub →</a>
                     </div>
                   </div>
@@ -813,7 +818,7 @@ export default function AdminClient({
             <div style={{ display: "flex", gap: 6 }}>
               {["All", "static", "generated", "admin"].map(s => (
                 <button key={s} onClick={() => { setSourceFilter(s); setQuizPage(1); }} style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: sourceFilter === s ? "#B84CFF" : "var(--surface)", color: sourceFilter === s ? "#fff" : "var(--text-muted)", WebkitTextFillColor: sourceFilter === s ? "#fff" : "var(--text-muted)", textTransform: "capitalize" }}>
-                  {s === "static" ? `📁 Static (${staticCount})` : s === "generated" ? `🤖 Generated (${generatedCount})` : s === "admin" ? `✍️ Admin (${adminCount})` : "All"}
+                  {s === "static" ? "📁 Static (" + staticCount + ")" : s === "generated" ? "🤖 Generated (" + generatedCount + ")" : s === "admin" ? "✍️ Admin (" + adminCount + ")" : "All"}
                 </button>
               ))}
             </div>
@@ -822,7 +827,7 @@ export default function AdminClient({
           <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
             {(["All", "Published", "Draft"] as const).map(s => (
               <button key={s} onClick={() => { setStatusFilter(s); setQuizPage(1); }} style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: statusFilter === s ? (s === "Draft" ? "var(--neon-yellow)" : "var(--neon-green)") : "var(--surface)", color: statusFilter === s ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: statusFilter === s ? "var(--bg)" : "var(--text-muted)" }}>
-                {s === "Draft" ? `⏳ Drafts (${draftCount})` : s === "Published" ? "✅ Published" : "All"}
+                {s === "Draft" ? "⏳ Drafts (" + draftCount + ")" : s === "Published" ? "✅ Published" : "All"}
               </button>
             ))}
           </div>
@@ -852,17 +857,21 @@ export default function AdminClient({
           </div>
 
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 120px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
-              <div>Title</div><div>Game</div><div>Difficulty</div><div>Qs</div><div>Source</div><div>Angle</div><div>Actions</div>
+            {/* Table header */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 110px 80px 40px 70px 150px 90px 130px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+              <div>Title</div><div>Game</div><div>Diff</div><div>Qs</div><div>Source</div><div>Angle</div><div>Published</div><div>Actions</div>
             </div>
+
             {paginatedQuizzes.map((quiz, i) => {
               const diff = diffColors[quiz.difficulty] || diffColors.Medium;
               const isDraft = quiz.status === "draft";
-              const isExpanded = editingDraft === quiz.slug;
+              const isExpanded = editingQuiz === quiz.slug;
+              const isEditable = quiz.source === "generated" || quiz.source === "admin";
+
               return (
                 <div key={quiz.slug} style={{ borderBottom: i < paginatedQuizzes.length - 1 ? "1px solid var(--border)" : "none" }}>
                   {/* Row */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 90px 50px 80px 160px 120px", alignItems: "center", padding: "12px 20px", background: isDraft ? "rgba(255,227,71,0.02)" : "transparent" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 110px 80px 40px 70px 150px 90px 130px", alignItems: "center", padding: "12px 20px", background: isDraft ? "rgba(255,227,71,0.02)" : "transparent" }}>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
                         {isDraft && <span style={{ fontSize: 9, fontWeight: 900, padding: "1px 6px", borderRadius: 100, background: "rgba(255,227,71,0.15)", color: "var(--neon-yellow)", textTransform: "uppercase" }}>Draft</span>}
@@ -873,27 +882,33 @@ export default function AdminClient({
                     <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)" }}>{quiz.game}</div>
                     <div><span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: diff.bg, color: diff.color }}>{quiz.difficulty}</span></div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{quiz.questions}</div>
-                    <div><span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: quiz.source === "generated" ? "rgba(184,76,255,0.15)" : "rgba(0,217,255,0.1)", color: quiz.source === "generated" ? "#B84CFF" : "var(--neon-blue)" }}>{quiz.source === "generated" ? "🤖 AI" : "📁 Static"}</span></div>
+                    <div><span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: quiz.source === "generated" ? "rgba(184,76,255,0.15)" : "rgba(0,217,255,0.1)", color: quiz.source === "generated" ? "#B84CFF" : "var(--neon-blue)" }}>{quiz.source === "generated" ? "🤖 AI" : quiz.source === "admin" ? "✍️" : "📁"}</span></div>
                     <div>
-                      <select value={quiz.angle || ""} onChange={e => updateAngle(quiz.slug, e.target.value)} disabled={updatingAngle === quiz.slug} style={{ fontSize: 10, fontWeight: 800, padding: "3px 6px", borderRadius: 6, background: quiz.angle ? "rgba(184,76,255,0.1)" : "var(--surface)", color: quiz.angle ? "#B84CFF" : "var(--text-dim)", border: "1px solid " + (quiz.angle ? "rgba(184,76,255,0.3)" : "var(--border)"), cursor: "pointer", fontFamily: "var(--font-body)", maxWidth: 150 }}>
+                      <select value={quiz.angle || ""} onChange={e => updateAngle(quiz.slug, e.target.value)} disabled={updatingAngle === quiz.slug} style={{ fontSize: 10, fontWeight: 800, padding: "3px 6px", borderRadius: 6, background: quiz.angle ? "rgba(184,76,255,0.1)" : "var(--surface)", color: quiz.angle ? "#B84CFF" : "var(--text-dim)", border: "1px solid " + (quiz.angle ? "rgba(184,76,255,0.3)" : "var(--border)"), cursor: "pointer", fontFamily: "var(--font-body)", maxWidth: 140 }}>
                         <option value="">— unset —</option>
                         {ANGLES.map(a => <option key={a} value={a}>{a}</option>)}
                       </select>
-                      {updatingAngle === quiz.slug && <span style={{ fontSize: 9, color: "var(--text-dim)", marginLeft: 4 }}>saving...</span>}
                     </div>
+                    {/* Published date */}
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>
+                      {isDraft ? <span style={{ color: "var(--neon-yellow)" }}>Draft</span> : formatDate(quiz.published_at)}
+                    </div>
+                    {/* Actions */}
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                      {isDraft && (
-                        <button onClick={() => loadDraftForEdit(quiz.slug)} disabled={loadingDraft === quiz.slug}
-                          style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: isExpanded ? "rgba(255,227,71,0.15)" : "rgba(255,227,71,0.1)", color: "var(--neon-yellow)", border: "1px solid rgba(255,227,71,0.3)", cursor: "pointer" }}>
-                          {loadingDraft === quiz.slug ? "⏳" : isExpanded ? "Close" : "✏️ Edit"}
+                      {isEditable && (
+                        <button onClick={() => loadQuizForEdit(quiz.slug)} disabled={loadingQuiz === quiz.slug}
+                          style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: isExpanded ? (isDraft ? "rgba(255,227,71,0.2)" : "rgba(0,217,255,0.2)") : (isDraft ? "rgba(255,227,71,0.1)" : "rgba(0,217,255,0.1)"), color: isDraft ? "var(--neon-yellow)" : "var(--neon-blue)", border: "1px solid " + (isDraft ? "rgba(255,227,71,0.3)" : "rgba(0,217,255,0.3)"), cursor: "pointer" }}>
+                          {loadingQuiz === quiz.slug ? "⏳" : isExpanded ? "Close" : "✏️ Edit"}
                         </button>
                       )}
-                      {!isDraft && <a href={"/quiz/" + quiz.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View</a>}
+                      {!isDraft && !isEditable && (
+                        <a href={"/quiz/" + quiz.slug} target="_blank" style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)", textDecoration: "none" }}>View</a>
+                      )}
                       {isDraft && (
                         <button onClick={() => publishQuiz(quiz.slug)}
                           style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(0,245,160,0.15)", color: "var(--neon-green)", border: "1px solid rgba(0,245,160,0.3)", cursor: "pointer" }}>🚀</button>
                       )}
-                      {(quiz.source === "generated" || quiz.source === "admin") && (
+                      {isEditable && (
                         <button onClick={() => deleteQuiz(quiz.slug)} disabled={deleting === quiz.slug}
                           style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", border: "none", cursor: "pointer" }}>
                           {deleting === quiz.slug ? "..." : "🗑️"}
@@ -902,28 +917,30 @@ export default function AdminClient({
                     </div>
                   </div>
 
-                  {/* Inline Draft Editor */}
-                  {isDraft && isExpanded && draftEditData && (
-                    <div style={{ borderTop: "1px solid rgba(255,227,71,0.2)", background: "rgba(255,227,71,0.03)", padding: 24 }}>
-                      <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 20 }}>✏️ Edit Quiz Questions</div>
+                  {/* Inline Editor */}
+                  {isExpanded && quizEditData && (
+                    <div style={{ borderTop: "1px solid " + (isDraft ? "rgba(255,227,71,0.2)" : "rgba(0,217,255,0.2)"), background: isDraft ? "rgba(255,227,71,0.03)" : "rgba(0,217,255,0.03)", padding: 24 }}>
+                      <div style={{ fontSize: 12, fontWeight: 900, color: isDraft ? "var(--neon-yellow)" : "var(--neon-blue)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 20 }}>
+                        {isDraft ? "✏️ Edit Draft Questions" : "✏️ Edit Published Quiz"}
+                      </div>
 
-                      {draftEditData.loadError ? (
-                        <div style={{ color: "var(--neon-pink)", fontWeight: 700, fontSize: 13 }}>{draftEditData.loadError}</div>
+                      {quizEditData.loadError ? (
+                        <div style={{ color: "var(--neon-pink)", fontWeight: 700, fontSize: 13 }}>{quizEditData.loadError}</div>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                          {draftEditData.questions.map((q: any, qi: number) => (
+                          {quizEditData.questions.map((q: any, qi: number) => (
                             <div key={qi} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 18 }}>
                               <div style={{ fontSize: 11, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Question {qi + 1}</div>
-                              <textarea value={q.q} onChange={e => updateDraftQuestion(qi, "q", e.target.value)} rows={2}
+                              <textarea value={q.q} onChange={e => updateQuizQuestion(qi, "q", e.target.value)} rows={2}
                                 style={{ width: "100%", padding: "10px 14px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 600, resize: "vertical", boxSizing: "border-box", marginBottom: 10 }} />
                               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                                 {q.a.map((ans: string, ai: number) => (
                                   <div key={ai} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <button onClick={() => updateDraftQuestion(qi, "correct", ai)}
+                                    <button onClick={() => updateQuizQuestion(qi, "correct", ai)}
                                       style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid " + (q.correct === ai ? "var(--neon-green)" : "var(--border)"), background: q.correct === ai ? "rgba(0,245,160,0.15)" : "var(--surface)", color: q.correct === ai ? "var(--neon-green)" : "var(--text-dim)", fontSize: 11, fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>
                                       {["A","B","C","D"][ai]}
                                     </button>
-                                    <input value={ans} onChange={e => updateDraftAnswer(qi, ai, e.target.value)}
+                                    <input value={ans} onChange={e => updateQuizAnswer(qi, ai, e.target.value)}
                                       style={{ flex: 1, padding: "8px 12px", background: "var(--surface)", border: "1.5px solid " + (q.correct === ai ? "var(--neon-green)" : "var(--border)"), borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 600 }} />
                                   </div>
                                 ))}
@@ -934,15 +951,23 @@ export default function AdminClient({
                       )}
 
                       <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
-                        <button onClick={() => saveDraftEdit(quiz.slug, false)} disabled={savingDraft}
-                          style={{ padding: "10px 24px", borderRadius: 100, border: "1px solid rgba(255,227,71,0.4)", background: draftSaveSuccess === quiz.slug ? "rgba(0,245,160,0.15)" : "rgba(255,227,71,0.1)", color: draftSaveSuccess === quiz.slug ? "var(--neon-green)" : "var(--neon-yellow)", fontWeight: 900, fontSize: 13, cursor: savingDraft ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
-                          {savingDraft ? "⏳ Saving..." : draftSaveSuccess === quiz.slug ? "✅ Saved!" : "💾 Save Draft"}
+                        <button onClick={() => saveQuizEdit(quiz.slug, false)} disabled={savingQuiz}
+                          style={{ padding: "10px 24px", borderRadius: 100, border: "1px solid " + (isDraft ? "rgba(255,227,71,0.4)" : "rgba(0,217,255,0.4)"), background: quizSaveSuccess === quiz.slug ? "rgba(0,245,160,0.15)" : (isDraft ? "rgba(255,227,71,0.1)" : "rgba(0,217,255,0.1)"), color: quizSaveSuccess === quiz.slug ? "var(--neon-green)" : (isDraft ? "var(--neon-yellow)" : "var(--neon-blue)"), fontWeight: 900, fontSize: 13, cursor: savingQuiz ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
+                          {savingQuiz ? "⏳ Saving..." : quizSaveSuccess === quiz.slug ? "✅ Saved!" : "💾 Save Changes"}
                         </button>
-                        <button onClick={() => saveDraftEdit(quiz.slug, true)} disabled={savingDraft}
-                          style={{ padding: "10px 24px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, cursor: savingDraft ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
-                          {savingDraft ? "⏳ Saving..." : "🚀 Save & Publish"}
-                        </button>
-                        <button onClick={() => { setEditingDraft(null); setDraftEditData(null); }}
+                        {isDraft && (
+                          <button onClick={() => saveQuizEdit(quiz.slug, true)} disabled={savingQuiz}
+                            style={{ padding: "10px 24px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, cursor: savingQuiz ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+                            {savingQuiz ? "⏳ Saving..." : "🚀 Save & Publish"}
+                          </button>
+                        )}
+                        {!isDraft && (
+                          <a href={"/quiz/" + quiz.slug} target="_blank"
+                            style={{ padding: "10px 24px", borderRadius: 100, border: "1px solid rgba(0,217,255,0.3)", background: "rgba(0,217,255,0.08)", color: "var(--neon-blue)", fontWeight: 800, fontSize: 13, textDecoration: "none" }}>
+                            🔗 View Live
+                          </a>
+                        )}
+                        <button onClick={() => { setEditingQuiz(null); setQuizEditData(null); }}
                           style={{ padding: "10px 24px", borderRadius: 100, border: "1px solid var(--border)", background: "none", color: "var(--text-muted)", fontWeight: 800, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)" }}>
                           Cancel
                         </button>
