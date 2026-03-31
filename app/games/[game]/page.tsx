@@ -3,7 +3,7 @@ import { supabase } from "../../lib/supabase";
 import { supabaseAdmin } from "../../lib/supabase";
 import GamesClient from "./GamesClient";
 
-const COMMAND_CENTER_SLUGS = ["blox-fruits", "brookhaven-rp", "murder-mystery-2"];
+const COMMAND_CENTER_SLUGS = ["blox-fruits", "brookhaven-rp", "murder-mystery-2", "adopt-me", "grow-a-garden", "dress-to-impress"];
 
 const gameEmojis: Record<string, string> = {
   "Blox Fruits": "⚔️",

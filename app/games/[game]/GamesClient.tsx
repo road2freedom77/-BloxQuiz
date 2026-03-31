@@ -48,7 +48,7 @@ const gameEmojis: Record<string, string> = {
   "Kick Off": "⚽",
 };
 
-const COMMAND_CENTER_GAMES = ["blox-fruits", "brookhaven-rp", "murder-mystery-2"];
+const COMMAND_CENTER_GAMES = ["blox-fruits", "brookhaven-rp", "murder-mystery-2", "adopt-me", "grow-a-garden", "dress-to-impress"];
 
 const ANGLE_ORDER = ["Beginner", "Mechanics", "Expert", "Lore", "Trading", "Secrets", "Updates"];
 const ANGLE_LABELS: Record<string, string> = {

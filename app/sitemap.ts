@@ -39,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/roblox-username-ideas`,           lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/roblox-display-name-generator`,   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/roblox-bio-generator`,            lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-group-name-generator`,     lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/champions`,                       lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/rules`,                           lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/about`,                           lastModified: now, changeFrequency: "monthly", priority: 0.4 },
