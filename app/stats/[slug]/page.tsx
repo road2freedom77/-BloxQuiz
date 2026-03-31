@@ -138,9 +138,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const game = await getGame(slug);
   if (!game) return {};
 
+  // Use latest snapshot as authoritative current player count for metadata
+  const { data: latestSnapshot } = await supabase
+    .from("game_snapshots")
+    .select("concurrent_players, total_visits")
+    .eq("universe_id", game.universe_id)
+    .order("captured_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  const currentPlayers = latestSnapshot?.concurrent_players ?? game.current_players;
+  const totalVisits = latestSnapshot?.total_visits ?? game.total_visits;
+
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-  const title = game.meta_title || `${game.name} Player Count — ${formatNumber(game.current_players)} Playing Now (${month}) | BloxQuiz`;
-  const description = game.meta_description || `${game.name} has ${formatNumber(game.current_players)} active players right now and ${formatVisits(game.total_visits)} total visits. Live player count, historical charts, and ranking vs other Roblox games. Updated hourly.`;
+  const title = game.meta_title || `${game.name} Player Count — ${formatNumber(currentPlayers)} Playing Now (${month}) | BloxQuiz`;
+  const description = game.meta_description || `${game.name} has ${formatNumber(currentPlayers)} active players right now and ${formatVisits(totalVisits)} total visits. Live player count, historical charts, and ranking vs other Roblox games. Updated hourly.`;
 
   return {
     title,
@@ -168,30 +180,51 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   const game = await getGame(slug);
   if (!game) notFound();
 
-  const [snapshots, dailyStats, rank, quizCount, compareGames, codesExist] = await Promise.all([
+  const [snapshots, dailyStats, quizCount, compareGames, codesExist] = await Promise.all([
     getRecentSnapshots(game.universe_id),
     getDailyStats(game.universe_id),
-    getPlayerRank(game.universe_id, game.current_players),
     getQuizCount(game.name),
     getCompareGames(slug),
     hasCodes(slug),
   ]);
 
+  // ─── Single source of truth ───────────────────────────────────────
+  // Use the most recent snapshot as authoritative numbers.
+  // This ensures hero paragraph, KPI cards, FAQ, and schema
+  // all show the exact same player count and visits.
+  const latestSnapshot = snapshots[0] ?? null;
+  const currentPlayers = latestSnapshot?.concurrent_players ?? game.current_players;
+  const totalVisits = latestSnapshot?.total_visits ?? game.total_visits;
+  const lastUpdated = latestSnapshot?.captured_at ?? game.last_updated;
+
+  // Derive peak24h from the same snapshots array
+  const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
+
+  // Rank based on authoritative currentPlayers
+  const rank = await getPlayerRank(game.universe_id, currentPlayers);
+
+  // Wire authoritative values into game object so StatsClient has one source
+  const gameWithLiveData: GameRow = {
+    ...game,
+    current_players: currentPlayers,
+    total_visits: totalVisits,
+    last_updated: lastUpdated,
+  };
+
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
   const approvalRate = game.likes && game.dislikes && game.likes + game.dislikes > 0
     ? ((game.likes / (game.likes + game.dislikes)) * 100).toFixed(1)
     : null;
-  const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
 
-  // Build merged FAQ list — static first, then unique DB faqs
+  // Build merged FAQ list — uses authoritative numbers
   const statsStaticFaqs = [
     {
       q: `How many people play ${game.name} right now?`,
-      a: `${game.name} currently has ${formatNumber(game.current_players)} concurrent players. This count is updated hourly via the Roblox API.`,
+      a: `${game.name} currently has ${formatNumber(currentPlayers)} concurrent players. This count is updated hourly via the Roblox API.`,
     },
     {
       q: `How many total visits does ${game.name} have?`,
-      a: `${game.name} has ${formatVisits(game.total_visits)} total all-time visits, reflecting its popularity since launch.`,
+      a: `${game.name} has ${formatVisits(totalVisits)} total all-time visits, reflecting its popularity since launch.`,
     },
     {
       q: `How often is the ${game.name} player count updated on BloxQuiz?`,
@@ -206,6 +239,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
 
   const allFaqs = [...statsStaticFaqs, ...dbFaqs];
 
+  // JSON-LD uses same authoritative numbers
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -220,7 +254,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
       {
         "@type": "Article",
         headline: `${game.name} Player Count & Live Stats — ${month}`,
-        dateModified: game.last_updated ?? new Date().toISOString(),
+        dateModified: lastUpdated ?? new Date().toISOString(),
         author: { "@type": "Organization", name: "BloxQuiz" },
         publisher: { "@type": "Organization", name: "BloxQuiz" },
         description: `Live ${game.name} player count, historical trends, and ranking vs other Roblox games.`,
@@ -251,7 +285,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
         />
       </div>
       <StatsClient
-        game={game}
+        game={gameWithLiveData}
         snapshots={snapshots}
         dailyStats={dailyStats}
         rank={rank}
