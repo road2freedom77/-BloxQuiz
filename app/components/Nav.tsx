@@ -12,6 +12,7 @@ const TOOLS = [
   { href: "/roblox-username-ideas", label: "Username Ideas", emoji: "👤" },
   { href: "/roblox-display-name-generator", label: "Display Name Generator", emoji: "✨" },
   { href: "/roblox-bio-generator", label: "Bio Generator", emoji: "✍️" },
+  { href: "/roblox-group-name-generator", label: "Group Name Generator", emoji: "🏰" },
 ];
 
 const clerkAppearance = {

@@ -18,6 +18,7 @@ export default function Footer() {
     { label: "Username Ideas", href: "/roblox-username-ideas" },
     { label: "Display Name Generator", href: "/roblox-display-name-generator" },
     { label: "Bio Generator", href: "/roblox-bio-generator" },
+    { label: "Group Name Generator", href: "/roblox-group-name-generator" },
   ];
 
   const moreLinks = [
