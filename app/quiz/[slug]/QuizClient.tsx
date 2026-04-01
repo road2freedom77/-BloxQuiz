@@ -149,11 +149,12 @@ function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionI
   );
 }
 
-export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
+export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSeason }: {
   quiz: any,
   slug: string,
   faqs: any[],
-  relatedQuizzes: any[]
+  relatedQuizzes: any[],
+  currentSeason?: { name: string, status: string } | null,
 }) {
   const { user } = useUser();
   const [current, setCurrent] = useState(0);
@@ -577,7 +578,9 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
             </div>
 
             <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: 12, padding: "14px 20px", marginBottom: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>🏆 Season 1 — Active Now</div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", marginBottom: 4 }}>
+                {"🏆 " + (currentSeason?.name || "Season") + " — " + (currentSeason?.status === "active" ? "Active Now" : "In Progress")}
+              </div>
               <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>Top players win Roblox gift cards. Keep playing and climb the leaderboard!</div>
               <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                 <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none" }}>View Leaderboard →</a>

@@ -39,6 +39,21 @@ async function getRelatedQuizzes(currentSlug: string, game: string) {
   return [];
 }
 
+async function getCurrentSeason() {
+  try {
+    const { data } = await supabase
+      .from("seasons")
+      .select("name, status")
+      .eq("status", "active")
+      .order("start_date", { ascending: false })
+      .limit(1)
+      .single();
+    return data || null;
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const quiz = await getQuiz(slug);
@@ -99,10 +114,13 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
     }
   }
 
-  const relatedQuizzes = await getRelatedQuizzes(slug, quiz.game);
+  const [relatedQuizzes, currentSeason] = await Promise.all([
+    getRelatedQuizzes(slug, quiz.game),
+    getCurrentSeason(),
+  ]);
+
   const article = quiz.difficulty === "Easy" ? "an" : "a";
 
-  // Use unique FAQs from Supabase if available, otherwise fall back to generic
   const faqs = (quiz.faqs && Array.isArray(quiz.faqs) && quiz.faqs.length > 0)
     ? quiz.faqs
     : [
@@ -220,7 +238,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         ))}
       </section>
 
-      <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} />
+      <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} currentSeason={currentSeason} />
     </>
   );
 }
