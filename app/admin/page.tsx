@@ -93,19 +93,15 @@ async function getCronLogs() {
   return data || [];
 }
 
-async function getCurrentSeason() {
+async function getAllSeasons() {
   const { data } = await supabase
     .from("seasons")
     .select("*")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-  return data || null;
+    .order("start_date", { ascending: false });
+  return data || [];
 }
 
-async function getSeasonStandings(seasonStartDate?: string) {
-  // Use season's start_date month, not current month.
-  // This ensures admin shows correct data even after season ends.
+async function getSeasonStandings(seasonStartDate?: string, seasonId?: string) {
   const currentMonth = seasonStartDate
     ? seasonStartDate.substring(0, 7)
     : new Date().toISOString().substring(0, 7);
@@ -132,7 +128,12 @@ async function getSeasonStandings(seasonStartDate?: string) {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  const { data: results } = await supabase.from("season_results").select("user_id, reward_status").in("user_id", userIds);
+  // Fetch reward_status scoped to this season
+  const { data: results } = await supabase
+    .from("season_results")
+    .select("user_id, reward_status, rank")
+    .eq("season_id", seasonId || "")
+    .in("user_id", userIds);
   const rewardByUser: Record<string, string> = {};
   for (const r of results || []) rewardByUser[r.user_id] = r.reward_status;
 
@@ -171,14 +172,17 @@ async function getPrizeClaims() {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  const { data: results } = await supabaseAdmin.from("season_results").select("user_id, rank").in("user_id", userIds);
-  const rankByUser: Record<string, number> = {};
-  for (const r of results || []) rankByUser[r.user_id] = r.rank;
+  const { data: results } = await supabaseAdmin
+    .from("season_results")
+    .select("user_id, rank, season_id")
+    .in("user_id", userIds);
+  const rankByUserSeason: Record<string, number> = {};
+  for (const r of results || []) rankByUserSeason[`${r.season_id}:${r.user_id}`] = r.rank;
 
   return claims.map(c => ({
     ...c,
     username: usersById[c.user_id]?.username || "Unknown",
-    rank: rankByUser[c.user_id] || null,
+    rank: rankByUserSeason[`${c.season_id}:${c.user_id}`] || null,
   }));
 }
 
@@ -186,8 +190,10 @@ export default async function AdminPage() {
   const { userId } = await auth();
   if (!userId || !ADMIN_USER_IDS.includes(userId)) redirect("/");
 
-  // Fetch season first so we can pass start_date to getSeasonStandings
-  const season = await getCurrentSeason();
+  const allSeasons = await getAllSeasons();
+
+  // Active season = first active one, fallback to most recent
+  const activeSeason = allSeasons.find(s => s.status === "active") || allSeasons[0] || null;
 
   const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, prizeClaims] = await Promise.all([
     getAllQuizzes(),
@@ -195,7 +201,7 @@ export default async function AdminPage() {
     getFlags(),
     getTopQuizzes(),
     getCronLogs(),
-    getSeasonStandings(season?.start_date),
+    getSeasonStandings(activeSeason?.start_date, activeSeason?.id),
     getFlaggedUsers(),
     getPrizeClaims(),
   ]);
@@ -209,7 +215,8 @@ export default async function AdminPage() {
       cronLogs={cronLogs}
       seasonStandings={seasonStandings}
       flaggedUsers={flaggedUsers}
-      season={season}
+      season={activeSeason}
+      allSeasons={allSeasons}
       prizeClaims={prizeClaims}
     />
   );

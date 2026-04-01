@@ -210,6 +210,7 @@ export default function AdminClient({
   seasonStandings,
   flaggedUsers,
   season,
+  allSeasons,
   prizeClaims: initialClaims,
 }: {
   quizzes: any[],
@@ -220,6 +221,7 @@ export default function AdminClient({
   seasonStandings: any[],
   flaggedUsers: any[],
   season: any,
+  allSeasons: any[],
   prizeClaims: any[],
 }) {
   const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "submit">("overview");
@@ -252,6 +254,27 @@ export default function AdminClient({
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [notifyingWinners, setNotifyingWinners] = useState(false);
   const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string>(season?.id || "");
+  const [loadingSeasonData, setLoadingSeasonData] = useState(false);
+
+  const selectedSeason = allSeasons.find(s => s.id === selectedSeasonId) || season;
+
+  async function switchSeason(seasonId: string) {
+    setSelectedSeasonId(seasonId);
+    const s = allSeasons.find(s => s.id === seasonId);
+    if (!s) return;
+    setLoadingSeasonData(true);
+    try {
+      const res = await fetch(`/api/admin/season-data?seasonId=${seasonId}&startDate=${s.start_date}`);
+      const data = await res.json();
+      if (data.standings) setStandings(data.standings);
+      if (data.claims) setClaims(data.claims);
+      setSeasonClosed(s.status === "closed");
+    } catch (e) {
+      console.error("Failed to load season data", e);
+    }
+    setLoadingSeasonData(false);
+  }
 
   // Draft/edit state
   const [editingQuiz, setEditingQuiz] = useState<string | null>(null);
@@ -553,11 +576,26 @@ export default function AdminClient({
       {/* Seasons Tab */}
       {tab === "seasons" && (
         <div>
+          {/* Season selector */}
+          {allSeasons.length > 1 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>Season:</span>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {allSeasons.map(s => (
+                  <button key={s.id} onClick={() => switchSeason(s.id)} style={{ padding: "6px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: selectedSeasonId === s.id ? (s.status === "closed" ? "var(--neon-pink)" : "var(--gradient-main)") : "var(--surface)", color: selectedSeasonId === s.id ? "#fff" : "var(--text-muted)", WebkitTextFillColor: selectedSeasonId === s.id ? "#fff" : "var(--text-muted)", opacity: loadingSeasonData ? 0.6 : 1 }}>
+                    {s.name} {s.status === "closed" ? "⛔" : "🟢"}
+                  </button>
+                ))}
+              </div>
+              {loadingSeasonData && <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>Loading...</span>}
+            </div>
+          )}
+
           <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Current Season</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 4 }}>{season?.name || "Season 1"}</div>
-              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{season?.start_date + " → " + season?.end_date}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 4 }}>{selectedSeason?.name || "Season 1"}</div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{selectedSeason?.start_date + " → " + selectedSeason?.end_date}</div>
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ fontSize: 12, fontWeight: 800, padding: "6px 16px", borderRadius: 100, background: seasonClosed ? "rgba(255,60,172,0.1)" : "rgba(0,245,160,0.1)", color: seasonClosed ? "var(--neon-pink)" : "var(--neon-green)" }}>{seasonClosed ? "⛔ Closed" : "🟢 Active"}</span>
