@@ -34,7 +34,7 @@ async function getPastSeasons() {
       .from("season_results")
       .select("rank, score, quizzes_completed, avg_accuracy, user_id")
       .eq("season_id", season.id)
-      .eq("reward_status", "sent")
+      .lte("rank", 3)
       .order("rank", { ascending: true })
       .limit(3);
 
