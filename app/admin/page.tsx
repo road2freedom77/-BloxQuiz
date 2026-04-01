@@ -93,9 +93,29 @@ async function getCronLogs() {
   return data || [];
 }
 
-async function getSeasonStandings() {
-  const currentMonth = new Date().toISOString().substring(0, 7);
-  const { data: scores } = await supabase.from("scores").select("user_id, weighted_score, score, total_questions").eq("month", currentMonth).eq("is_first_attempt", true);
+async function getCurrentSeason() {
+  const { data } = await supabase
+    .from("seasons")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+  return data || null;
+}
+
+async function getSeasonStandings(seasonStartDate?: string) {
+  // Use season's start_date month, not current month.
+  // This ensures admin shows correct data even after season ends.
+  const currentMonth = seasonStartDate
+    ? seasonStartDate.substring(0, 7)
+    : new Date().toISOString().substring(0, 7);
+
+  const { data: scores } = await supabase
+    .from("scores")
+    .select("user_id, weighted_score, score, total_questions")
+    .eq("month", currentMonth)
+    .eq("is_first_attempt", true);
+
   if (!scores || scores.length === 0) return [];
 
   const userMap: Record<string, any> = {};
@@ -138,16 +158,6 @@ async function getFlaggedUsers() {
   return data || [];
 }
 
-async function getCurrentSeason() {
-  const { data } = await supabase
-    .from("seasons")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-  return data || null;
-}
-
 async function getPrizeClaims() {
   const { data: claims } = await supabaseAdmin
     .from("prize_claims")
@@ -176,15 +186,17 @@ export default async function AdminPage() {
   const { userId } = await auth();
   if (!userId || !ADMIN_USER_IDS.includes(userId)) redirect("/");
 
-  const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, season, prizeClaims] = await Promise.all([
+  // Fetch season first so we can pass start_date to getSeasonStandings
+  const season = await getCurrentSeason();
+
+  const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, prizeClaims] = await Promise.all([
     getAllQuizzes(),
     getStats(),
     getFlags(),
     getTopQuizzes(),
     getCronLogs(),
-    getSeasonStandings(),
+    getSeasonStandings(season?.start_date),
     getFlaggedUsers(),
-    getCurrentSeason(),
     getPrizeClaims(),
   ]);
 
