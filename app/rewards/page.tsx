@@ -13,7 +13,7 @@ const PRIZE_AMOUNTS: Record<number, string> = { 1: "$20", 2: "$15", 3: "$10" };
 export default async function RewardsPage() {
   const { userId } = await auth();
 
-  if (!userId) redirect("/sign-in?redirect=/rewards");
+  if (!userId) redirect("/sign-in?redirect_url=/rewards");
 
   const user = await currentUser();
   const clerkUsername = user?.username || user?.firstName || "Player";
