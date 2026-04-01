@@ -15,6 +15,7 @@ async function getCurrentSeason() {
   const { data } = await supabase
     .from("seasons")
     .select("*")
+    .eq("status", "active")
     .order("start_date", { ascending: false })
     .limit(1)
     .single();
@@ -55,7 +56,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
   const rank = allUsers.findIndex(u => u.id === userData.id) + 1 || null;
 
-  // Use season's start_date month — not current month
+  // Use active season's start_date month
   const seasonMonth = currentSeason?.start_date
     ? currentSeason.start_date.substring(0, 7)
     : new Date().toISOString().substring(0, 7);
