@@ -22,6 +22,14 @@ function getXPForNextLevel(xp: number) {
 
 const PRIZE_AMOUNTS: Record<number, string> = { 1: "$20", 2: "$15", 3: "$10" };
 
+function formatSeasonLabel(season: any): string {
+  if (!season) return "Current Season";
+  const month = season.start_date
+    ? new Date(season.start_date).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "";
+  return season.name + (month ? " — " + month : "");
+}
+
 export default function PublicProfileClient({
   userData,
   scores,
@@ -31,6 +39,7 @@ export default function PublicProfileClient({
   seasonQuizzes,
   prizeData,
   isOwner,
+  currentSeason,
 }: {
   userData: any,
   scores: any[],
@@ -40,6 +49,7 @@ export default function PublicProfileClient({
   seasonQuizzes: number,
   prizeData: any | null,
   isOwner: boolean,
+  currentSeason?: any,
 }) {
   const [copied, setCopied] = useState(false);
   const xp = userData?.xp || 0;
@@ -56,9 +66,9 @@ export default function PublicProfileClient({
 
   const badges = getBadges({ rank, streak, xp, totalQuizzes, perfectScores });
 
-  // Only show prize banner to the profile owner with a pending prize
   const isPrizeWinner = isOwner && prizeData && prizeData.rank <= 3 && prizeData.reward_status === "pending";
   const qualifiesThisSeason = seasonQuizzes >= 10;
+  const seasonLabel = formatSeasonLabel(currentSeason);
 
   function copyProfileLink() {
     navigator.clipboard.writeText("https://www.bloxquiz.gg/profile/" + userData.username);
@@ -75,7 +85,7 @@ export default function PublicProfileClient({
           <div>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>🎉 You Won a Prize!</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 4 }}>
-              {"Season 1 — Rank #" + prizeData.rank + " — " + (PRIZE_AMOUNTS[prizeData.rank] || "") + " Roblox Gift Card"}
+              {seasonLabel + " — Rank #" + prizeData.rank + " — " + (PRIZE_AMOUNTS[prizeData.rank] || "") + " Roblox Gift Card"}
             </div>
             <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Claim your prize before the end of the month!</div>
           </div>
@@ -168,11 +178,13 @@ export default function PublicProfileClient({
         ))}
       </div>
 
-      {/* Season 1 Block */}
+      {/* Season Block */}
       <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.1), rgba(255,60,172,0.06))", border: "1px solid rgba(184,76,255,0.25)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>🏆 Season 1 — March 2026</div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+              {"🏆 " + seasonLabel}
+            </div>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 8 }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--neon-green)" }}>
