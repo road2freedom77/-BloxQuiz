@@ -598,7 +598,7 @@ export default function AdminClient({
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700 }}><span style={{ color: "var(--text-dim)" }}>Accuracy</span><span style={{ color: "var(--text-muted)" }}>{player.avg_accuracy}%</span></div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, fontWeight: 700, marginTop: 4, paddingTop: 8, borderTop: "1px solid var(--border)" }}>
                           <span style={{ color: colors[i], fontWeight: 900 }}>{prizes[i]} Gift Card</span>
-                          <select value={player.reward_status || "pending"} onChange={e => updateRewardStatus(player.user_id, e.target.value)} disabled={updatingReward === player.user_id} style={{ fontSize: 10, fontWeight: 800, padding: "3px 6px", borderRadius: 6, background: rs.bg, color: rs.color, border: "1px solid " + rs.color + "40", cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                          <select value={player.reward_status || "pending"} onChange={e => updateRewardStatus(player.user_id, e.target.value)} disabled={updatingReward === player.user_id} style={{ fontSize: 10, fontWeight: 800, padding: "3px 6px", borderRadius: 6, background: "#0d1117", color: rs.color, border: "1px solid " + rs.color + "40", cursor: "pointer", fontFamily: "var(--font-body)" }}>
                             {["pending", "claimed", "sent", "expired", "disqualified"].map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                         </div>
