@@ -193,20 +193,22 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
   }, [user?.id]);
 
   async function saveScore(finalScore: number) {
+    // Guard against corrupted scores — must be integer between 0 and total questions
+    const safeScore = Math.min(Math.max(0, Math.round(finalScore)), quiz.questions.length);
+
     const today = new Date().toISOString().split("T")[0];
     const month = today.substring(0, 7);
-    const basePoints = finalScore * 10;
+    const basePoints = safeScore * 10;
     const weightedScore = Math.round(basePoints * multiplier);
 
     await supabase.from("plays").insert({
       quiz_slug: slug,
-      score: finalScore,
+      score: safeScore,
       total_questions: quiz.questions.length,
     });
 
     if (!user) {
-      // Still compute percentile for signed-out users
-      await computePercentile(finalScore);
+      await computePercentile(safeScore);
       return;
     }
 
@@ -251,12 +253,12 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
     if (newStreak >= 30 && !newBadges.includes("streak_30")) newBadges.push("streak_30");
 
     const monthlyAdd = capped ? 0 : weightedScore + streakBonus;
-    const xpGained = capped ? 0 : finalScore * 10;
+    const xpGained = capped ? 0 : safeScore * 10;
 
     await supabase.from("scores").insert({
       user_id: user.id,
       quiz_slug: slug,
-      score: finalScore,
+      score: safeScore,
       total_questions: quiz.questions.length,
       weighted_score: capped ? 0 : weightedScore,
       difficulty: quiz.difficulty,
@@ -281,7 +283,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
 
     setPlayedSlugs(prev => new Set([...prev, slug]));
     setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped });
-    await computePercentile(finalScore);
+    await computePercentile(safeScore);
   }
 
   async function computePercentile(finalScore: number) {
@@ -297,7 +299,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes }: {
       ).length;
       setPercentile(Math.round((beaten / allScores.length) * 100));
     } else {
-      // Fallback — difficulty-based estimate until enough data accumulates
       const fallbacks: Record<string, number> = { Easy: 42, Medium: 61, Hard: 74 };
       setPercentile(fallbacks[quiz.difficulty] || 50);
     }
