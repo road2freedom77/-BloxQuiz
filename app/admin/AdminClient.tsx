@@ -254,6 +254,8 @@ export default function AdminClient({
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [notifyingWinners, setNotifyingWinners] = useState(false);
   const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
+  const [giftCardCodes, setGiftCardCodes] = useState<Record<string, string>>({});
+  const [sendingGiftCard, setSendingGiftCard] = useState<string | null>(null);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>(season?.id || "");
   const [loadingSeasonData, setLoadingSeasonData] = useState(false);
 
@@ -490,6 +492,26 @@ export default function AdminClient({
     const data = await res.json();
     setNotifyingWinners(false);
     setNotifyResult({ sent: data.sent || [], failed: data.failed || [] });
+  }
+
+  async function sendGiftCard(claimId: string) {
+    const code = giftCardCodes[claimId]?.trim();
+    if (!code) return;
+    if (!confirm("Send gift card code to winner? This cannot be undone.")) return;
+    setSendingGiftCard(claimId);
+    const res = await fetch("/api/rewards/send-gift-card", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ claimId, giftCardCode: code }),
+    });
+    const data = await res.json();
+    setSendingGiftCard(null);
+    if (data.success) {
+      setClaims(prev => prev.map(c => c.id === claimId ? { ...c, status: "sent" } : c));
+      setGiftCardCodes(prev => { const next = { ...prev }; delete next[claimId]; return next; });
+    } else {
+      alert("Failed to send: " + (data.error || "Unknown error"));
+    }
   }
 
   function copyToClipboard(text: string, id: string) {
@@ -777,9 +799,22 @@ export default function AdminClient({
                               </div>
                             </div>
                           </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-                            {claim.status === "pending" && <button onClick={() => updateClaimStatus(claim.id, "sent")} disabled={updatingClaim === claim.id} style={{ padding: "10px 20px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>{updatingClaim === claim.id ? "⏳ Updating..." : "✅ Mark as Sent"}</button>}
-                            {claim.status === "pending" && <button onClick={() => updateClaimStatus(claim.id, "rejected")} disabled={updatingClaim === claim.id} style={{ padding: "10px 20px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", fontWeight: 800, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)" }}>❌ Reject</button>}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, minWidth: 200 }}>
+                            {claim.status === "pending" && (
+                              <>
+                                <input
+                                  type="text"
+                                  placeholder="Gift card code..."
+                                  value={giftCardCodes[claim.id] || ""}
+                                  onChange={e => setGiftCardCodes(prev => ({ ...prev, [claim.id]: e.target.value }))}
+                                  style={{ padding: "8px 12px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "monospace", fontWeight: 700, outline: "none", letterSpacing: 2 }}
+                                />
+                                <button onClick={() => sendGiftCard(claim.id)} disabled={sendingGiftCard === claim.id || !giftCardCodes[claim.id]?.trim()} style={{ padding: "10px 20px", borderRadius: 100, border: "none", background: giftCardCodes[claim.id]?.trim() ? "var(--gradient-main)" : "var(--surface)", color: "var(--bg)", fontWeight: 900, fontSize: 13, cursor: giftCardCodes[claim.id]?.trim() ? "pointer" : "default", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: sendingGiftCard === claim.id ? 0.7 : 1 }}>
+                                  {sendingGiftCard === claim.id ? "⏳ Sending..." : "🎁 Send Gift Card"}
+                                </button>
+                                <button onClick={() => updateClaimStatus(claim.id, "rejected")} disabled={updatingClaim === claim.id} style={{ padding: "8px 16px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", fontWeight: 800, fontSize: 12, cursor: "pointer", fontFamily: "var(--font-body)" }}>❌ Reject</button>
+                              </>
+                            )}
                             {claim.status === "sent" && <span style={{ fontSize: 12, fontWeight: 800, padding: "8px 16px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)", textAlign: "center" }}>✓ Gift Card Sent</span>}
                           </div>
                         </div>
