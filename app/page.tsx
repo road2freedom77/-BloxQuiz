@@ -12,6 +12,61 @@ import path from "path";
 
 const DAILY_CHALLENGE_THRESHOLD = 50;
 
+// Easter event window — update dates each year or remove when done
+const EASTER_START = new Date("2026-04-03");
+const EASTER_END = new Date("2026-04-07T23:59:59");
+
+function EasterBanner() {
+  const now = new Date();
+  if (now < EASTER_START || now > EASTER_END) return null;
+
+  return (
+    <div style={{
+      maxWidth: 1200,
+      margin: "0 auto",
+      padding: "0 24px 8px",
+    }}>
+      <div style={{
+        background: "linear-gradient(135deg, rgba(255,182,193,0.12), rgba(216,191,216,0.12), rgba(152,251,152,0.12))",
+        border: "1px solid rgba(255,182,193,0.3)",
+        borderRadius: 16,
+        padding: "14px 24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: 12,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 28 }}>🥚</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#e8a0b4", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>
+              Easter Event — April 3–6
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)" }}>
+              Hunt for hidden egg quizzes and earn bonus XP this weekend!
+            </div>
+          </div>
+        </div>
+        <a href="/browse" style={{
+          background: "linear-gradient(135deg, #e8a0b4, #b8a0d8)",
+          color: "#fff",
+          fontWeight: 900,
+          fontSize: 13,
+          padding: "8px 20px",
+          borderRadius: 100,
+          textDecoration: "none",
+          WebkitTextFillColor: "#fff",
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+        }}>
+          🐣 Start Hunting
+        </a>
+      </div>
+    </div>
+  );
+}
+
 async function getInitialQuizzes() {
   try {
     const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
@@ -66,6 +121,7 @@ export default async function Home() {
   return (
     <>
       <Hero />
+      <EasterBanner />
       <TrendingGames />
       <GameCategories />
       <UsernameGeneratorBanner />

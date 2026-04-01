@@ -15,6 +15,15 @@ const TOOLS = [
   { href: "/roblox-group-name-generator", label: "Group Name Generator", emoji: "🏰" },
 ];
 
+// Easter event window — update or remove each year
+const EASTER_START = new Date("2026-04-03");
+const EASTER_END = new Date("2026-04-07T23:59:59");
+
+function isEaster() {
+  const now = new Date();
+  return now >= EASTER_START && now <= EASTER_END;
+}
+
 const clerkAppearance = {
   variables: {
     colorBackground: "#0B0E17",
@@ -45,6 +54,7 @@ export default function Nav() {
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
   const isAdmin = ADMIN_USER_IDS.includes(user?.id || "");
+  const easter = isEaster();
 
   useEffect(() => {
     if (!user?.id) { setStreak(null); return; }
@@ -72,12 +82,18 @@ export default function Nav() {
 
   return (
     <>
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(11,14,23,0.85)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--border)", padding: "0 24px" }}>
+      <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(11,14,23,0.85)", backdropFilter: "blur(24px)", borderBottom: easter ? "1px solid rgba(255,182,193,0.25)" : "1px solid var(--border)", padding: "0 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 68 }}>
 
-          {/* Logo */}
-          <a href="/" style={{ fontFamily: "var(--font-display)", fontSize: 28, textDecoration: "none", background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", flexShrink: 0 }}>
-            Blox<span style={{ background: "var(--gradient-fire)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Quiz</span>
+          {/* Logo — Easter variant: pastel gradient shift + soft underline */}
+          <a href="/" style={{ fontFamily: "var(--font-display)", fontSize: 28, textDecoration: "none", flexShrink: 0, position: "relative", display: "inline-flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <span style={{ display: "flex" }}>
+              <span style={{ background: easter ? "linear-gradient(135deg, #a8edca, #7dd3c8)" : "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Blox</span>
+              <span style={{ background: easter ? "linear-gradient(135deg, #e8a0b4, #c3a0d8, #a0c8d8)" : "var(--gradient-fire)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Quiz</span>
+            </span>
+            {easter && (
+              <span style={{ display: "block", height: 2, width: "100%", borderRadius: 2, background: "linear-gradient(90deg, #a8edca, #e8a0b4, #c3a0d8, #a0c8d8)", opacity: 0.7, marginTop: -2 }} />
+            )}
           </a>
 
           {/* Desktop nav */}
@@ -133,7 +149,7 @@ export default function Nav() {
                   <button style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "8px 20px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)" }}>Sign In</button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 800, fontSize: 14, padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>Sign Up</button>
+                  <button style={{ background: easter ? "linear-gradient(135deg, #e8a0b4, #b8a0d8)" : "var(--gradient-main)", color: "var(--bg)", fontWeight: 800, fontSize: 14, padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>Sign Up</button>
                 </SignUpButton>
               </>
             )}
@@ -149,7 +165,7 @@ export default function Nav() {
                   <button style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 800, fontSize: 13, padding: "7px 14px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)" }}>Sign In</button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 800, fontSize: 13, padding: "7px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>Sign Up</button>
+                  <button style={{ background: easter ? "linear-gradient(135deg, #e8a0b4, #b8a0d8)" : "var(--gradient-main)", color: "var(--bg)", fontWeight: 800, fontSize: 13, padding: "7px 14px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>Sign Up</button>
                 </SignUpButton>
               </>
             )}
