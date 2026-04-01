@@ -11,6 +11,16 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   };
 }
 
+async function getCurrentSeason() {
+  const { data } = await supabase
+    .from("seasons")
+    .select("*")
+    .order("start_date", { ascending: false })
+    .limit(1)
+    .single();
+  return data || null;
+}
+
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const { userId } = await auth();
@@ -19,33 +29,41 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     .from("users")
     .select("*")
     .eq("username", username)
+    .order("xp", { ascending: false })
+    .limit(1)
     .single();
 
   if (!userData) notFound();
 
-  // Only show prize banner if the logged-in user is viewing their own profile
   const isOwner = !!userId && userId === userData.id;
 
-  const { data: scores } = await supabase
-    .from("scores")
-    .select("*")
-    .eq("user_id", userData.id)
-    .order("completed_at", { ascending: false })
-    .limit(10);
+  const [scores, allUsers, currentSeason] = await Promise.all([
+    supabase
+      .from("scores")
+      .select("*")
+      .eq("user_id", userData.id)
+      .order("completed_at", { ascending: false })
+      .limit(10)
+      .then(({ data }) => data || []),
+    supabase
+      .from("users")
+      .select("id, xp")
+      .order("xp", { ascending: false })
+      .then(({ data }) => data || []),
+    getCurrentSeason(),
+  ]);
 
-  // All-time rank
-  const { data: allUsers } = await supabase
-    .from("users")
-    .select("id, xp")
-    .order("xp", { ascending: false });
-  const rank = allUsers ? allUsers.findIndex(u => u.id === userData.id) + 1 : null;
+  const rank = allUsers.findIndex(u => u.id === userData.id) + 1 || null;
 
-  // Season rank + score
-  const currentMonth = new Date().toISOString().substring(0, 7);
+  // Use season's start_date month — not current month
+  const seasonMonth = currentSeason?.start_date
+    ? currentSeason.start_date.substring(0, 7)
+    : new Date().toISOString().substring(0, 7);
+
   const { data: monthlyScores } = await supabase
     .from("scores")
     .select("user_id, weighted_score")
-    .eq("month", currentMonth)
+    .eq("month", seasonMonth)
     .eq("is_first_attempt", true);
 
   let seasonRank: number | null = null;
@@ -66,7 +84,6 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     seasonRank = idx >= 0 ? idx + 1 : null;
   }
 
-  // Only fetch prize data if this is the owner
   let prizeData = null;
   if (isOwner) {
     const { data } = await supabase
@@ -82,7 +99,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   return (
     <PublicProfileClient
       userData={userData}
-      scores={scores || []}
+      scores={scores}
       rank={rank}
       seasonRank={seasonRank}
       seasonScore={seasonScore}
