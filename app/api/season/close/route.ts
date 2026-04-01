@@ -9,13 +9,25 @@ export async function POST(req: Request) {
     const seasonId = rawSeasonId || FALLBACK_SEASON_ID;
     console.log("[close-season] seasonId received:", rawSeasonId, "using:", seasonId);
 
-    const currentMonth = new Date().toISOString().substring(0, 7);
-    console.log("[close-season] currentMonth:", currentMonth);
+    // Fetch season to get start_date — use that month, not current month
+    const { data: seasonData, error: seasonError } = await supabase
+      .from("seasons")
+      .select("start_date")
+      .eq("id", seasonId)
+      .single();
+
+    if (seasonError || !seasonData) {
+      console.error("[close-season] season fetch error:", seasonError);
+      return NextResponse.json({ success: false, error: "Season not found" });
+    }
+
+    const seasonMonth = seasonData.start_date.substring(0, 7);
+    console.log("[close-season] seasonMonth:", seasonMonth);
 
     const { data: scores, error: scoresError } = await supabase
       .from("scores")
       .select("user_id, weighted_score, score, total_questions")
-      .eq("month", currentMonth)
+      .eq("month", seasonMonth)
       .eq("is_first_attempt", true);
 
     if (scoresError) {
@@ -26,7 +38,7 @@ export async function POST(req: Request) {
     console.log("[close-season] scores found:", scores?.length);
 
     if (!scores || scores.length === 0) {
-      return NextResponse.json({ success: false, error: "No scores found for current month" });
+      return NextResponse.json({ success: false, error: "No scores found for season month: " + seasonMonth });
     }
 
     const userMap: Record<string, any> = {};
