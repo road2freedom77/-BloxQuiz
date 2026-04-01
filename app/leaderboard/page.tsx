@@ -36,14 +36,18 @@ async function getAllTimeLeaderboard() {
   }));
 }
 
-async function getSeasonLeaderboard() {
-  const currentMonth = new Date().toISOString().substring(0, 7);
+async function getSeasonLeaderboard(seasonStartDate?: string) {
+  // Use season's start_date month, not current month.
+  // This ensures leaderboard shows correct data even after season ends.
+  const currentMonth = seasonStartDate
+    ? seasonStartDate.substring(0, 7)
+    : new Date().toISOString().substring(0, 7);
 
   const { data, error } = await supabaseAdmin
     .from("scores")
     .select("user_id, weighted_score, score, total_questions, quiz_slug, completed_at")
     .eq("month", currentMonth)
-    .order("completed_at", { ascending: true }); // oldest first for dedup
+    .order("completed_at", { ascending: true });
 
   if (error || !data || data.length === 0) return [];
 
@@ -104,11 +108,13 @@ async function getSeasonLeaderboard() {
 }
 
 export default async function LeaderboardPage() {
-  const [allTime, season, currentSeason] = await Promise.all([
+  const [allTime, currentSeason] = await Promise.all([
     getAllTimeLeaderboard(),
-    getSeasonLeaderboard(),
     getCurrentSeason(),
   ]);
+
+  // Fetch season scores using the season's own month, not today's month
+  const season = await getSeasonLeaderboard(currentSeason?.start_date);
 
   return (
     <LeaderboardClient
