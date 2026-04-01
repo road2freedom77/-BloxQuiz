@@ -107,6 +107,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       seasonQuizzes={seasonQuizzes}
       prizeData={prizeData}
       isOwner={isOwner}
+      currentSeason={currentSeason}
     />
   );
 }
