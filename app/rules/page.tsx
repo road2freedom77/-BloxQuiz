@@ -11,9 +11,9 @@ export default function RulesPage() {
 
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Official Contest Rules</div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginBottom: 12 }}>Season 1 Rules</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginBottom: 12 }}>Season 2 Rules</h1>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 15, lineHeight: 1.7 }}>
-          BloxQuiz.gg Season 1 runs from March 1–31, 2026. Read the full rules before competing.
+          BloxQuiz.gg Season 2 runs from April 1–30, 2026. Read the full rules before competing.
         </p>
       </div>
 
