@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contest Rules | BloxQuiz.gg",
-  description: "Official rules for the BloxQuiz.gg Season 1 leaderboard contest. Learn how to qualify, win prizes, and claim your Roblox gift card.",
+  description: "Official rules for the BloxQuiz.gg Season 2 leaderboard contest. Learn how to qualify, win prizes, and claim your Roblox gift card.",
 };
 
 export default function RulesPage() {
@@ -27,7 +27,7 @@ export default function RulesPage() {
           emoji: "🏆",
           title: "How the Leaderboard Works",
           items: [
-            "Season 1 runs March 1–31, 2026. Scores reset on April 1st.",
+            "Season 2 runs April 1–30, 2026. Scores reset on May 1st.",
             "Points are awarded based on quiz difficulty: Easy = 1x, Medium = 1.5x, Hard = 2x.",
             "Only your first attempt on each quiz counts toward your season score.",
             "A maximum of 20 quizzes per day count toward your season score.",
@@ -110,7 +110,7 @@ export default function RulesPage() {
       ))}
 
       <div style={{ marginTop: 24, fontSize: 12, color: "var(--text-dim)", fontWeight: 600, textAlign: "center" }}>
-        Last updated: March 1, 2026 · <a href="/leaderboard" style={{ color: "#B84CFF", textDecoration: "none" }}>View Leaderboard →</a>
+        Last updated: April 1, 2026 · <a href="/leaderboard" style={{ color: "#B84CFF", textDecoration: "none" }}>View Leaderboard →</a>
       </div>
 
     </div>
