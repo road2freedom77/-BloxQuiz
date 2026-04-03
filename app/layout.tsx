@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 };
 
 // Easter event window — update or remove each year
-const EASTER_START = new Date("2026-04-03");
+const EASTER_START = new Date("2026-04-02");
 const EASTER_END = new Date("2026-04-07T23:59:59");
 
 function isEasterActive() {
