@@ -18,14 +18,14 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "BloxQuiz — Roblox Trivia & Quizzes for Every Game",
+  title: "BloxQuiz — Roblox Quizzes, Live Stats & Game Codes (2026)",
   description: "Test your Roblox knowledge! Free trivia quizzes for Blox Fruits, Brookhaven, Adopt Me, Tower of Hell & more. Daily challenges, leaderboards & codes.",
   keywords: "Roblox quiz, Roblox trivia, Blox Fruits quiz, Brookhaven quiz, Adopt Me quiz, Roblox games, free Roblox quizzes, Roblox codes",
   verification: {
     google: "NqxJEMiRRquJUTiRoldLHa-Xl3R5kzUdwCGDuZFVdwk",
   },
   openGraph: {
-    title: "BloxQuiz — Roblox Trivia & Quizzes",
+    title: "BloxQuiz — Roblox Quizzes, Live Stats & Game Codes (2026)",
     description: "Test your Roblox knowledge! Free trivia quizzes for Blox Fruits, Brookhaven, Adopt Me & more.",
     url: "https://www.bloxquiz.gg",
     siteName: "BloxQuiz",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BloxQuiz — Roblox Trivia & Quizzes",
+    title: "BloxQuiz — Roblox Quizzes, Live Stats & Game Codes (2026)",
     description: "Test your Roblox knowledge! Free trivia quizzes for Blox Fruits, Brookhaven, Adopt Me & more.",
   },
   robots: {
