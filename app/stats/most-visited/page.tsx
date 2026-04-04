@@ -64,7 +64,7 @@ export async function generateMetadata() {
       : `${(topGame.total_visits / 1_000_000).toFixed(1)}M`
     : "80B+";
 
-  const title = `Most Visited Roblox Games (${month}) — ${topName} Leads with ${topVisits} Visits | BloxQuiz`;
+  const title = `Most Visited Roblox Games — Live Player Count Rankings 2026 | BloxQuiz`;
   const description = `The most visited Roblox games of all time ranked by total visits in ${month}. ${topName} leads with ${topVisits} total visits. Updated hourly with real visit counts.`;
 
   return {
