@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { useUser } from "@clerk/nextjs";
+import RobuxCTA from "../../components/RobuxCTA";
 
 const DIFFICULTY_MULTIPLIER: Record<string, number> = {
   Easy: 1,
@@ -586,6 +587,10 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
                 <a href="/leaderboard" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none" }}>View Leaderboard →</a>
                 <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "var(--text-muted)", textDecoration: "none" }}>View Rules →</a>
               </div>
+            </div>
+
+            <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+              <RobuxCTA variant="default" />
             </div>
 
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>

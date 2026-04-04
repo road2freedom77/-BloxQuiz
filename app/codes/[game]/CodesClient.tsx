@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import RobuxCTA from "../../components/RobuxCTA";
 
 const gameTips: Record<string, string> = {
   "blox-fruits": "Most Blox Fruits codes provide double experience boosts or stat resets. Players typically redeem XP boost codes while grinding levels or completing sea quests to maximize efficiency. Because codes expire quickly — often within days of release — it's best to redeem them immediately after they are announced on the developer's Twitter or Discord.",
@@ -157,6 +158,11 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       )}
 
+      {/* Robux affiliate CTA — users in "free rewards" mindset convert well here */}
+      <div style={{ marginBottom: 24 }}>
+        <RobuxCTA variant="card" />
+      </div>
+
       {/* Quiz CTA */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -178,47 +184,22 @@ export default function CodesClient({ data, game, description, activeCodes, expi
 
       {/* Stats cross-link card */}
       {statsData && (statsData.currentPlayers || statsData.totalVisits) && (
-        <a
-          href={`/stats/${game}`}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)",
-            border: "1px solid rgba(0,180,216,0.25)",
-            borderRadius: "var(--radius)",
-            padding: "16px 24px",
-            textDecoration: "none",
-            marginBottom: 24,
-            flexWrap: "wrap",
-          }}
-        >
+        <a href={`/stats/${game}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)", border: "1px solid rgba(0,180,216,0.25)", borderRadius: "var(--radius)", padding: "16px 24px", textDecoration: "none", marginBottom: 24, flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {statsData.currentPlayers && (
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(0,180,216,0.8)", marginBottom: 2 }}>
-                  Playing Now
-                </div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
-                  {formatNumber(statsData.currentPlayers)}
-                </div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(0,180,216,0.8)", marginBottom: 2 }}>Playing Now</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(statsData.currentPlayers)}</div>
               </div>
             )}
             {statsData.totalVisits && (
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>
-                  Total Visits
-                </div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>
-                  {formatNumber(statsData.totalVisits)}
-                </div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>Total Visits</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>{formatNumber(statsData.totalVisits)}</div>
               </div>
             )}
           </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>
-            📊 View Live Stats →
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>📊 View Live Stats →</div>
         </a>
       )}
 
@@ -290,16 +271,13 @@ export default function CodesClient({ data, game, description, activeCodes, expi
           {"Explore all " + data.game + " quizzes, live player stats, or browse codes for every Roblox game."}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href={"/games/" + quizSlug}
-            style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
+          <a href={"/games/" + quizSlug} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
             {"🎮 " + data.game + " Quizzes"}
           </a>
-          <a href={"/stats/" + game}
-            style={{ background: "linear-gradient(135deg, #00b4d8, #0077b6)", color: "#fff", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
+          <a href={"/stats/" + game} style={{ background: "linear-gradient(135deg, #00b4d8, #0077b6)", color: "#fff", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
             {"📊 Live Stats"}
           </a>
-          <a href="/codes"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
+          <a href="/codes" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
             {"🎁 All Roblox Codes"}
           </a>
         </div>

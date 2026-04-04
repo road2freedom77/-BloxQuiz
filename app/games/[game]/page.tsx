@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { supabaseAdmin } from "../../lib/supabase";
 import GamesClient from "./GamesClient";
+import RobuxCTA from "../../components/RobuxCTA";
 
 const COMMAND_CENTER_SLUGS = ["blox-fruits", "brookhaven-rp", "murder-mystery-2", "adopt-me", "grow-a-garden", "dress-to-impress"];
 
@@ -603,6 +604,9 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
         insights={insights}
         activeCodes={activeCodes}
       />
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px 40px" }}>
+        <RobuxCTA variant="card" />
+      </div>
     </>
   );
 }
