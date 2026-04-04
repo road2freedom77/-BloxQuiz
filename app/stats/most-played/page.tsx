@@ -64,7 +64,7 @@ export async function generateMetadata() {
       : `${Math.round(topGame.current_players / 1_000)}K`
     : "500K+";
 
-  const title = `Most Played Roblox Games (${month}) — #1 is ${topName} with ${topCount} Players | BloxQuiz`;
+  const title = `Most Played Roblox Games Right Now (${month}) — Live Player Counts 2026 | BloxQuiz`;
   const description = `The most played Roblox games right now ranked by live concurrent players in ${month}. ${topName} leads with ${topCount} active players. Updated hourly with real player counts.`;
 
   return {
