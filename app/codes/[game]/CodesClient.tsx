@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import RobuxCTA from "../../components/RobuxCTA";
+import FollowButton from "../../components/FollowButton";
 
 const gameTips: Record<string, string> = {
   "blox-fruits": "Most Blox Fruits codes provide double experience boosts or stat resets. Players typically redeem XP boost codes while grinding levels or completing sea quests to maximize efficiency. Because codes expire quickly — often within days of release — it's best to redeem them immediately after they are announced on the developer's Twitter or Discord.",
@@ -99,6 +100,9 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
         <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>
           {"🕐 Last updated: " + data.updatedAt + " — bookmark this page for daily code updates"}
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <FollowButton gameSlug={game} gameName={data.game} />
         </div>
       </div>
 

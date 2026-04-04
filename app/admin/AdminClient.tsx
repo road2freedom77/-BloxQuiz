@@ -224,7 +224,7 @@ export default function AdminClient({
   allSeasons: any[],
   prizeClaims: any[],
 }) {
-  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "submit">("overview");
+  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "codes" | "submit">("overview");
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -256,6 +256,8 @@ export default function AdminClient({
   const [notifyResult, setNotifyResult] = useState<{ sent: string[], failed: string[] } | null>(null);
   const [giftCardCodes, setGiftCardCodes] = useState<Record<string, string>>({});
   const [sendingGiftCard, setSendingGiftCard] = useState<string | null>(null);
+  const [notifyingFollowers, setNotifyingFollowers] = useState(false);
+  const [notifyFollowersResult, setNotifyFollowersResult] = useState<any>(null);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>(season?.id || "");
   const [loadingSeasonData, setLoadingSeasonData] = useState(false);
 
@@ -514,6 +516,15 @@ export default function AdminClient({
     }
   }
 
+  async function notifyFollowers() {
+    if (!confirm("Send code alert emails to all followers with new codes?")) return;
+    setNotifyingFollowers(true);
+    const res = await fetch("/api/codes/notify-followers", { method: "POST" });
+    const data = await res.json();
+    setNotifyingFollowers(false);
+    setNotifyFollowersResult(data);
+  }
+
   function copyToClipboard(text: string, id: string) {
     navigator.clipboard.writeText(text);
     setCopiedEmail(id);
@@ -546,10 +557,10 @@ export default function AdminClient({
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        {(["overview", "seasons", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
+        {(["overview", "seasons", "codes", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "submit" ? "✍️ Submit Quiz" : t}
+            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t}
           </button>
         ))}
       </div>
@@ -1128,6 +1139,47 @@ export default function AdminClient({
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {tab === "codes" && (
+        <div style={{ maxWidth: 700 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>🎁 Code Alerts</h2>
+          <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 28 }}>After running a codes batch update, log the new codes then notify followers.</p>
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24, marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Step 1 — Run this SQL after each batch update</div>
+            <div style={{ background: "#0B0E17", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10, padding: 16, marginBottom: 12 }}>
+              <pre style={{ fontSize: 12, color: "#00F5A0", fontFamily: "monospace", margin: 0, whiteSpace: "pre-wrap" }}>{`INSERT INTO code_change_log (game_slug, code, change_type, batch_id)
+SELECT slug, code, 'added',
+  'batch-' || to_char(NOW(), 'YYYY-MM-DD-HH24MI')
+FROM codes
+WHERE is_new = true
+AND updated_at >= NOW() - INTERVAL '1 hour'
+ON CONFLICT DO NOTHING;`}</pre>
+            </div>
+            <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, margin: 0 }}>Run in Supabase SQL editor after every codes batch update.</p>
+          </div>
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Step 2 — Send Code Alerts to Followers</div>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>Sends one grouped email per game to all followers. Only fires for unnotified new codes.</p>
+            <button onClick={notifyFollowers} disabled={notifyingFollowers} style={{ padding: "14px 32px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, cursor: notifyingFollowers ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: notifyingFollowers ? 0.7 : 1 }}>
+              {notifyingFollowers ? "⏳ Sending alerts..." : "🔔 Notify Followers of New Codes"}
+            </button>
+            {notifyFollowersResult && (
+              <div style={{ marginTop: 16, padding: "14px 18px", background: "rgba(0,245,160,0.08)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10 }}>
+                {notifyFollowersResult.message ? (
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{notifyFollowersResult.message}</div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-green)", marginBottom: 8 }}>✅ Alerts sent!</div>
+                    {(notifyFollowersResult.results || []).map((r: any) => (
+                      <div key={r.game} style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4 }}>{r.game}: {r.sent} emails sent to {r.followers} followers</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

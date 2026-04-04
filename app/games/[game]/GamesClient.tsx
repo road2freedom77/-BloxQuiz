@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "../../lib/supabase";
 import GameCrossLinks from "../../components/GameCrossLinks";
+import FollowButton from "../../components/FollowButton";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -125,68 +126,48 @@ function CommandCenter({ gameSlug, gameName, statsData, insights, activeCodes, q
         {"⚡ " + gameName + " Command Center"}
       </div>
 
-      {/* Top row: live stats + codes + trend */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
-        {/* Live players */}
         <a href={"/stats/" + gameSlug} style={{ background: "rgba(0,180,216,0.08)", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 12, padding: "16px", textDecoration: "none" }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(0,180,216,0.7)", marginBottom: 4 }}>Playing Now</div>
-          <div style={{ fontSize: 24, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>
-            {formatNumber(statsData?.currentPlayers)}
-          </div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(statsData?.currentPlayers)}</div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{"📊 View Stats →"}</div>
         </a>
 
-        {/* Player rank */}
         {insights && (
           <a href={"/stats/" + gameSlug + "/history"} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px", textDecoration: "none" }}>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>7-Day Trend</div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: trendColor(insights.trend_label) }}>
-              {trendArrow(insights.trend_label)} {insights.trend_label ?? "—"}
-            </div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: trendColor(insights.trend_label) }}>{trendArrow(insights.trend_label)} {insights.trend_label ?? "—"}</div>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{"📈 View History →"}</div>
           </a>
         )}
 
-        {/* Codes */}
         <a href={"/codes/" + gameSlug} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px", textDecoration: "none" }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Active Codes</div>
-          <div style={{ fontSize: 24, fontWeight: 900, color: activeCodes > 0 ? "#00f5a0" : "rgba(255,255,255,0.4)" }}>
-            {activeCodes > 0 ? activeCodes : "None"}
-          </div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: activeCodes > 0 ? "#00f5a0" : "rgba(255,255,255,0.4)" }}>{activeCodes > 0 ? activeCodes : "None"}</div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{"🎁 Get Codes →"}</div>
         </a>
 
-        {/* Total visits */}
         {statsData?.totalVisits && (
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px" }}>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Total Visits</div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>
-              {formatNumber(statsData.totalVisits)}
-            </div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: "rgba(255,255,255,0.7)", fontVariantNumeric: "tabular-nums" }}>{formatNumber(statsData.totalVisits)}</div>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>all-time</div>
           </div>
         )}
       </div>
 
-      {/* Featured quizzes: Start Here module */}
       {quizzes.length > 0 && (
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.3)", marginBottom: 12 }}>Start Here</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {beginnerQuiz && (
-              <a href={"/quiz/" + beginnerQuiz.slug} style={{ background: "rgba(0,245,160,0.08)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10, padding: "10px 16px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "#00f5a0" }}>
-                {"🟢 Beginner Quiz"}
-              </a>
+              <a href={"/quiz/" + beginnerQuiz.slug} style={{ background: "rgba(0,245,160,0.08)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10, padding: "10px 16px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "#00f5a0" }}>{"🟢 Beginner Quiz"}</a>
             )}
             {hardestQuiz && (
-              <a href={"/quiz/" + hardestQuiz.slug} style={{ background: "rgba(255,60,172,0.08)", border: "1px solid rgba(255,60,172,0.2)", borderRadius: 10, padding: "10px 16px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "#ff3cac" }}>
-                {"🔥 Hardest Quiz"}
-              </a>
+              <a href={"/quiz/" + hardestQuiz.slug} style={{ background: "rgba(255,60,172,0.08)", border: "1px solid rgba(255,60,172,0.2)", borderRadius: 10, padding: "10px 16px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "#ff3cac" }}>{"🔥 Hardest Quiz"}</a>
             )}
             {mostPlayed && (
-              <a href={"/quiz/" + mostPlayed.slug} style={{ background: "rgba(0,217,255,0.08)", border: "1px solid rgba(0,217,255,0.2)", borderRadius: 10, padding: "10px 16px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "#00d9ff" }}>
-                {"⚡ Most Recent Quiz"}
-              </a>
+              <a href={"/quiz/" + mostPlayed.slug} style={{ background: "rgba(0,217,255,0.08)", border: "1px solid rgba(0,217,255,0.2)", borderRadius: 10, padding: "10px 16px", textDecoration: "none", fontSize: 13, fontWeight: 700, color: "#00d9ff" }}>{"⚡ Most Recent Quiz"}</a>
             )}
           </div>
         </div>
@@ -211,9 +192,7 @@ function QuizCard({ quiz, thumb, emoji, played }: { quiz: any, thumb: string, em
             <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", fontSize: 32 }}>{emoji}</span>
           </>
         ) : (
-          <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, background: thumb }}>
-            {emoji}
-          </div>
+          <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, background: thumb }}>{emoji}</div>
         )}
         {played ? (
           <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,245,160,0.15)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 100, fontSize: 10, fontWeight: 900, color: "var(--neon-green)", border: "1px solid rgba(0,245,160,0.3)" }}>{"✅ PLAYED"}</span>
@@ -336,7 +315,7 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData, hasC
         activeTab="quiz"
       />
 
-      {/* Command Center — top 3 hubs only */}
+      {/* Command Center */}
       {isCommandCenter && (
         <CommandCenter
           gameSlug={gameSlug}
@@ -365,17 +344,18 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData, hasC
           <p style={{ color: "rgba(255,255,255,0.8)", fontWeight: 600, fontSize: 15, marginBottom: 20, maxWidth: 600 }}>
             {quizzes.length + " quizzes available — test your " + config.displayName + " knowledge across all difficulty levels!"}
           </p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <a href={startQuiz} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>{"⚡ Start Easiest Quiz"}</a>
             {randomSlug && (
               <a href={"/quiz/" + randomSlug} style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}>{"🎲 Random Quiz"}</a>
             )}
             <a href="/codes" style={{ background: "rgba(255,255,255,0.1)", color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>{"🎁 Free Roblox Codes"}</a>
+            <FollowButton gameSlug={gameSlug} gameName={config.displayName} />
           </div>
         </div>
       </div>
 
-      {/* Stats cross-link card — only for non-command-center pages */}
+      {/* Stats cross-link card */}
       {!isCommandCenter && statsData && (
         <StatsCard gameSlug={gameSlug} currentPlayers={statsData.currentPlayers} totalVisits={statsData.totalVisits} />
       )}
