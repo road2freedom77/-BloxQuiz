@@ -1,6 +1,4 @@
 // components/GameCrossLinks.tsx
-// Drop this in app/components/GameCrossLinks.tsx
-
 interface GameCrossLinksProps {
   slug: string;
   gameName: string;
@@ -77,9 +75,7 @@ export default function GameCrossLinks({
                 textDecoration: "none",
                 background: isActive ? link.bg : "var(--bg-card)",
                 border: `1px solid ${isActive ? link.border : "var(--border)"}`,
-                flex: "1 1 160px",
-                minWidth: 140,
-                maxWidth: 260,
+                width: "auto",
                 opacity: isActive ? 1 : 0.85,
                 transition: "opacity 0.15s",
                 cursor: isActive ? "default" : "pointer",
@@ -93,13 +89,14 @@ export default function GameCrossLinks({
                   fontWeight: 900,
                   color: isActive ? link.color : "var(--text)",
                   marginBottom: 2,
+                  whiteSpace: "nowrap",
                 }}>
                   {link.label}
                   {isActive && (
                     <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: link.color, opacity: 0.8 }}>← here</span>
                   )}
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)" }}>{link.desc}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", whiteSpace: "nowrap" }}>{link.desc}</div>
               </div>
             </a>
           );

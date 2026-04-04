@@ -184,8 +184,8 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px 0" }}>
-        <GameCrossLinks
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px 0" }}>
+      <GameCrossLinks
           slug={game}
           gameName={data.game}
           hasQuizzes={quizCount > 0}
