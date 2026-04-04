@@ -4,17 +4,20 @@ import CodesHubClient from './CodesHubClient'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = {
-  title: 'Roblox Codes (2026) — All Active Codes Updated Daily | BloxQuiz',
-  description: 'Find active Roblox codes for 2026. Blox Fruits, Adopt Me, Anime Defenders, Doors, Bee Swarm & 12 more games. Free rewards updated daily — redeem before they expire!',
-  alternates: { canonical: 'https://www.bloxquiz.gg/codes' },
-  openGraph: {
-    title: 'Roblox Codes (2026) — All Active Codes Updated Daily | BloxQuiz',
-    description: 'Active Roblox codes for Blox Fruits, Adopt Me, Anime Defenders, Doors & more. Updated daily — redeem free rewards before they expire!',
-    url: 'https://www.bloxquiz.gg/codes',
-    siteName: 'BloxQuiz',
-    type: 'website',
-  },
+export async function generateMetadata() {
+  const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+  return {
+    title: `All Roblox Codes — Active & Working Game Codes (${month}) | BloxQuiz`,
+    description: 'Find active Roblox codes for 2026. Blox Fruits, Adopt Me, Anime Defenders, Doors, Bee Swarm & 12 more games. Free rewards updated daily — redeem before they expire!',
+    alternates: { canonical: 'https://www.bloxquiz.gg/codes' },
+    openGraph: {
+      title: `All Roblox Codes — Active & Working Game Codes (${month}) | BloxQuiz`,
+      description: 'Active Roblox codes for Blox Fruits, Adopt Me, Anime Defenders, Doors & more. Updated daily — redeem free rewards before they expire!',
+      url: 'https://www.bloxquiz.gg/codes',
+      siteName: 'BloxQuiz',
+      type: 'website',
+    },
+  };
 }
 
 const faqs = [
