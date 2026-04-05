@@ -46,6 +46,11 @@ interface HistoryInsights {
   volatility_label: string | null;
 }
 
+interface SimilarGame {
+  name: string;
+  slug: string;
+}
+
 async function getGame(slug: string): Promise<GameRow | null> {
   const { data, error } = await supabaseAdmin
     .from("roblox_games")
@@ -76,6 +81,34 @@ async function getHistoryInsights(slug: string): Promise<HistoryInsights | null>
   return data as HistoryInsights | null;
 }
 
+async function getSimilarTrendingGames(slug: string, genre: string | null, trendLabel: string | null): Promise<SimilarGame[]> {
+  if (!genre || !trendLabel) return [];
+  try {
+    const { data: trendSlugs } = await supabaseAdmin
+      .from("game_history_insights_14d")
+      .select("slug")
+      .eq("trend_label", trendLabel)
+      .neq("slug", slug)
+      .limit(20);
+
+    if (!trendSlugs || trendSlugs.length === 0) return [];
+
+    const slugList = trendSlugs.map((r: { slug: string }) => r.slug);
+
+    const { data: games } = await supabaseAdmin
+      .from("roblox_games")
+      .select("slug, name")
+      .eq("genre", genre)
+      .eq("is_tracked", true)
+      .in("slug", slugList)
+      .limit(2);
+
+    return (games ?? []) as SimilarGame[];
+  } catch {
+    return [];
+  }
+}
+
 async function getAllSlugs(): Promise<string[]> {
   const { data } = await supabaseAdmin
     .from("roblox_games")
@@ -94,6 +127,79 @@ function formatNum(n: number | null): string {
 function formatDate(d: string | null): string {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+}
+
+function trendColor(label: string | null): string {
+  if (label === "Rising") return "#00f5a0";
+  if (label === "Cooling Off") return "#ff6b6b";
+  return "#a0aec0";
+}
+
+function trendArrow(label: string | null): string {
+  if (label === "Rising") return "↑";
+  if (label === "Cooling Off") return "↓";
+  return "→";
+}
+
+function volatilityColor(label: string | null): string {
+  if (label === "Volatile") return "#ffd166";
+  if (label === "Moderate") return "#00b4d8";
+  return "#00f5a0";
+}
+
+function buildNarrative(
+  gameName: string,
+  gameGenre: string | null,
+  insights: HistoryInsights | null,
+  dailyStats: DailyStatRow[],
+  avgOverPeriod: number | null,
+  peakDay: DailyStatRow | null,
+  similarGames: SimilarGame[]
+): string {
+  if (!insights || dailyStats.length === 0) {
+    return `BloxQuiz tracks ${gameName} player counts hourly. Daily aggregate data will appear here after the first full day of tracking.`;
+  }
+
+  const parts: string[] = [];
+  const trend = insights.trend_label;
+  const trendPct = insights.trend_pct_7d;
+
+  if (trend && trendPct !== null) {
+    const direction = trend === "Rising" ? "up" : trend === "Cooling Off" ? "down" : "flat";
+    const trendWord = trend === "Rising" ? "growing" : trend === "Cooling Off" ? "cooling off" : "holding steady";
+    parts.push(`${gameName} is currently ${trendWord}, ${direction} ${Math.abs(trendPct)}% over the past 7 days compared to the prior 3.`);
+  }
+
+  if (avgOverPeriod) {
+    const peakStr = peakDay
+      ? `, peaking at ${peakDay.peak_players.toLocaleString()} players on ${new Date(peakDay.date).toLocaleDateString("en-US", { month: "long", day: "numeric" })}`
+      : "";
+    parts.push(`The game has averaged ${avgOverPeriod.toLocaleString()} concurrent players per day over the tracked period${peakStr}.`);
+  }
+
+  if (insights.weekend_lift_pct !== null) {
+    if (insights.weekend_lift_pct > 5) {
+      parts.push(`Weekend sessions run about ${insights.weekend_lift_pct}% busier than weekdays, suggesting a younger or more casual player base.`);
+    } else if (insights.weekend_lift_pct <= 0) {
+      parts.push(`Player counts are consistent throughout the week with no significant weekend lift.`);
+    }
+  }
+
+  if (insights.volatility_label === "Volatile") {
+    parts.push(`Player counts fluctuate significantly day to day, which is typical for games that spike around updates or events.`);
+  } else if (insights.volatility_label === "Stable") {
+    parts.push(`Player counts are unusually stable, indicating a consistent core audience.`);
+  }
+
+  if (similarGames.length > 0 && trend) {
+    const names = similarGames.map((g) => g.name).join(" and ");
+    const count = similarGames.length > 1 ? "Two" : "One";
+    const plural = similarGames.length > 1 ? "s are" : " is";
+    const trendStr = trend === "Rising" ? "trending up" : "cooling off";
+    parts.push(`${count} other ${gameGenre ?? ""} game${plural} also ${trendStr} right now: ${names}.`);
+  }
+
+  return parts.join(" ");
 }
 
 export async function generateStaticParams() {
@@ -122,21 +228,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const avgStr = avgDaily ? formatNum(avgDaily) : null;
 
   const title = avgStr
-    ? game.name + " Player Count History — Avg " + avgStr + "/Day (" + month + ") | BloxQuiz"
-    : game.name + " Player Count History (" + month + ") — 90 Day Chart | BloxQuiz";
+    ? `${game.name} Player Count History — Avg ${avgStr}/Day (${month}) | BloxQuiz`
+    : `${game.name} Player Count History (${month}) — 90 Day Chart | BloxQuiz`;
 
   const description = avgStr
-    ? game.name + " averages " + avgStr + " players per day. Full 90-day player count history with daily averages, peaks, and visit growth. Updated daily."
-    : game.name + " player count history over the last 90 days. Daily average, peak, and minimum player counts with visit growth data. Updated daily.";
+    ? `${game.name} averages ${avgStr} players per day. Full 90-day player count history with daily averages, peaks, and visit growth. Updated daily.`
+    : `${game.name} player count history over the last 90 days. Daily average, peak, and minimum player counts with visit growth data. Updated daily.`;
 
   return {
     title,
     description,
-    alternates: { canonical: "https://www.bloxquiz.gg/stats/" + slug + "/history" },
+    alternates: { canonical: `https://www.bloxquiz.gg/stats/${slug}/history` },
     openGraph: {
       title,
       description,
-      url: "https://www.bloxquiz.gg/stats/" + slug + "/history",
+      url: `https://www.bloxquiz.gg/stats/${slug}/history`,
       siteName: "BloxQuiz",
       type: "website",
       ...(game.thumbnail_url ? { images: [{ url: game.thumbnail_url }] } : {}),
@@ -144,33 +250,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-function trendColor(label: string | null): string {
-  if (label === "Rising") return "#00f5a0";
-  if (label === "Cooling Off") return "#ff6b6b";
-  return "#a0aec0";
-}
-
-function trendArrow(label: string | null): string {
-  if (label === "Rising") return "↑";
-  if (label === "Cooling Off") return "↓";
-  return "→";
-}
-
-function volatilityColor(label: string | null): string {
-  if (label === "Volatile") return "#ffd166";
-  if (label === "Moderate") return "#00b4d8";
-  return "#00f5a0";
-}
-
 export default async function StatsHistoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const game = await getGame(slug);
   if (!game) notFound();
+  if (!game) return null; // TypeScript guard — notFound() throws but TS doesn't narrow
 
   const [dailyStats, insights] = await Promise.all([
     getDailyStats(game.universe_id),
     getHistoryInsights(slug),
   ]);
+
+  const similarGames = await getSimilarTrendingGames(slug, game.genre, insights?.trend_label ?? null);
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
   const isMature = (insights?.days_tracked ?? 0) >= 14;
@@ -185,7 +276,8 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
 
   const totalVisitsGained = dailyStats.reduce((sum, d) => sum + (d.total_visits_delta ?? 0), 0);
 
-  // Build FAQ answers dynamically from real data
+  const narrative = buildNarrative(game.name, game.genre, insights, dailyStats, avgOverPeriod, peakDay, similarGames);
+
   const faqEntries = [
     {
       q: `What is ${game.name}'s average daily player count?`,
@@ -221,18 +313,18 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: "https://www.bloxquiz.gg" },
           { "@type": "ListItem", position: 2, name: "Stats", item: "https://www.bloxquiz.gg/stats" },
-          { "@type": "ListItem", position: 3, name: game.name + " Stats", item: "https://www.bloxquiz.gg/stats/" + slug },
-          { "@type": "ListItem", position: 4, name: "Player Count History", item: "https://www.bloxquiz.gg/stats/" + slug + "/history" },
+          { "@type": "ListItem", position: 3, name: `${game.name} Stats`, item: `https://www.bloxquiz.gg/stats/${slug}` },
+          { "@type": "ListItem", position: 4, name: "Player Count History", item: `https://www.bloxquiz.gg/stats/${slug}/history` },
         ],
       },
       {
         "@type": "Article",
-        headline: game.name + " Player Count History — " + month,
+        headline: `${game.name} Player Count History — ${month}`,
         dateModified: game.last_updated ?? new Date().toISOString(),
         author: { "@type": "Organization", name: "BloxQuiz" },
         publisher: { "@type": "Organization", name: "BloxQuiz" },
-        description: "Historical player count data for " + game.name + " including daily averages, peaks, and visit growth over the past 90 days.",
-        mainEntityOfPage: "https://www.bloxquiz.gg/stats/" + slug + "/history",
+        description: `Historical player count data for ${game.name} including daily averages, peaks, and visit growth over the past 90 days.`,
+        mainEntityOfPage: `https://www.bloxquiz.gg/stats/${slug}/history`,
       },
       {
         "@type": "FAQPage",
@@ -258,7 +350,7 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
               <span>/</span>
               <Link href="/stats" style={{ color: "inherit", textDecoration: "none" }}>Stats</Link>
               <span>/</span>
-              <Link href={"/stats/" + slug} style={{ color: "inherit", textDecoration: "none" }}>{game.name}</Link>
+              <Link href={`/stats/${slug}`} style={{ color: "inherit", textDecoration: "none" }}>{game.name}</Link>
               <span>/</span>
               <span style={{ color: "rgba(255,255,255,0.7)" }}>History</span>
             </nav>
@@ -284,21 +376,17 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
 
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 20px 80px" }}>
 
-          {/* Quick Answer block */}
+          {/* Narrative block */}
           <div style={{ background: "linear-gradient(135deg, #0f1629 0%, #111827 100%)", border: "1px solid rgba(0,180,216,0.2)", borderLeft: "3px solid #00b4d8", borderRadius: 12, padding: "20px 24px", marginBottom: 32 }}>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.85)" }}>
-              {dailyStats.length > 0
-                ? game.name + " has averaged " + (avgOverPeriod?.toLocaleString() ?? "—") + " concurrent players per day over the past " + dailyStats.length + " days" + (peakDay ? ", with a peak of " + peakDay.peak_players.toLocaleString() + " players on " + new Date(peakDay.date).toLocaleDateString("en-US", { month: "long", day: "numeric" }) : "") + ". The game gained " + totalVisitsGained.toLocaleString() + " total visits during this period. BloxQuiz collects hourly snapshots and aggregates them into daily stats."
-                : "BloxQuiz tracks " + game.name + " player counts hourly. Daily aggregate data will appear here after the first full day of tracking."}
+              {narrative}
             </p>
           </div>
 
           {/* INSIGHT BLOCK — above chart, only for mature pages */}
           {isMature && insights && (
             <div style={{ background: "#0f1629", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "24px", marginBottom: 32 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                <span style={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)" }}>7-Day Trend Analysis</span>
-              </div>
+              <div style={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>7-Day Trend Analysis</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Trend</div>
@@ -414,7 +502,7 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
             </div>
           )}
 
-          {/* FAQ section — visible on page, mirrors schema */}
+          {/* FAQ section — mirrors schema, required for rich results */}
           <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "24px 28px", marginTop: 32 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Frequently Asked Questions</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -464,13 +552,13 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
 
           {/* Cross-links */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 40 }}>
-            <Link href={"/stats/" + slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+            <Link href={`/stats/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
               <span>{"📊"}</span><span>{game.name} Live Stats</span>
             </Link>
-            <Link href={"/games/" + slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+            <Link href={`/games/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
               <span>{"🧠"}</span><span>{game.name} Quizzes</span>
             </Link>
-            <Link href={"/codes/" + slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+            <Link href={`/codes/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
               <span>{"🎁"}</span><span>{game.name} Codes</span>
             </Link>
             <Link href="/stats" style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
