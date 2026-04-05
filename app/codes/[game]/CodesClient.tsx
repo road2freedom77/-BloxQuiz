@@ -23,6 +23,26 @@ const gameTips: Record<string, string> = {
   "fisch": "Fisch codes typically reward free coins and bait to help you progress faster. Redeem codes as soon as they are released since they often expire within days. Follow the Fisch developers on Twitter/X and join the Discord for the fastest code announcements.",
 };
 
+const gameRewards: Record<string, string[]> = {
+  "blox-fruits": ["2x XP boosts for faster leveling", "Stat resets to respec your build", "In-game currency for items"],
+  "adopt-me": ["Free Bucks to spend on eggs and pets", "Limited event items", "In-game cosmetics"],
+  "murder-mystery-2": ["Free knives and cosmetic skins", "Seasonal limited items", "Event-exclusive accessories"],
+  "grow-a-garden": ["Seeds and rare plants", "Fertilizer and growth boosters", "Gardening tools"],
+  "brookhaven-rp": ["Free vehicles and props", "Exclusive roleplay items", "Seasonal cosmetics"],
+  "tower-of-hell": ["Modifier tokens", "Rings for customization", "Event badges"],
+  "royale-high": ["Free diamonds for the in-game shop", "Seasonal accessories", "Limited event items"],
+  "doors": ["Free Knobs for the shop", "Cosmetic items", "Event-exclusive rewards"],
+  "arsenal": ["Free weapon skins", "Bucks for cosmetics", "Seasonal event items"],
+  "anime-fighting-simulator": ["Chikara Shards to power up", "Yen for upgrades", "Stat boosts"],
+  "berry-avenue": ["Free in-game cash", "Roleplay items and props", "Seasonal cosmetics"],
+  "livetopia": ["Coins for your virtual world", "Exclusive items", "Seasonal rewards"],
+  "natural-disaster-survival": ["Badges and special items", "Event rewards", "Milestone cosmetics"],
+  "anime-defenders": ["Free gems for summons", "Unit upgrade materials", "Event-exclusive rewards"],
+  "funky-friday": ["Free points for songs and cosmetics", "Exclusive animations", "Collaboration rewards"],
+  "kick-off": ["Free coins for customization", "Exclusive skins", "Tournament rewards"],
+  "fisch": ["Free coins for progression", "Bait and fishing gear", "Rare item boosts"],
+};
+
 const gameSlugMap: Record<string, string> = {
   "blox-fruits": "blox-fruits",
   "adopt-me": "adopt-me",
@@ -61,6 +81,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const tips = gameTips[game] || "";
+  const rewards = gameRewards[game] || [];
   const quizSlug = gameSlugMap[game] || game;
   const newestCode = activeCodes[0] || null;
 
@@ -140,9 +161,74 @@ export default function CodesClient({ data, game, description, activeCodes, expi
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>
         {"🟢 " + data.game + " Codes 2026 — Active & Working"}
       </h2>
+
       {activeCodes.length === 0 ? (
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: 24, textAlign: "center", color: "var(--text-muted)", fontWeight: 700, marginBottom: 24 }}>
-          {data.noCodesMessage || "No active codes right now — check back soon! New codes are added regularly."}
+        <div style={{ marginBottom: 24 }}>
+
+          {/* No codes notice */}
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "18px 24px", marginBottom: 16, display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 22, flexShrink: 0 }}>🔍</span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>
+                {"No active codes right now for " + data.game}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6 }}>
+                {"We monitor this page continuously. When new codes drop, this list updates immediately — usually within hours of the developer announcement."}
+              </div>
+            </div>
+          </div>
+
+          {/* Follow CTA */}
+          <div style={{ background: "linear-gradient(135deg, rgba(0,245,160,0.08), rgba(184,76,255,0.08))", border: "1px solid rgba(0,245,160,0.3)", borderRadius: "var(--radius)", padding: "24px 28px", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-green)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+              {"🔔 Get Alerted When " + data.game + " Codes Drop"}
+            </div>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6, marginBottom: 16 }}>
+              {"Follow " + data.game + " and we'll email you the moment new codes are released — before they expire."}
+            </p>
+            <FollowButton gameSlug={game} gameName={data.game} />
+          </div>
+
+          {/* What rewards to expect */}
+          {rewards.length > 0 && (
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "20px 24px", marginBottom: 16 }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, marginBottom: 12, color: "var(--text)" }}>
+                {"What " + data.game + " Codes Usually Give"}
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {rewards.map((reward, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>
+                    <span style={{ color: "var(--neon-green)", fontWeight: 900, flexShrink: 0 }}>✓</span>
+                    {reward}
+                  </div>
+                ))}
+              </div>
+              {tips && (
+                <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+                  {tips}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* While you wait */}
+          <div style={{ background: "rgba(255,227,71,0.06)", border: "1px solid rgba(255,227,71,0.15)", borderRadius: "var(--radius-sm)", padding: "16px 20px" }}>
+            <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+              ⏳ While You Wait
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {[
+                "Codes expire fast — redeem within hours of release",
+                "Codes are case sensitive — copy exactly as shown",
+                "Follow the game's official Twitter/X and Discord for announcements",
+              ].map((tip, i) => (
+                <div key={i} style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, display: "flex", gap: 8 }}>
+                  <span style={{ flexShrink: 0 }}>•</span>{tip}
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
@@ -162,7 +248,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       )}
 
-      {/* Robux affiliate CTA — users in "free rewards" mindset convert well here */}
+      {/* Robux affiliate CTA */}
       <div style={{ marginBottom: 24 }}>
         <RobuxCTA variant="card" />
       </div>
@@ -216,8 +302,8 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* Tips */}
-      {tips && (
+      {/* Tips — only show on pages with active codes (no-code pages show tips inline above) */}
+      {tips && activeCodes.length > 0 && (
         <div style={{ marginBottom: 40 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>
             {"Tips for Using " + data.game + " Codes"}

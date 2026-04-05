@@ -54,11 +54,25 @@ export default function FollowButton({ gameSlug, gameName }: { gameSlug: string;
     );
   }
 
-  // Logged out — show button that triggers sign in
+  // Logged out — hardcoded values to avoid Clerk CSS variable resolution issues
   if (!user) {
     return (
       <SignInButton mode="modal" fallbackRedirectUrl={`/codes/${gameSlug}`}>
-        <button style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "8px 18px", fontSize: 13, fontWeight: 800, color: "var(--text-muted)", cursor: "pointer", fontFamily: "var(--font-body)" }}>
+        <button style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          background: "linear-gradient(135deg, #00f5a0, #b84cff)",
+          border: "none",
+          borderRadius: 100,
+          padding: "10px 22px",
+          fontSize: 13,
+          fontWeight: 800,
+          color: "#0a0f1e",
+          WebkitTextFillColor: "#0a0f1e",
+          cursor: "pointer",
+          fontFamily: "inherit",
+        }}>
           🔔 Follow for Code Alerts
         </button>
       </SignInButton>
