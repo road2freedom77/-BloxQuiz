@@ -71,13 +71,14 @@ function formatNumber(n: number | null | undefined): string {
   return n.toLocaleString();
 }
 
-export default function CodesClient({ data, game, description, activeCodes, expiredCodes, statsData }: {
+export default function CodesClient({ data, game, description, activeCodes, expiredCodes, statsData, activeCodeGames }: {
   data: any,
   game: string,
   description: string,
   activeCodes: any[],
   expiredCodes: any[],
   statsData: { currentPlayers: number | null; totalVisits: number | null } | null,
+  activeCodeGames: { slug: string; game: string; icon: string }[],
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const tips = gameTips[game] || "";
@@ -212,7 +213,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
           )}
 
           {/* While you wait */}
-          <div style={{ background: "rgba(255,227,71,0.06)", border: "1px solid rgba(255,227,71,0.15)", borderRadius: "var(--radius-sm)", padding: "16px 20px" }}>
+          <div style={{ background: "rgba(255,227,71,0.06)", border: "1px solid rgba(255,227,71,0.15)", borderRadius: "var(--radius-sm)", padding: "16px 20px", marginBottom: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
               ⏳ While You Wait
             </div>
@@ -228,6 +229,22 @@ export default function CodesClient({ data, game, description, activeCodes, expi
               ))}
             </div>
           </div>
+
+          {/* Cross-links to games with active codes */}
+          {activeCodeGames.length > 0 && (
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "20px 24px" }}>
+              <div style={{ fontSize: 12, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+                🎁 Games With Active Codes Right Now
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {activeCodeGames.map((g) => (
+                  <a key={g.slug} href={`/codes/${g.slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textDecoration: "none", whiteSpace: "nowrap" }}>
+                    <span>{g.icon}</span>{g.game}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       ) : (

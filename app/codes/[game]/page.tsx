@@ -92,6 +92,35 @@ async function getQuizCount(slug: string): Promise<number> {
   }
 }
 
+async function getActiveCodeGames(excludeSlug: string): Promise<{ slug: string; game: string; icon: string }[]> {
+  try {
+    // Get slugs with at least one active code
+    const { data: activeSlugs } = await supabaseAdmin
+      .from("codes")
+      .select("slug")
+      .eq("active", true);
+
+    if (!activeSlugs || activeSlugs.length === 0) return [];
+
+    const uniqueSlugs = [...new Set(activeSlugs.map((r) => r.slug))].filter(
+      (s) => s !== excludeSlug
+    );
+
+    if (uniqueSlugs.length === 0) return [];
+
+    // Fetch game names + icons for those slugs, limit to 6
+    const { data: games } = await supabaseAdmin
+      .from("code_games")
+      .select("slug, game, icon")
+      .in("slug", uniqueSlugs)
+      .limit(6);
+
+    return games ?? [];
+  } catch (e) {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
 
@@ -121,11 +150,12 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 export default async function CodesGamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
 
-  const [{ data: gameData }, { data: codesData }, statsData, quizCount] = await Promise.all([
+  const [{ data: gameData }, { data: codesData }, statsData, quizCount, activeCodeGames] = await Promise.all([
     supabase.from("code_games").select("*").eq("slug", game).single(),
     supabase.from("codes").select("*").eq("slug", game).order("is_new", { ascending: false }),
     getGameStats(game),
     getQuizCount(game),
+    getActiveCodeGames(game),
   ]);
 
   if (!gameData) notFound();
@@ -185,7 +215,7 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px 0" }}>
-      <GameCrossLinks
+        <GameCrossLinks
           slug={game}
           gameName={data.game}
           hasQuizzes={quizCount > 0}
@@ -201,6 +231,7 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
         activeCodes={activeCodes}
         expiredCodes={expiredCodes}
         statsData={statsData}
+        activeCodeGames={activeCodeGames}
       />
     </>
   );
