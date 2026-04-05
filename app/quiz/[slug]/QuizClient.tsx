@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
-import { useUser } from "@clerk/nextjs";
+import { useUser, SignUpButton } from "@clerk/nextjs";
 import RobuxCTA from "../../components/RobuxCTA";
 
 const DIFFICULTY_MULTIPLIER: Record<string, number> = {
@@ -541,8 +541,17 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
 
             <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
               {!user ? (
-                <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14 }}>
-                  Sign in to earn leaderboard points and track your streak!
+                <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.1), rgba(0,245,160,0.06))", border: "1px solid rgba(184,76,255,0.25)", borderRadius: 14, padding: "20px 24px", maxWidth: 480, textAlign: "center" }}>
+                  <div style={{ fontSize: 22, marginBottom: 8 }}>💾</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 18, marginBottom: 6 }}>Save this score!</div>
+                  <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6, marginBottom: 16 }}>
+                    {"Create a free account to save your " + score + "/" + quiz.questions.length + " score, build your streak, and get code alerts for " + quiz.game + "."}
+                  </div>
+                  <SignUpButton mode="modal">
+                    <button style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)" }}>
+                      🚀 Save My Score — It's Free
+                    </button>
+                  </SignUpButton>
                 </div>
               ) : earnedPoints?.capped ? (
                 <div style={{ background: "rgba(255,227,71,0.1)", border: "1px solid rgba(255,227,71,0.2)", borderRadius: 12, padding: "10px 20px" }}>
