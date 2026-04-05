@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { supabase } from "../../lib/supabase";
+import { supabase, supabaseAdmin } from "../../lib/supabase";
 import PublicProfileClient from "./PublicProfileClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
@@ -22,6 +22,44 @@ async function getCurrentSeason() {
   return data || null;
 }
 
+async function getFollowedGames(userId: string) {
+  const { data: follows } = await supabaseAdmin
+    .from("game_follows")
+    .select("game_slug, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (!follows || follows.length === 0) return [];
+
+  const slugs = follows.map(f => f.game_slug);
+
+  const { data: games } = await supabaseAdmin
+    .from("code_games")
+    .select("slug, game, icon")
+    .in("slug", slugs);
+
+  const { data: codes } = await supabaseAdmin
+    .from("codes")
+    .select("slug, active")
+    .in("slug", slugs)
+    .eq("active", true);
+
+  const codeCountBySlug: Record<string, number> = {};
+  for (const c of codes || []) {
+    codeCountBySlug[c.slug] = (codeCountBySlug[c.slug] || 0) + 1;
+  }
+
+  const gamesBySlug: Record<string, any> = {};
+  for (const g of games || []) gamesBySlug[g.slug] = g;
+
+  return slugs.map(slug => ({
+    slug,
+    game: gamesBySlug[slug]?.game || slug,
+    icon: gamesBySlug[slug]?.icon || "🎮",
+    activeCodes: codeCountBySlug[slug] || 0,
+  }));
+}
+
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const { userId } = await auth();
@@ -38,7 +76,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
   const isOwner = !!userId && userId === userData.id;
 
-  const [scores, allUsers, currentSeason] = await Promise.all([
+  const [scores, allUsers, currentSeason, followedGames] = await Promise.all([
     supabase
       .from("scores")
       .select("*")
@@ -52,11 +90,11 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       .order("xp", { ascending: false })
       .then(({ data }) => data || []),
     getCurrentSeason(),
+    isOwner && userId ? getFollowedGames(userId) : Promise.resolve([]),
   ]);
 
   const rank = allUsers.findIndex(u => u.id === userData.id) + 1 || null;
 
-  // Use active season's start_date month
   const seasonMonth = currentSeason?.start_date
     ? currentSeason.start_date.substring(0, 7)
     : new Date().toISOString().substring(0, 7);
@@ -108,6 +146,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       prizeData={prizeData}
       isOwner={isOwner}
       currentSeason={currentSeason}
+      followedGames={followedGames}
     />
   );
 }

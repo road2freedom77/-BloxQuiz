@@ -25,7 +25,7 @@ const PRIZE_AMOUNTS: Record<number, string> = { 1: "$20", 2: "$15", 3: "$10" };
 function formatSeasonLabel(season: any): string {
   if (!season) return "Current Season";
   const month = season.start_date
-    ? new Date(season.start_date).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    ? new Date(season.start_date + "T12:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : "";
   return season.name + (month ? " — " + month : "");
 }
@@ -40,6 +40,7 @@ export default function PublicProfileClient({
   prizeData,
   isOwner,
   currentSeason,
+  followedGames = [],
 }: {
   userData: any,
   scores: any[],
@@ -50,6 +51,7 @@ export default function PublicProfileClient({
   prizeData: any | null,
   isOwner: boolean,
   currentSeason?: any,
+  followedGames?: { slug: string, game: string, icon: string, activeCodes: number }[],
 }) {
   const [copied, setCopied] = useState(false);
   const xp = userData?.xp || 0;
@@ -79,7 +81,7 @@ export default function PublicProfileClient({
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
-      {/* Prize Winner Banner — only visible to owner */}
+      {/* Prize Winner Banner */}
       {isPrizeWinner && (
         <div style={{ background: "linear-gradient(135deg, rgba(255,227,71,0.12), rgba(184,76,255,0.08))", border: "2px solid rgba(255,227,71,0.4)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
@@ -178,6 +180,42 @@ export default function PublicProfileClient({
         ))}
       </div>
 
+      {/* My Games — only visible to owner */}
+      {isOwner && (
+        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24, marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, margin: 0 }}>🎮 My Games</h2>
+            <a href="/codes" style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)", textDecoration: "none" }}>Browse All Games →</a>
+          </div>
+          {followedGames.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "24px 0" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🔔</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-muted)", marginBottom: 12 }}>No followed games yet</div>
+              <p style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, marginBottom: 16, maxWidth: 360, margin: "0 auto 16px" }}>
+                Follow your favorite games to get alerts when new codes drop!
+              </p>
+              <a href="/codes" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, padding: "10px 24px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
+                🎁 Find Games to Follow
+              </a>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+              {followedGames.map(game => (
+                <a key={game.slug} href={"/codes/" + game.slug} style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px", textDecoration: "none" }}>
+                  <span style={{ fontSize: 24, flexShrink: 0 }}>{game.icon}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{game.game}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: game.activeCodes > 0 ? "var(--neon-green)" : "var(--text-dim)" }}>
+                      {game.activeCodes > 0 ? "✅ " + game.activeCodes + " active codes" : "No active codes"}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Season Block */}
       <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.1), rgba(255,60,172,0.06))", border: "1px solid rgba(184,76,255,0.25)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
@@ -272,7 +310,7 @@ export default function PublicProfileClient({
           {"Think you can beat " + userData.username + "?"}
         </div>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 16 }}>
-          Create your free account and start climbing the leaderboard!
+          Create a free account to save scores, track streaks, follow your favorite games, and get code alerts!
         </p>
         <a href="/browse" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
           {"🎮 Start Playing"}
