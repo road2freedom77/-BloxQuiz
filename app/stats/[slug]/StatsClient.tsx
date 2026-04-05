@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import type { GameRow, SnapshotRow, DailyStatRow } from "./page";
 import QuizCTA from "../../components/QuizCTA";
+import FollowButton from "../../components/FollowButton";
 
 interface StatsClientProps {
   game: GameRow;
@@ -133,7 +134,7 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
                 {game.emoji && <span style={{ marginRight: 8 }}>{game.emoji}</span>}
                 {game.name} Player Count &amp; Live Stats
               </h1>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 12 }}>
                 {game.genre && (
                   <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: "rgba(0,180,216,0.15)", color: "#00b4d8", textTransform: "capitalize" }}>{game.genre}</span>
                 )}
@@ -142,6 +143,7 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
                   <a href={robloxUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#00b4d8", textDecoration: "none" }}>Play on Roblox ↗</a>
                 )}
               </div>
+              <FollowButton gameSlug={slug} gameName={game.name} />
             </div>
           </div>
         </div>
@@ -261,7 +263,7 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
           </div>
         )}
 
-        {/* FAQ — uses allFaqs passed from server to match JSON-LD exactly */}
+        {/* FAQ */}
         {allFaqs.length > 0 && (
           <div style={{ marginBottom: 40 }}>
             <SectionHeading>❓ Frequently Asked Questions</SectionHeading>
