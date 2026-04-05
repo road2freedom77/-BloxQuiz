@@ -15,10 +15,13 @@ export default function Footer() {
   ];
 
   const toolLinks = [
+    { label: "All Tools", href: "/tools" },
+    { label: "Game Finder", href: "/what-roblox-game-should-i-play" },
     { label: "Username Ideas", href: "/roblox-username-ideas" },
     { label: "Display Name Generator", href: "/roblox-display-name-generator" },
     { label: "Bio Generator", href: "/roblox-bio-generator" },
     { label: "Group Name Generator", href: "/roblox-group-name-generator" },
+    { label: "Duo & Matching Names", href: "/roblox-duo-names" },
   ];
 
   const moreLinks = [
@@ -46,7 +49,7 @@ export default function Footer() {
           </a>
         </div>
 
-        {/* Links grid — 2 cols on mobile, 4 cols on desktop */}
+        {/* Links grid */}
         <div className="footer-links">
           <div>
             <h4 style={{ fontSize: 12, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1, color: "var(--text-muted)", marginBottom: 14 }}>Popular Games</h4>

@@ -9,10 +9,13 @@ const ADMIN_USER_IDS = [
 ];
 
 const TOOLS = [
+  { href: "/tools", label: "All Tools", emoji: "🛠️", divider: true },
+  { href: "/what-roblox-game-should-i-play", label: "Game Finder", emoji: "🎮" },
   { href: "/roblox-username-ideas", label: "Username Ideas", emoji: "👤" },
   { href: "/roblox-display-name-generator", label: "Display Name Generator", emoji: "✨" },
   { href: "/roblox-bio-generator", label: "Bio Generator", emoji: "✍️" },
   { href: "/roblox-group-name-generator", label: "Group Name Generator", emoji: "🏰" },
+  { href: "/roblox-duo-names", label: "Duo & Matching Names", emoji: "👥" },
 ];
 
 // Easter event window — update or remove each year
@@ -85,7 +88,7 @@ export default function Nav() {
       <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(11,14,23,0.85)", backdropFilter: "blur(24px)", borderBottom: easter ? "1px solid rgba(255,182,193,0.25)" : "1px solid var(--border)", padding: "0 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 68 }}>
 
-          {/* Logo — Easter variant: pastel gradient shift + soft underline */}
+          {/* Logo */}
           <a href="/" style={{ fontFamily: "var(--font-display)", fontSize: 28, textDecoration: "none", flexShrink: 0, position: "relative", display: "inline-flex", flexDirection: "column", alignItems: "flex-start" }}>
             <span style={{ display: "flex" }}>
               <span style={{ background: easter ? "linear-gradient(135deg, #a8edca, #7dd3c8)" : "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Blox</span>
@@ -109,12 +112,17 @@ export default function Nav() {
                 🛠️ Tools {toolsOpen ? "▲" : "▾"}
               </button>
               {toolsOpen && (
-                <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, background: "rgba(11,14,23,0.97)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "8px", minWidth: 220, boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 200 }}>
-                  {TOOLS.map(tool => (
-                    <a key={tool.href} href={tool.href} onClick={() => setToolsOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, textDecoration: "none", color: "var(--text-muted)", fontSize: 13, fontWeight: 700 }}>
-                      <span>{tool.emoji}</span>
-                      <span>{tool.label}</span>
-                    </a>
+                <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, background: "rgba(11,14,23,0.97)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "8px", minWidth: 240, boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 200 }}>
+                  {TOOLS.map((tool, i) => (
+                    <div key={tool.href}>
+                      <a href={tool.href} onClick={() => setToolsOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, textDecoration: "none", color: tool.divider ? "var(--neon-green)" : "var(--text-muted)", fontSize: 13, fontWeight: tool.divider ? 800 : 700 }}>
+                        <span>{tool.emoji}</span>
+                        <span>{tool.label}</span>
+                      </a>
+                      {tool.divider && (
+                        <div style={{ height: 1, background: "var(--border)", margin: "4px 8px 8px" }} />
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -191,7 +199,7 @@ export default function Nav() {
             {mobileToolsOpen && (
               <div style={{ paddingLeft: 16, display: "flex", flexDirection: "column", gap: 4 }}>
                 {TOOLS.map(tool => (
-                  <a key={tool.href} href={tool.href} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "var(--text-dim)", fontSize: 14, fontWeight: 700, padding: "8px 0" }}>
+                  <a key={tool.href} href={tool.href} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: tool.divider ? "var(--neon-green)" : "var(--text-dim)", fontSize: 14, fontWeight: tool.divider ? 800 : 700, padding: "8px 0" }}>
                     {tool.emoji} {tool.label}
                   </a>
                 ))}
