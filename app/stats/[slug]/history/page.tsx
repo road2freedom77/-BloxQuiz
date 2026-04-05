@@ -185,6 +185,34 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
 
   const totalVisitsGained = dailyStats.reduce((sum, d) => sum + (d.total_visits_delta ?? 0), 0);
 
+  // Build FAQ answers dynamically from real data
+  const faqEntries = [
+    {
+      q: `What is ${game.name}'s average daily player count?`,
+      a: avgOverPeriod
+        ? `${game.name} averages ${avgOverPeriod.toLocaleString()} concurrent players per day based on the last ${dailyStats.length} days of data tracked by BloxQuiz.`
+        : `BloxQuiz tracks ${game.name} player counts hourly. Daily averages will appear after the first full day of tracking.`,
+    },
+    {
+      q: `What was ${game.name}'s peak player count?`,
+      a: peakDay
+        ? `${game.name}'s highest recorded player count was ${peakDay.peak_players.toLocaleString()} players on ${new Date(peakDay.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}, based on BloxQuiz hourly tracking data.`
+        : `Peak player count data will be available after BloxQuiz has tracked ${game.name} for at least one full day.`,
+    },
+    {
+      q: `Is ${game.name} growing or declining?`,
+      a: insights?.trend_label
+        ? `Based on the last 7 days of data, ${game.name} is ${insights.trend_label === "Rising" ? "growing" : insights.trend_label === "Cooling Off" ? "declining" : "holding steady"}${insights.trend_pct_7d !== null ? ` (${insights.trend_pct_7d > 0 ? "+" : ""}${insights.trend_pct_7d}% vs the prior 3 days)` : ""}. BloxQuiz updates this trend analysis daily.`
+        : `Trend data for ${game.name} will be available after 7 or more days of tracking.`,
+    },
+    {
+      q: `Is ${game.name} more popular on weekends?`,
+      a: insights?.avg_weekend && insights?.avg_weekday
+        ? `${game.name} averages ${formatNum(insights.avg_weekend)} players on weekends vs ${formatNum(insights.avg_weekday)} on weekdays${insights.weekend_lift_pct !== null ? ` — a ${insights.weekend_lift_pct > 0 ? "+" : ""}${insights.weekend_lift_pct}% weekend lift` : ""}. ${(insights.weekend_lift_pct ?? 0) > 5 ? "Weekend sessions tend to be busier." : "Player counts are fairly consistent throughout the week."}`
+        : `Weekend vs weekday comparison for ${game.name} will be available after sufficient tracking data is collected.`,
+    },
+  ];
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -205,6 +233,14 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
         publisher: { "@type": "Organization", name: "BloxQuiz" },
         description: "Historical player count data for " + game.name + " including daily averages, peaks, and visit growth over the past 90 days.",
         mainEntityOfPage: "https://www.bloxquiz.gg/stats/" + slug + "/history",
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqEntries.map((faq) => ({
+          "@type": "Question",
+          name: faq.q,
+          acceptedAnswer: { "@type": "Answer", text: faq.a },
+        })),
       },
     ],
   };
@@ -264,7 +300,6 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
                 <span style={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)" }}>7-Day Trend Analysis</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
-                {/* Trend */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Trend</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: trendColor(insights.trend_label) }}>
@@ -276,7 +311,6 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
                     </div>
                   )}
                 </div>
-                {/* Volatility */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Volatility</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: volatilityColor(insights.volatility_label) }}>
@@ -288,13 +322,11 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
                     </div>
                   )}
                 </div>
-                {/* 7d avg */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>7-Day Avg</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{formatNum(insights.avg_players_7d)}</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>players/day</div>
                 </div>
-                {/* Weekend lift */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Weekend Lift</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: (insights.weekend_lift_pct ?? 0) > 5 ? "#00f5a0" : "#a0aec0" }}>
@@ -302,7 +334,6 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
                   </div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>vs weekdays</div>
                 </div>
-                {/* Visits 7d */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Visits (7d)</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{formatNum(insights.visits_gained_7d)}</div>
@@ -347,19 +378,16 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
             <div style={{ background: "#0f1629", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "24px", marginTop: 32 }}>
               <div style={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>Deeper Insights</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
-                {/* Biggest spike */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Biggest Spike Day</div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: "#00f5a0" }}>{formatDate(insights.peak_day)}</div>
                   <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{formatNum(insights.peak_players)} avg players</div>
                 </div>
-                {/* Biggest drop */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Lowest Day</div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: "#ff6b6b" }}>{formatDate(insights.lowest_day)}</div>
                   <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{formatNum(insights.lowest_players)} avg players</div>
                 </div>
-                {/* Weekend pattern */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Weekend vs Weekday</div>
                   <div style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
@@ -377,7 +405,6 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
                     </div>
                   )}
                 </div>
-                {/* 14d visits */}
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Visits Gained (14d)</div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{formatNum(insights.visits_gained_14d)}</div>
@@ -386,6 +413,19 @@ export default async function StatsHistoryPage({ params }: { params: Promise<{ s
               </div>
             </div>
           )}
+
+          {/* FAQ section — visible on page, mirrors schema */}
+          <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "24px 28px", marginTop: 32 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Frequently Asked Questions</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {faqEntries.map((faq, i) => (
+                <div key={i} style={{ background: "#0f1629", borderRadius: 10, padding: "16px 20px" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 6 }}>{faq.q}</div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.7 }}>{faq.a}</div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Daily data table */}
           {dailyStats.length > 0 && (
