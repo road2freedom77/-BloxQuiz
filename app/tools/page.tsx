@@ -18,7 +18,7 @@ const TOOLS = [
     href: "/what-roblox-game-should-i-play",
     emoji: "🎮",
     label: "What Roblox Game Should I Play?",
-    description: "Not sure what to play? Pick your vibe and get 3 personalized Roblox game picks with live player counts and fresh recommendations.",
+    description: "Our Roblox game finder helps you discover what to play next. Pick your vibe and get 3 personalized picks with live player counts — updated hourly.",
     cta: "Find Your Game",
     badge: "🔥 Popular",
     meta: "Live player counts · Updated hourly",
@@ -99,6 +99,13 @@ export default function ToolsPage() {
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", margin: "0 auto", maxWidth: 540, lineHeight: 1.7 }}>
             Free Roblox tools to help you find your next game, generate better usernames, write a stronger bio, and build the perfect group.
           </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 20 }}>
+            {["6 Free Tools", "Live Data", "Instant Results", "No Sign-Up Needed"].map((tag) => (
+              <span key={tag} style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.06)", padding: "4px 12px", borderRadius: 100 }}>
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
