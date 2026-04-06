@@ -25,27 +25,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // ─── Static pages ─────────────────────────────────────────────────
   const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE,                                      lastModified: now, changeFrequency: "daily",   priority: 1.0 },
-    { url: `${BASE}/browse`,                          lastModified: now, changeFrequency: "daily",   priority: 0.9 },
-    { url: `${BASE}/leaderboard`,                     lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
-    { url: `${BASE}/codes`,                           lastModified: now, changeFrequency: "daily",   priority: 0.9 },
-    { url: `${BASE}/codes/new`,                       lastModified: now, changeFrequency: "daily",   priority: 0.8 },
-    { url: `${BASE}/codes/recently-updated`,          lastModified: now, changeFrequency: "daily",   priority: 0.8 },
-    { url: `${BASE}/codes/expired`,                   lastModified: now, changeFrequency: "daily",   priority: 0.7 },
-    { url: `${BASE}/stats`,                           lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
-    { url: `${BASE}/stats/most-played`,               lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
-    { url: `${BASE}/stats/most-visited`,              lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
-    { url: `${BASE}/stats/trending`,                  lastModified: now, changeFrequency: "daily",   priority: 0.8 },
-    { url: `${BASE}/roblox-username-ideas`,           lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/roblox-display-name-generator`,   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/roblox-bio-generator`,            lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/roblox-group-name-generator`,     lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/champions`,                       lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/rules`,                           lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${BASE}/about`,                           lastModified: now, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${BASE}/privacy`,                         lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${BASE}/terms`,                           lastModified: now, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${BASE}/contact`,                         lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: BASE,                                          lastModified: now, changeFrequency: "daily",   priority: 1.0 },
+    { url: `${BASE}/browse`,                              lastModified: now, changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE}/leaderboard`,                         lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
+    { url: `${BASE}/codes`,                               lastModified: now, changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE}/codes/new`,                           lastModified: now, changeFrequency: "daily",   priority: 0.8 },
+    { url: `${BASE}/codes/recently-updated`,              lastModified: now, changeFrequency: "daily",   priority: 0.8 },
+    { url: `${BASE}/codes/expired`,                       lastModified: now, changeFrequency: "daily",   priority: 0.7 },
+    { url: `${BASE}/stats`,                               lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
+    { url: `${BASE}/stats/most-played`,                   lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
+    { url: `${BASE}/stats/most-visited`,                  lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
+    { url: `${BASE}/stats/trending`,                      lastModified: now, changeFrequency: "daily",   priority: 0.8 },
+    // Tools hub + individual tools
+    { url: `${BASE}/tools`,                               lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${BASE}/what-roblox-game-should-i-play`,      lastModified: now, changeFrequency: "daily",   priority: 0.8 },
+    { url: `${BASE}/roblox-username-ideas`,               lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-display-name-generator`,       lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-bio-generator`,                lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-group-name-generator`,         lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/roblox-duo-names`,                    lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    // Other static
+    { url: `${BASE}/champions`,                           lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/rules`,                               lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE}/about`,                               lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${BASE}/privacy`,                             lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/terms`,                               lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/contact`,                             lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     ...STATIC_GENRES.map(genre => ({
       url: `${BASE}/stats/category/${genre}`,
       lastModified: now,
@@ -110,7 +115,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order("current_players", { ascending: false });
 
     if (allGames) {
-      // All tracked games get stats + history pages
       statsPages = allGames.flatMap(g => [
         {
           url: `${BASE}/stats/${g.slug}`,
@@ -126,7 +130,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
       ]);
 
-      // Compare pages — top 45 games with 5K+ concurrent players
       const comparePool = allGames
         .filter(g => (g.current_players ?? 0) >= MIN_PLAYERS_FOR_COMPARE)
         .slice(0, MAX_COMPARE_GAMES)
@@ -147,12 +150,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (_) {}
 
   return [
-    ...staticPages,   // ~32 URLs (inc. codes/new, codes/recently-updated, codes/expired)
+    ...staticPages,   // ~35 URLs
     ...codesPages,    // ~96 URLs
     ...quizPages,     // ~373 URLs
     ...gameHubPages,  // ~97 URLs
     ...statsPages,    // ~190 URLs (95 games × 2: stats + history)
     ...comparePages,  // ~990 URLs (top 45 games, 5K+ players, all pairs)
   ];
-  // Target total: ~1,778 URLs
+  // Target total: ~1,781 URLs
 }
