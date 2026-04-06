@@ -97,7 +97,6 @@ async function getGame(slug: string): Promise<GameRow | null> {
 }
 
 async function getCompareInsights(slugA: string, slugB: string): Promise<CompareInsights | null> {
-  // Ensure alphabetical order for the view
   const [a, b] = [slugA, slugB].sort();
   const { data } = await supabaseAdmin
     .from("compare_page_insights_v1")
@@ -120,56 +119,125 @@ function trendArrow(label: string | null): string {
   return "→";
 }
 
-// Generate best-for labels based on genre and player counts
 function getBestFor(gameA: GameRow, gameB: GameRow, insights: CompareInsights | null) {
   const results: { label: string; winner: GameRow; reason: string }[] = [];
+  const genreA = gameA.genre ?? "";
+  const genreB = gameB.genre ?? "";
 
-  // Beginners: favor roleplay/simulator over shooter/rpg
-  const beginnerFriendly = ["roleplay", "simulator", "fashion"];
-  const aBeginnerScore = beginnerFriendly.includes(gameA.genre ?? "") ? 1 : 0;
-  const bBeginnerScore = beginnerFriendly.includes(gameB.genre ?? "") ? 1 : 0;
-  if (aBeginnerScore !== bBeginnerScore) {
+  // 1. Beginners
+  const beginnerGenres = ["roleplay", "simulator", "fashion"];
+  const aB = beginnerGenres.includes(genreA) ? 1 : 0;
+  const bB = beginnerGenres.includes(genreB) ? 1 : 0;
+  if (aB !== bB) {
     results.push({
       label: "Beginners",
-      winner: aBeginnerScore > bBeginnerScore ? gameA : gameB,
-      reason: "more casual and accessible genre",
+      winner: aB > bB ? gameA : gameB,
+      reason: "more casual and accessible genre with a lower skill floor",
     });
   }
 
-  // Friends: higher player count = more social activity
+  // 2. Playing with Friends
   if (gameA.current_players && gameB.current_players) {
     results.push({
       label: "Playing with Friends",
       winner: gameA.current_players > gameB.current_players ? gameA : gameB,
-      reason: "larger active player base means easier matchmaking",
+      reason: "larger active playerbase means easier matchmaking and fuller servers",
     });
   }
 
-  // Long sessions: favor rpg/simulator
-  const longSession = ["rpg", "simulator", "roleplay"];
-  const aLongScore = longSession.includes(gameA.genre ?? "") ? 1 : 0;
-  const bLongScore = longSession.includes(gameB.genre ?? "") ? 1 : 0;
-  if (aLongScore !== bLongScore) {
+  // 3. Solo Grind
+  const soloGenres = ["rpg", "simulator"];
+  const aS = soloGenres.includes(genreA) ? 1 : 0;
+  const bS = soloGenres.includes(genreB) ? 1 : 0;
+  if (aS !== bS) {
+    results.push({
+      label: "Solo Grind",
+      winner: aS > bS ? gameA : gameB,
+      reason: "deeper progression systems reward solo grinding and long play sessions",
+    });
+  }
+
+  // 4. Long Sessions
+  const longGenres = ["rpg", "simulator", "roleplay"];
+  const aL = longGenres.includes(genreA) ? 1 : 0;
+  const bL = longGenres.includes(genreB) ? 1 : 0;
+  if (aL !== bL) {
     results.push({
       label: "Long Sessions",
-      winner: aLongScore > bLongScore ? gameA : gameB,
-      reason: "deeper progression systems reward longer play",
+      winner: aL > bL ? gameA : gameB,
+      reason: "deeper progression and open-world design rewards longer play sessions",
     });
   }
 
-  // Quick sessions: favor shooter/horror/obby
-  const quickSession = ["shooter", "horror", "obby", "mystery"];
-  const aQuickScore = quickSession.includes(gameA.genre ?? "") ? 1 : 0;
-  const bQuickScore = quickSession.includes(gameB.genre ?? "") ? 1 : 0;
-  if (aQuickScore !== bQuickScore) {
+  // 5. Quick Sessions
+  const quickGenres = ["shooter", "horror", "obby", "mystery", "sports"];
+  const aQ = quickGenres.includes(genreA) ? 1 : 0;
+  const bQ = quickGenres.includes(genreB) ? 1 : 0;
+  if (aQ !== bQ) {
     results.push({
       label: "Quick Sessions",
-      winner: aQuickScore > bQuickScore ? gameA : gameB,
-      reason: "faster round-based gameplay fits shorter sessions",
+      winner: aQ > bQ ? gameA : gameB,
+      reason: "faster round-based gameplay fits shorter sessions without long-term commitment",
     });
   }
 
-  return results;
+  // 6. Horror & Suspense Fans
+  const horrorGenres = ["horror", "mystery", "survival"];
+  const aH = horrorGenres.includes(genreA) ? 1 : 0;
+  const bH = horrorGenres.includes(genreB) ? 1 : 0;
+  if (aH !== bH) {
+    results.push({
+      label: "Horror & Suspense Fans",
+      winner: aH > bH ? gameA : gameB,
+      reason: "tense atmosphere and unpredictable gameplay designed for thrill-seekers",
+    });
+  }
+
+  // 7. Competitive Players
+  const compGenres = ["shooter", "sports", "tower-defense", "obby"];
+  const aC = compGenres.includes(genreA) ? 1 : 0;
+  const bC = compGenres.includes(genreB) ? 1 : 0;
+  if (aC !== bC) {
+    results.push({
+      label: "Competitive Players",
+      winner: aC > bC ? gameA : gameB,
+      reason: "skill-based gameplay with clear win conditions rewards competitive players",
+    });
+  }
+
+  // 8. Creative & Social
+  const socialGenres = ["roleplay", "fashion", "rhythm"];
+  const aSo = socialGenres.includes(genreA) ? 1 : 0;
+  const bSo = socialGenres.includes(genreB) ? 1 : 0;
+  if (aSo !== bSo) {
+    results.push({
+      label: "Creative & Social",
+      winner: aSo > bSo ? gameA : gameB,
+      reason: "open-ended social gameplay lets you express yourself and connect with others",
+    });
+  }
+
+  // 9. Most Popular Right Now — only if trending winner has 5%+ momentum
+  if (insights?.trend_winner_7d) {
+    const trendWinner = insights.trend_winner_7d === gameA.slug ? gameA : gameB;
+    const winnerPct = insights.slug_a === trendWinner.slug ? insights.trend_pct_a : insights.trend_pct_b;
+    if (winnerPct && winnerPct > 5) {
+      results.push({
+        label: "Most Popular Right Now",
+        winner: trendWinner,
+        reason: `growing faster this week — up ${winnerPct}% vs the prior 3 days`,
+      });
+    }
+  }
+
+  // Deduplicate and cap at 5
+  const seen = new Set<string>();
+  return results.filter(r => {
+    const key = r.winner.slug + r.label;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 5);
 }
 
 function StatRow({ label, valueA, valueB, formatFn }: {
@@ -235,6 +303,7 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
     getCompareInsights(slugA, slugB),
   ]);
   if (!gameA || !gameB) notFound();
+  if (!gameA || !gameB) return null;
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
   const playerWinner = (gameA.current_players ?? 0) >= (gameB.current_players ?? 0) ? gameA : gameB;
@@ -242,7 +311,6 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
   const hasTrend = insights && insights.days_tracked_a >= 7 && insights.days_tracked_b >= 7;
   const bestForList = getBestFor(gameA, gameB, insights);
 
-  // Trend labels relative to page param order (not alphabetical)
   const trendA = insights ? (insights.slug_a === slugA ? insights.trend_a : insights.trend_b) : null;
   const trendB = insights ? (insights.slug_a === slugA ? insights.trend_b : insights.trend_a) : null;
   const trendPctA = insights ? (insights.slug_a === slugA ? insights.trend_pct_a : insights.trend_pct_b) : null;
@@ -297,7 +365,6 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
               Player count comparison — {month} · Updated {timeAgo(gameA.last_updated)}
             </p>
 
-            {/* Winner badge */}
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,180,216,0.1)", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 100, padding: "6px 16px", fontSize: 13, fontWeight: 700, color: "#00b4d8" }}>
               {"👑 "}{playerWinner.name} is more popular right now with {formatNumber(playerWinner.current_players)} players
             </div>
@@ -353,7 +420,7 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
             )}
           </div>
 
-          {/* Trend snapshot — only if 7+ days of data */}
+          {/* Trend snapshot */}
           {hasTrend && (
             <div style={{ background: "#0f1629", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "24px 28px", marginBottom: 32 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 20 }}>7-Day Momentum</h2>
@@ -396,7 +463,7 @@ export default async function ComparePage({ params }: { params: Promise<{ pair: 
             </div>
           )}
 
-          {/* Cross-links — full set */}
+          {/* Cross-links */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 32 }}>
             <Link href={"/stats/" + gameA.slug} style={{ display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 18px", textDecoration: "none", color: "#fff", fontWeight: 600, fontSize: 14 }}>
               <span>{"📊"}</span><span>{gameA.name} Stats</span>
