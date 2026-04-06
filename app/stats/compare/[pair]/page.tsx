@@ -210,7 +210,7 @@ export async function generateMetadata({ params }: { params: Promise<{ pair: str
   const playerWinner = (gameA.current_players ?? 0) > (gameB.current_players ?? 0) ? gameA : gameB;
 
   return {
-    title: gameA.name + " vs " + gameB.name + " — Player Count Comparison (" + month + ") | BloxQuiz",
+    title: `${gameA.name} vs ${gameB.name} — ${formatNumber(gameA.current_players)} vs ${formatNumber(gameB.current_players)} Players (${month}) | BloxQuiz`,
     description: gameA.name + " has " + formatNumber(gameA.current_players) + " players vs " + gameB.name + " with " + formatNumber(gameB.current_players) + ". " + playerWinner.name + " is currently more popular. Live stats updated hourly.",
     alternates: { canonical: "https://www.bloxquiz.gg/stats/compare/" + pair },
     openGraph: {
