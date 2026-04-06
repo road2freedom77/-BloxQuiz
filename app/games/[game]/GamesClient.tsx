@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { supabase } from "../../lib/supabase";
 import GameCrossLinks from "../../components/GameCrossLinks";
 import FollowButton from "../../components/FollowButton";
+import RobuxCTA from "../../components/RobuxCTA";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
@@ -128,14 +129,12 @@ function CommandCenter({ gameSlug, gameName, statsData, insights, activeCodes, q
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(0,180,216,0.7)", marginBottom: 16 }}>
         {"⚡ " + gameName + " Command Center"}
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
         <a href={"/stats/" + gameSlug} style={{ background: "rgba(0,180,216,0.08)", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 12, padding: "16px", textDecoration: "none" }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(0,180,216,0.7)", marginBottom: 4 }}>Playing Now</div>
           <div style={{ fontSize: 24, fontWeight: 900, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(statsData?.currentPlayers)}</div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{"📊 View Stats →"}</div>
         </a>
-
         {insights && (
           <a href={"/stats/" + gameSlug + "/history"} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px", textDecoration: "none" }}>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>7-Day Trend</div>
@@ -143,13 +142,11 @@ function CommandCenter({ gameSlug, gameName, statsData, insights, activeCodes, q
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{"📈 View History →"}</div>
           </a>
         )}
-
         <a href={"/codes/" + gameSlug} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px", textDecoration: "none" }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Active Codes</div>
           <div style={{ fontSize: 24, fontWeight: 900, color: activeCodes > 0 ? "#00f5a0" : "rgba(255,255,255,0.4)" }}>{activeCodes > 0 ? activeCodes : "None"}</div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{"🎁 Get Codes →"}</div>
         </a>
-
         {statsData?.totalVisits && (
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px" }}>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Total Visits</div>
@@ -158,7 +155,6 @@ function CommandCenter({ gameSlug, gameName, statsData, insights, activeCodes, q
           </div>
         )}
       </div>
-
       {quizzes.length > 0 && (
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.3)", marginBottom: 12 }}>Start Here</div>
@@ -262,7 +258,6 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData, hasC
   const hasThumb = !!statsData?.thumbnailUrl;
   const heroBg = hasThumb ? "url(" + statsData!.thumbnailUrl + ")" : gradientThumb;
   const cardThumb = hasThumb ? "url(" + statsData!.thumbnailUrl + ")" : gradientThumb;
-
   const startQuiz = getStartQuiz(quizzes);
   const [randomSlug, setRandomSlug] = useState<string>("");
   const isCommandCenter = COMMAND_CENTER_GAMES.includes(gameSlug);
@@ -445,6 +440,11 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData, hasC
         )}
       </div>
 
+      {/* PLACEMENT 1 — After quiz collection, before Why Play */}
+      <div style={{ marginBottom: 48 }}>
+        <RobuxCTA variant="card" game={config.displayName} />
+      </div>
+
       {/* Why play */}
       {config.whyPlay && (
         <div style={{ marginBottom: 48 }}>
@@ -500,6 +500,11 @@ export default function GamesClient({ quizzes, config, gameSlug, statsData, hasC
           </div>
         </div>
       )}
+
+      {/* PLACEMENT 2 — Above freshness signal */}
+      <div style={{ marginBottom: 32 }}>
+        <RobuxCTA variant="default" game={config.displayName} />
+      </div>
 
       {/* Freshness signal */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "24px 28px", textAlign: "center" }}>

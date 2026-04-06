@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin as supabase } from "../../lib/supabase";
 import StatsClient from "./StatsClient";
 import GameCrossLinks from "../../components/GameCrossLinks";
+import RobuxCTA from "../../components/RobuxCTA";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -138,7 +139,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const game = await getGame(slug);
   if (!game) return {};
 
-  // Use latest snapshot as authoritative current player count for metadata
   const { data: latestSnapshot } = await supabase
     .from("game_snapshots")
     .select("concurrent_players, total_visits")
@@ -188,27 +188,15 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     hasCodes(slug),
   ]);
 
-  // ─── Single source of truth ───────────────────────────────────────
-  // Use the most recent snapshot as authoritative numbers.
-  // This ensures hero paragraph, KPI cards, FAQ, and schema
-  // all show the exact same player count and visits.
   const latestSnapshot = snapshots[0] ?? null;
   const currentPlayers = latestSnapshot?.concurrent_players ?? game.current_players;
   const totalVisits = latestSnapshot?.total_visits ?? game.total_visits;
   const lastUpdated = latestSnapshot?.captured_at ?? game.last_updated;
-
-  // Derive peak24h from the same snapshots array
   const peak24h = snapshots.length ? Math.max(...snapshots.map((s) => s.concurrent_players)) : null;
-
-  // Rank based on authoritative currentPlayers
   const rank = await getPlayerRank(game.universe_id, currentPlayers);
 
-  // Generate intro dynamically from authoritative numbers.
-  // The DB intro field has hardcoded player counts that go stale —
-  // override it so hero copy always matches KPI cards exactly.
   const generatedIntro = `${game.name} currently has ${formatNumber(currentPlayers)} concurrent players and ${formatVisits(totalVisits)} total visits${rank ? `, ranking #${rank} among tracked Roblox games` : ""}. BloxQuiz tracks ${game.name} player counts hourly so you always have the latest data.`;
 
-  // Wire authoritative values into game object so StatsClient has one source
   const gameWithLiveData: GameRow = {
     ...game,
     current_players: currentPlayers,
@@ -222,7 +210,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
     ? ((game.likes / (game.likes + game.dislikes)) * 100).toFixed(1)
     : null;
 
-  // Build merged FAQ list — uses authoritative numbers
   const statsStaticFaqs = [
     {
       q: `How many people play ${game.name} right now?`,
@@ -239,7 +226,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   ];
 
   const staticQuestions = new Set(statsStaticFaqs.map((f) => f.q.toLowerCase().trim()));
-  // Also deduplicate by key phrases to catch near-duplicate DB faqs
   const staticKeywords = ["how many people play", "how many total visits", "how often", "player count updated", "concurrent players"];
   const dbFaqs = (game.faqs ?? [])
     .map((f) => ({ q: f.q, a: f.a }))
@@ -252,7 +238,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
 
   const allFaqs = [...statsStaticFaqs, ...dbFaqs];
 
-  // JSON-LD uses same authoritative numbers
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -296,6 +281,10 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
           hasStats={true}
           activeTab="stats"
         />
+        {/* Affiliate placement — below cross-links, above stats hero */}
+        <div style={{ marginTop: 16 }}>
+          <RobuxCTA variant="card" game={game.name} />
+        </div>
       </div>
       <StatsClient
         game={gameWithLiveData}

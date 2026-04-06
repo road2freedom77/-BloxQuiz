@@ -1,4 +1,5 @@
 import UsernameIdeasClient from "./UsernameIdeasClient";
+import RobuxCTA from "../components/RobuxCTA";
 
 export const metadata = {
   title: "Roblox Username Ideas — 1,100+ Cool, Funny & OG Names (2026)",
@@ -62,43 +63,50 @@ export default function RobloxUsernameIdeasPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      {/* Affiliate placement — top of page, user is in Roblox mode */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 24px 0" }}>
+        <RobuxCTA variant="banner" />
+      </div>
+
       <UsernameIdeasClient />
+
       {/* Game hub cross-links */}
-<div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 64px" }}>
-  <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>
-    Find a Username for Your Favorite Game
-  </h2>
-  <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, marginBottom: 20 }}>
-    Once you have your username, test your knowledge with free quizzes for every Roblox game.
-  </p>
-  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
-    {[
-      { slug: "blox-fruits", name: "Blox Fruits", emoji: "⚔️" },
-      { slug: "brookhaven-rp", name: "Brookhaven RP", emoji: "🏠" },
-      { slug: "adopt-me", name: "Adopt Me!", emoji: "🐾" },
-      { slug: "murder-mystery-2", name: "Murder Mystery 2", emoji: "🔫" },
-      { slug: "dress-to-impress", name: "Dress to Impress", emoji: "👗" },
-      { slug: "bee-swarm-simulator", name: "Bee Swarm Simulator", emoji: "🐝" },
-      { slug: "doors", name: "Doors", emoji: "🚪" },
-      { slug: "tower-of-hell", name: "Tower of Hell", emoji: "🏗️" },
-      { slug: "grow-a-garden", name: "Grow a Garden", emoji: "🌱" },
-      { slug: "royale-high", name: "Royale High", emoji: "👑" },
-      { slug: "arsenal", name: "Arsenal", emoji: "🎯" },
-      { slug: "fisch", name: "Fisch", emoji: "🎣" },
-      { slug: "anime-defenders", name: "Anime Defenders", emoji: "🐉" },
-      { slug: "funky-friday", name: "Funky Friday", emoji: "🎵" },
-      { slug: "berry-avenue", name: "Berry Avenue", emoji: "🍓" },
-      { slug: "livetopia", name: "Livetopia", emoji: "🏖️" },
-      { slug: "kick-off", name: "Kick Off", emoji: "⚽" },
-      { slug: "natural-disaster-survival", name: "Natural Disaster Survival", emoji: "🌪️" },
-    ].map(({ slug, name, emoji }) => (
-      <a key={slug} href={`/games/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px", textDecoration: "none", color: "var(--text)", fontWeight: 600, fontSize: 13 }}>
-        <span style={{ fontSize: 20 }}>{emoji}</span>
-        <span>{name}</span>
-      </a>
-    ))}
-  </div>
-</div>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 64px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>
+          Find a Username for Your Favorite Game
+        </h2>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, marginBottom: 20 }}>
+          Once you have your username, test your knowledge with free quizzes for every Roblox game.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+          {[
+            { slug: "blox-fruits", name: "Blox Fruits", emoji: "⚔️" },
+            { slug: "brookhaven-rp", name: "Brookhaven RP", emoji: "🏠" },
+            { slug: "adopt-me", name: "Adopt Me!", emoji: "🐾" },
+            { slug: "murder-mystery-2", name: "Murder Mystery 2", emoji: "🔫" },
+            { slug: "dress-to-impress", name: "Dress to Impress", emoji: "👗" },
+            { slug: "bee-swarm-simulator", name: "Bee Swarm Simulator", emoji: "🐝" },
+            { slug: "doors", name: "Doors", emoji: "🚪" },
+            { slug: "tower-of-hell", name: "Tower of Hell", emoji: "🏗️" },
+            { slug: "grow-a-garden", name: "Grow a Garden", emoji: "🌱" },
+            { slug: "royale-high", name: "Royale High", emoji: "👑" },
+            { slug: "arsenal", name: "Arsenal", emoji: "🎯" },
+            { slug: "fisch", name: "Fisch", emoji: "🎣" },
+            { slug: "anime-defenders", name: "Anime Defenders", emoji: "🐉" },
+            { slug: "funky-friday", name: "Funky Friday", emoji: "🎵" },
+            { slug: "berry-avenue", name: "Berry Avenue", emoji: "🍓" },
+            { slug: "livetopia", name: "Livetopia", emoji: "🏖️" },
+            { slug: "kick-off", name: "Kick Off", emoji: "⚽" },
+            { slug: "natural-disaster-survival", name: "Natural Disaster Survival", emoji: "🌪️" },
+          ].map(({ slug, name, emoji }) => (
+            <a key={slug} href={`/games/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px", textDecoration: "none", color: "var(--text)", fontWeight: 600, fontSize: 13 }}>
+              <span style={{ fontSize: 20 }}>{emoji}</span>
+              <span>{name}</span>
+            </a>
+          ))}
+        </div>
+      </div>
     </>
   );
 }

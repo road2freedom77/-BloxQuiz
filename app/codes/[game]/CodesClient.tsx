@@ -107,7 +107,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
       </nav>
 
       {/* Hero */}
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 56, marginBottom: 12 }}>{data.icon}</div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 5vw, 42px)", marginBottom: 12 }}>
           {data.game + " Codes 2026 — All Active & Working"}
@@ -126,6 +126,11 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         <div style={{ marginTop: 12 }}>
           <FollowButton gameSlug={game} gameName={data.game} />
         </div>
+      </div>
+
+      {/* PLACEMENT 1 — Banner after hero, before codes */}
+      <div style={{ marginBottom: 24 }}>
+        <RobuxCTA variant="banner" game={data.game} />
       </div>
 
       {/* Latest code highlight */}
@@ -165,8 +170,6 @@ export default function CodesClient({ data, game, description, activeCodes, expi
 
       {activeCodes.length === 0 ? (
         <div style={{ marginBottom: 24 }}>
-
-          {/* No codes notice */}
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "18px 24px", marginBottom: 16, display: "flex", gap: 14, alignItems: "flex-start" }}>
             <span style={{ fontSize: 22, flexShrink: 0 }}>🔍</span>
             <div>
@@ -179,7 +182,6 @@ export default function CodesClient({ data, game, description, activeCodes, expi
             </div>
           </div>
 
-          {/* Follow CTA */}
           <div style={{ background: "linear-gradient(135deg, rgba(0,245,160,0.08), rgba(184,76,255,0.08))", border: "1px solid rgba(0,245,160,0.3)", borderRadius: "var(--radius)", padding: "24px 28px", marginBottom: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-green)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
               {"🔔 Get Alerted When " + data.game + " Codes Drop"}
@@ -190,7 +192,6 @@ export default function CodesClient({ data, game, description, activeCodes, expi
             <FollowButton gameSlug={game} gameName={data.game} />
           </div>
 
-          {/* What rewards to expect */}
           {rewards.length > 0 && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "20px 24px", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, marginBottom: 12, color: "var(--text)" }}>
@@ -212,17 +213,10 @@ export default function CodesClient({ data, game, description, activeCodes, expi
             </div>
           )}
 
-          {/* While you wait */}
           <div style={{ background: "rgba(255,227,71,0.06)", border: "1px solid rgba(255,227,71,0.15)", borderRadius: "var(--radius-sm)", padding: "16px 20px", marginBottom: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
-              ⏳ While You Wait
-            </div>
+            <div style={{ fontSize: 12, fontWeight: 900, color: "var(--neon-yellow)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>⏳ While You Wait</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {[
-                "Codes expire fast — redeem within hours of release",
-                "Codes are case sensitive — copy exactly as shown",
-                "Follow the game's official Twitter/X and Discord for announcements",
-              ].map((tip, i) => (
+              {["Codes expire fast — redeem within hours of release", "Codes are case sensitive — copy exactly as shown", "Follow the game's official Twitter/X and Discord for announcements"].map((tip, i) => (
                 <div key={i} style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, display: "flex", gap: 8 }}>
                   <span style={{ flexShrink: 0 }}>•</span>{tip}
                 </div>
@@ -230,12 +224,9 @@ export default function CodesClient({ data, game, description, activeCodes, expi
             </div>
           </div>
 
-          {/* Cross-links to games with active codes */}
           {activeCodeGames.length > 0 && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "20px 24px" }}>
-              <div style={{ fontSize: 12, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
-                🎁 Games With Active Codes Right Now
-              </div>
+              <div style={{ fontSize: 12, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>🎁 Games With Active Codes Right Now</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {activeCodeGames.map((g) => (
                   <a key={g.slug} href={`/codes/${g.slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textDecoration: "none", whiteSpace: "nowrap" }}>
@@ -245,7 +236,6 @@ export default function CodesClient({ data, game, description, activeCodes, expi
               </div>
             </div>
           )}
-
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
@@ -265,9 +255,9 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       )}
 
-      {/* Robux affiliate CTA */}
+      {/* PLACEMENT 2 — Card after codes list */}
       <div style={{ marginBottom: 24 }}>
-        <RobuxCTA variant="card" />
+        <RobuxCTA variant="card" game={data.game} />
       </div>
 
       {/* Quiz CTA */}
@@ -275,21 +265,16 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <span style={{ fontSize: 32 }}>{data.icon}</span>
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 15, marginBottom: 3 }}>
-              {"Think You Know " + data.game + "?"}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
-              {"Test your knowledge with free " + data.game + " trivia quizzes!"}
-            </div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 15, marginBottom: 3 }}>{"Think You Know " + data.game + "?"}</div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{"Test your knowledge with free " + data.game + " trivia quizzes!"}</div>
           </div>
         </div>
-        <a href={"/games/" + quizSlug}
-          style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, padding: "10px 22px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", whiteSpace: "nowrap", flexShrink: 0 }}>
+        <a href={"/games/" + quizSlug} style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 13, padding: "10px 22px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)", whiteSpace: "nowrap", flexShrink: 0 }}>
           {"🎮 Take the Quiz"}
         </a>
       </div>
 
-      {/* Stats cross-link card */}
+      {/* Stats cross-link */}
       {statsData && (statsData.currentPlayers || statsData.totalVisits) && (
         <a href={`/stats/${game}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, #0d1f3c 0%, #0f2744 100%)", border: "1px solid rgba(0,180,216,0.25)", borderRadius: "var(--radius)", padding: "16px 24px", textDecoration: "none", marginBottom: 24, flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
@@ -310,7 +295,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </a>
       )}
 
-      {/* Expiring soon notice */}
+      {/* Expiring notice */}
       <div style={{ background: "rgba(255,227,71,0.08)", border: "1px solid rgba(255,227,71,0.2)", borderRadius: "var(--radius-sm)", padding: "14px 20px", marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
         <span style={{ fontSize: 20 }}>⚠️</span>
         <div>
@@ -319,12 +304,10 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* Tips — only show on pages with active codes (no-code pages show tips inline above) */}
+      {/* Tips */}
       {tips && activeCodes.length > 0 && (
         <div style={{ marginBottom: 40 }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>
-            {"Tips for Using " + data.game + " Codes"}
-          </h2>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>{"Tips for Using " + data.game + " Codes"}</h2>
           <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8 }}>{tips}</p>
         </div>
       )}
@@ -332,9 +315,7 @@ export default function CodesClient({ data, game, description, activeCodes, expi
       {/* Expired codes */}
       {expiredCodes.length > 0 && (
         <div style={{ marginBottom: 48 }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8, color: "var(--text-muted)" }}>
-            {"🔴 Expired " + data.game + " Codes"}
-          </h2>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8, color: "var(--text-muted)" }}>{"🔴 Expired " + data.game + " Codes"}</h2>
           <p style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, marginBottom: 12 }}>These codes no longer work but are kept for reference.</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {expiredCodes.map((c: any) => (
@@ -368,12 +349,15 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
+      {/* PLACEMENT 3 — Default above bottom CTA */}
+      <div style={{ marginBottom: 24 }}>
+        <RobuxCTA variant="default" game={data.game} />
+      </div>
+
       {/* Bottom CTA */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>{data.icon}</div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 8 }}>
-          {"More " + data.game + " Content"}
-        </h2>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 8 }}>{"More " + data.game + " Content"}</h2>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20, maxWidth: 400, margin: "0 auto 20px" }}>
           {"Explore all " + data.game + " quizzes, live player stats, or browse codes for every Roblox game."}
         </p>

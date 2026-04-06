@@ -8,6 +8,7 @@ import EmailSignup from "./components/EmailSignup";
 import UsernameGeneratorBanner from "./components/UsernameGeneratorBanner";
 import { supabase } from "./lib/supabase";
 import WhySignUp from "./components/WhySignUp";
+import RobuxCTA from "./components/RobuxCTA";
 import fs from "fs";
 import path from "path";
 
@@ -62,7 +63,6 @@ function EasterBanner() {
     </div>
   );
 }
-
 
 async function getInitialQuizzes() {
   try {
@@ -123,6 +123,10 @@ export default async function Home() {
       <GameCategories />
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
+      {/* Affiliate placement — between Popular Quizzes and Why Sign Up */}
+      <div style={{ maxWidth: 1200, margin: "16px auto 0", padding: "0 24px 32px" }}>
+        <RobuxCTA variant="default" />
+      </div>
       <WhySignUp />
       {showDailyChallenge && <DailyChallenge initialDaily={initialDaily} />}
       <Codes />
