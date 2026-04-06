@@ -30,6 +30,37 @@ function formatSeasonLabel(season: any): string {
   return season.name + (month ? " — " + month : "");
 }
 
+function timeAgo(iso: string | null): string {
+  if (!iso) return "Never";
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+  if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+  if (diff < 86400 * 7) return Math.floor(diff / 86400) + "d ago";
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function trendColor(label: string | null): string {
+  if (label === "Rising") return "var(--neon-green)";
+  if (label === "Cooling Off") return "var(--neon-pink)";
+  return "var(--text-dim)";
+}
+
+function trendArrow(label: string | null): string {
+  if (label === "Rising") return "↑";
+  if (label === "Cooling Off") return "↓";
+  return "→";
+}
+
+interface FollowedGame {
+  slug: string;
+  game: string;
+  icon: string;
+  activeCodes: number;
+  trendLabel: string | null;
+  trendPct: number | null;
+  lastCodeAt: string | null;
+}
+
 export default function PublicProfileClient({
   userData,
   scores,
@@ -51,7 +82,7 @@ export default function PublicProfileClient({
   prizeData: any | null,
   isOwner: boolean,
   currentSeason?: any,
-  followedGames?: { slug: string, game: string, icon: string, activeCodes: number }[],
+  followedGames?: FollowedGame[],
 }) {
   const [copied, setCopied] = useState(false);
   const xp = userData?.xp || 0;
@@ -199,17 +230,50 @@ export default function PublicProfileClient({
               </a>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {followedGames.map(game => (
-                <a key={game.slug} href={"/codes/" + game.slug} style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px", textDecoration: "none" }}>
-                  <span style={{ fontSize: 24, flexShrink: 0 }}>{game.icon}</span>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{game.game}</div>
+                <div key={game.slug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+
+                  {/* Icon */}
+                  <span style={{ fontSize: 28, flexShrink: 0 }}>{game.icon}</span>
+
+                  {/* Name + codes */}
+                  <div style={{ flex: 1, minWidth: 120 }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", marginBottom: 3 }}>{game.game}</div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: game.activeCodes > 0 ? "var(--neon-green)" : "var(--text-dim)" }}>
                       {game.activeCodes > 0 ? "✅ " + game.activeCodes + " active codes" : "No active codes"}
                     </div>
                   </div>
-                </a>
+
+                  {/* Trend */}
+                  {game.trendLabel && (
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 60 }}>
+                      <div style={{ fontSize: 14, fontWeight: 900, color: trendColor(game.trendLabel) }}>
+                        {trendArrow(game.trendLabel)} {game.trendLabel}
+                      </div>
+                      {game.trendPct !== null && (
+                        <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-dim)" }}>
+                          {game.trendPct > 0 ? "+" : ""}{game.trendPct}% 7d
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Last code */}
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-dim)", minWidth: 80, textAlign: "right" }}>
+                    {game.lastCodeAt ? "🕐 " + timeAgo(game.lastCodeAt) : "No codes logged"}
+                  </div>
+
+                  {/* CTAs */}
+                  <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                    <a href={"/codes/" + game.slug} style={{ fontSize: 11, fontWeight: 800, color: "var(--neon-green)", background: "rgba(0,245,160,0.08)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 100, padding: "4px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                      🎁 Codes
+                    </a>
+                    <a href={"/stats/" + game.slug} style={{ fontSize: 11, fontWeight: 800, color: "var(--text-muted)", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 100, padding: "4px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                      📊 Stats
+                    </a>
+                  </div>
+                </div>
               ))}
             </div>
           )}

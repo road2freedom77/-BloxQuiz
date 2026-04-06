@@ -33,30 +33,59 @@ async function getFollowedGames(userId: string) {
 
   const slugs = follows.map(f => f.game_slug);
 
-  const { data: games } = await supabaseAdmin
-    .from("code_games")
-    .select("slug, game, icon")
-    .in("slug", slugs);
+  const [gamesRes, codesRes, insightsRes, changeLogRes] = await Promise.all([
+    supabaseAdmin
+      .from("code_games")
+      .select("slug, game, icon")
+      .in("slug", slugs),
+    supabaseAdmin
+      .from("codes")
+      .select("slug, active")
+      .in("slug", slugs)
+      .eq("active", true),
+    supabaseAdmin
+      .from("game_history_insights_14d")
+      .select("slug, trend_label, trend_pct_7d")
+      .in("slug", slugs),
+    supabaseAdmin
+      .from("code_change_log")
+      .select("game_slug, changed_at")
+      .in("game_slug", slugs)
+      .order("changed_at", { ascending: false }),
+  ]);
 
-  const { data: codes } = await supabaseAdmin
-    .from("codes")
-    .select("slug, active")
-    .in("slug", slugs)
-    .eq("active", true);
-
+  // Active code counts
   const codeCountBySlug: Record<string, number> = {};
-  for (const c of codes || []) {
+  for (const c of codesRes.data || []) {
     codeCountBySlug[c.slug] = (codeCountBySlug[c.slug] || 0) + 1;
   }
 
+  // Game name + icon
   const gamesBySlug: Record<string, any> = {};
-  for (const g of games || []) gamesBySlug[g.slug] = g;
+  for (const g of gamesRes.data || []) gamesBySlug[g.slug] = g;
+
+  // Trend data
+  const trendBySlug: Record<string, { trend_label: string | null; trend_pct_7d: number | null }> = {};
+  for (const i of insightsRes.data || []) {
+    trendBySlug[i.slug] = { trend_label: i.trend_label, trend_pct_7d: i.trend_pct_7d };
+  }
+
+  // Most recent code change per game
+  const lastCodeBySlug: Record<string, string | null> = {};
+  for (const row of changeLogRes.data || []) {
+    if (!lastCodeBySlug[row.game_slug]) {
+      lastCodeBySlug[row.game_slug] = row.changed_at;
+    }
+  }
 
   return slugs.map(slug => ({
     slug,
     game: gamesBySlug[slug]?.game || slug,
     icon: gamesBySlug[slug]?.icon || "🎮",
     activeCodes: codeCountBySlug[slug] || 0,
+    trendLabel: trendBySlug[slug]?.trend_label ?? null,
+    trendPct: trendBySlug[slug]?.trend_pct_7d ?? null,
+    lastCodeAt: lastCodeBySlug[slug] ?? null,
   }));
 }
 
