@@ -4,7 +4,10 @@ import { supabaseAdmin } from "../../lib/supabase";
 import GamesClient from "./GamesClient";
 import RobuxCTA from "../../components/RobuxCTA";
 
-const COMMAND_CENTER_SLUGS = ["blox-fruits", "brookhaven-rp", "murder-mystery-2", "adopt-me", "grow-a-garden", "dress-to-impress"];
+const COMMAND_CENTER_SLUGS = [
+  "blox-fruits", "brookhaven-rp", "murder-mystery-2", "adopt-me", "grow-a-garden", "dress-to-impress",
+  "jujutsu-shenanigans", "dandys-world", "forsaken", "the-strongest-battlegrounds", "fish-it", "99-nights-in-the-forest", "rivals",
+];
 
 const gameEmojis: Record<string, string> = {
   "Blox Fruits": "⚔️",
