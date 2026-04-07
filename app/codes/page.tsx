@@ -8,11 +8,11 @@ export async function generateMetadata() {
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
   return {
     title: `All Roblox Codes — Active & Working Game Codes (${month}) | BloxQuiz`,
-    description: 'Find active Roblox codes for 2026. Blox Fruits, Adopt Me, Anime Defenders, Doors, Bee Swarm & 12 more games. Free rewards updated daily — redeem before they expire!',
+    description: 'Find active Roblox codes for 2026. Blox Fruits, Adopt Me, Anime Defenders, Doors, Bee Swarm & more. Free rewards — verified and updated when new codes are released.',
     alternates: { canonical: 'https://www.bloxquiz.gg/codes' },
     openGraph: {
       title: `All Roblox Codes — Active & Working Game Codes (${month}) | BloxQuiz`,
-      description: 'Active Roblox codes for Blox Fruits, Adopt Me, Anime Defenders, Doors & more. Updated daily — redeem free rewards before they expire!',
+      description: 'Active Roblox codes for Blox Fruits, Adopt Me, Anime Defenders, Doors & more. Verified and updated when new codes drop.',
       url: 'https://www.bloxquiz.gg/codes',
       siteName: 'BloxQuiz',
       type: 'website',
@@ -93,7 +93,7 @@ export default async function CodesPage() {
 
       {/* Hero */}
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, marginBottom: 12 }}>
-        🎁 Roblox Game Codes — Active & Updated Daily
+        🎁 Roblox Game Codes — Active & Verified
       </h1>
       <p style={{ fontSize: 15, color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.7, maxWidth: 760, marginBottom: 20 }}>
         Roblox codes give players free rewards such as coins, boosts, skins, and special items inside their favorite games. Many popular Roblox games release new codes during updates, events, or milestones. On this page you can find active Roblox codes for games like Blox Fruits, Adopt Me, Brookhaven RP, Doors, and many more. Codes often expire quickly — redeem them as soon as possible!
@@ -103,13 +103,13 @@ export default async function CodesPage() {
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 8 }}>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--neon-green)' }}>✅ {totalActive} Active Codes</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--neon-blue)' }}>🎮 {allCodes.length} Games Covered</span>
-        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-muted)' }}>🔄 Updated Daily</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-muted)' }}>🔄 Checked Regularly</span>
       </div>
       <div style={{ fontSize: 13, color: 'var(--text-dim)', fontWeight: 600, marginBottom: 24 }}>
-        🕐 Last updated: {lastUpdatedStr} — codes verified and refreshed
+        🕐 Last verified: {lastUpdatedStr} — codes checked and updated when new ones are confirmed
       </div>
 
-      {/* Freshness nav — server rendered */}
+      {/* Freshness nav */}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
         <a href="/codes/new" style={{ background: 'rgba(0,245,160,0.08)', border: '1px solid rgba(0,245,160,0.2)', borderRadius: 100, padding: '8px 18px', textDecoration: 'none', fontSize: 13, fontWeight: 800, color: 'var(--neon-green)' }}>🆕 New Codes</a>
         <a href="/codes/recently-updated" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 100, padding: '8px 18px', textDecoration: 'none', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)' }}>🔄 Recently Updated</a>

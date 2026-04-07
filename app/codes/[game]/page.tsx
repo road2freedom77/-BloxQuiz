@@ -94,7 +94,6 @@ async function getQuizCount(slug: string): Promise<number> {
 
 async function getActiveCodeGames(excludeSlug: string): Promise<{ slug: string; game: string; icon: string }[]> {
   try {
-    // Get slugs with at least one active code
     const { data: activeSlugs } = await supabaseAdmin
       .from("codes")
       .select("slug")
@@ -108,7 +107,6 @@ async function getActiveCodeGames(excludeSlug: string): Promise<{ slug: string; 
 
     if (uniqueSlugs.length === 0) return [];
 
-    // Fetch game names + icons for those slugs, limit to 6
     const { data: games } = await supabaseAdmin
       .from("code_games")
       .select("slug, game, icon")
@@ -135,11 +133,11 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 
   return {
     title: `${gameData.game} Codes 2026 — All Active & Working Codes | BloxQuiz`,
-    description: `All active ${gameData.game} codes for 2026. ${activeCount} working codes updated daily. Redeem free rewards before they expire!`,
+    description: `All active ${gameData.game} codes for 2026. ${activeCount} working codes — verified and updated when new codes are released. Redeem free rewards before they expire!`,
     alternates: { canonical: `https://www.bloxquiz.gg/codes/${game}` },
     openGraph: {
       title: `${gameData.game} Codes 2026 — All Active Codes | BloxQuiz`,
-      description: `${activeCount} active ${gameData.game} codes. Updated daily on BloxQuiz.gg`,
+      description: `${activeCount} active ${gameData.game} codes. Verified and updated on BloxQuiz.gg`,
       url: `https://www.bloxquiz.gg/codes/${game}`,
       siteName: "BloxQuiz",
       type: "website",
@@ -199,7 +197,7 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
           {
             "@type": "Question",
             name: `How many active ${data.game} codes are there?`,
-            acceptedAnswer: { "@type": "Answer", text: `There are currently ${activeCodes.length} active ${data.game} codes. This page is updated regularly with the latest working codes.` },
+            acceptedAnswer: { "@type": "Answer", text: `There are currently ${activeCodes.length} active ${data.game} codes. This page is checked regularly and updated when new codes are confirmed.` },
           },
           {
             "@type": "Question",
