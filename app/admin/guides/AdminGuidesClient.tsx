@@ -269,7 +269,7 @@ export default function AdminGuidesClient() {
               {/* Source notes (read-only) */}
               {selected.source_notes && (
                 <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "12px 14px" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-dim)", display: "block", marginBottom: 4" }}>Source Notes</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>Source Notes</span>
                   <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{selected.source_notes}</span>
                 </div>
               )}
