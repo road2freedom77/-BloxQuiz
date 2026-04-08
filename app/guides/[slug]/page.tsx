@@ -112,7 +112,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           {guide.title}
         </h1>
 
-        {/* Badges */}
+        {/* Badges — no word count */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
           <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: `${diffColor[guide.difficulty] || "#fff"}20`, color: diffColor[guide.difficulty] || "#fff", border: `1px solid ${diffColor[guide.difficulty] || "#fff"}40` }}>
             {guide.difficulty}
@@ -120,11 +120,9 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
             🎮 {guide.game_name}
           </span>
-          {guide.word_count && (
-            <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
-              ~{Math.round(guide.word_count / 100) * 100} words
-            </span>
-          )}
+          <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
+            Free Guide
+          </span>
         </div>
 
         {/* Trust signals */}
@@ -175,7 +173,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           </div>
         )}
 
-        {/* Main sections */}
+        {/* Main sections — no mid-article CTA */}
         {content.sections?.map((section: any, i: number) => (
           <div key={i} id={`section-${i}`} style={{ marginBottom: 48 }}>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16, color: "var(--text)" }}>
@@ -184,11 +182,6 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             {section.body.split("\n").filter(Boolean).map((para: string, j: number) => (
               <p key={j} style={{ fontSize: 15, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, marginBottom: 16 }}>{para}</p>
             ))}
-            {i === 2 && (
-              <div style={{ marginTop: 32 }}>
-                <RobuxCTA variant="card" game={guide.game_name} />
-              </div>
-            )}
           </div>
         ))}
 
@@ -227,7 +220,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
         )}
 
         {/* Cross-links */}
-        <div style={{ background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 14, padding: "24px 28px", marginBottom: 40 }}>
+        <div style={{ background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 14, padding: "24px 28px", marginBottom: 32 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, marginBottom: 16, color: "var(--text)" }}>
             More {guide.game_name} Content on BloxQuiz
           </h2>
@@ -263,6 +256,14 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </div>
           </div>
         )}
+
+        {/* Affiliate CTA — below all content, clearly labeled */}
+        <div style={{ borderTop: "1px solid var(--border, rgba(255,255,255,0.07))", paddingTop: 32, marginBottom: 24 }}>
+          <RobuxCTA variant="card" game={guide.game_name} />
+          <p style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginTop: 10, textAlign: "center" }}>
+            BloxQuiz participates in the Amazon Associates program. If you purchase through our link, we earn a small commission at no extra cost to you. <a href="/editorial#affiliate" style={{ color: "var(--text-dim)" }}>Affiliate disclosure</a>
+          </p>
+        </div>
 
         {/* Footer attribution */}
         <p style={{ fontSize: 12, color: "var(--text-dim)", textAlign: "center", fontWeight: 600 }}>

@@ -18,11 +18,12 @@ export const metadata = {
 export default async function GuidesHubPage() {
   const { data: guides } = await supabaseAdmin
     .from("game_guides")
-    .select("slug, title, game_name, game_slug, difficulty, excerpt, word_count, updated_at")
+    .select("slug, title, game_name, game_slug, difficulty, excerpt, updated_at")
     .eq("status", "published")
     .order("updated_at", { ascending: false });
 
   const allGuides = guides ?? [];
+  const guideCount = allGuides.length;
 
   const diffColor: Record<string, string> = {
     Beginner: "#00f5a0",
@@ -59,7 +60,7 @@ export default async function GuidesHubPage() {
         Free beginner guides for the most popular Roblox games. Each guide covers getting started, key mechanics, best strategies, common mistakes, and a clear progression path. Written and reviewed by the BloxQuiz editorial team.
       </p>
       <div style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, marginBottom: 40 }}>
-        {allGuides.length} guide{allGuides.length !== 1 ? "s" : ""} available · Updated regularly · <a href="/editorial" style={{ color: "var(--text-dim)" }}>Editorial Standards</a>
+        {guideCount} {guideCount === 1 ? "guide" : "guides"} available · Updated regularly · <a href="/editorial" style={{ color: "var(--text-dim)" }}>Editorial Standards</a>
       </div>
 
       {/* Guides grid */}
@@ -78,9 +79,8 @@ export default async function GuidesHubPage() {
               <a
                 key={guide.slug}
                 href={`/guides/${guide.slug}`}
-                style={{ display: "flex", flexDirection: "column", background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 16, padding: "24px", textDecoration: "none", transition: "border-color 0.15s" }}
+                style={{ display: "flex", flexDirection: "column", background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 16, padding: "24px", textDecoration: "none" }}
               >
-                {/* Game + difficulty */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 28 }}>{emoji}</span>
@@ -90,20 +90,14 @@ export default async function GuidesHubPage() {
                     {guide.difficulty}
                   </span>
                 </div>
-
-                {/* Title */}
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text)", marginBottom: 10, lineHeight: 1.3 }}>
                   {guide.title}
                 </h2>
-
-                {/* Excerpt */}
                 {guide.excerpt && (
                   <p style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 16, flex: 1 }}>
                     {guide.excerpt.substring(0, 120)}...
                   </p>
                 )}
-
-                {/* Footer */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto" }}>
                   <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>Updated {lastUpdated}</span>
                   <span style={{ fontSize: 13, fontWeight: 800, color: "#00b4d8" }}>Read Guide →</span>
@@ -114,9 +108,12 @@ export default async function GuidesHubPage() {
         </div>
       )}
 
-      {/* What are these guides */}
+      {/* What these guides cover */}
       <div style={{ background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 14, padding: "28px 32px", marginBottom: 48 }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>What These Guides Cover</h2>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>What These Guides Cover</h2>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>
+          Every BloxQuiz guide is researched using current game wikis, community knowledge, and direct gameplay testing. Guides are reviewed for factual accuracy before publication and updated when major patches change core mechanics.
+        </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
           {[
             { emoji: "🚀", label: "Getting Started", desc: "What to do in your first session" },
