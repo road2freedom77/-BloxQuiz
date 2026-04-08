@@ -133,6 +133,8 @@ export default async function Home() {
       <Hero />
       <EasterBanner />
       <TrendingGames />
+      {/* Game Guides — surfaced early for editorial depth signal */}
+      <GuidesSection guides={guides} />
       <GameCategories />
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
@@ -141,8 +143,6 @@ export default async function Home() {
         <RobuxCTA variant="default" />
       </div>
       <WhySignUp />
-      {/* Game Guides — only renders when guides are published */}
-      <GuidesSection guides={guides} />
       {showDailyChallenge && <DailyChallenge initialDaily={initialDaily} />}
       <Codes />
       <EmailSignup />
