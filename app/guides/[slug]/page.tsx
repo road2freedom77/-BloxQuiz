@@ -112,16 +112,13 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           {guide.title}
         </h1>
 
-        {/* Badges — no word count */}
+        {/* Badges — difficulty and game only */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
           <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: `${diffColor[guide.difficulty] || "#fff"}20`, color: diffColor[guide.difficulty] || "#fff", border: `1px solid ${diffColor[guide.difficulty] || "#fff"}40` }}>
             {guide.difficulty}
           </span>
           <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
             🎮 {guide.game_name}
-          </span>
-          <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
-            Free Guide
           </span>
         </div>
 
