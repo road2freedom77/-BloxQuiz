@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.bloxquiz.gg/editorial" },
 };
 
-const LAST_UPDATED = "April 7, 2026";
+const LAST_UPDATED = "April 8, 2026";
 
 export default function EditorialPage() {
   return (
@@ -103,7 +103,31 @@ export default function EditorialPage() {
 
         <div style={{ height: 1, background: "var(--border, rgba(255,255,255,0.07))" }} />
 
-        {/* AI content policy */}
+        {/* Game Guides */}
+        <section id="guides">
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16, color: "var(--text)" }}>
+            Game Guides
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: "var(--text)" }}>How guides are researched:</strong> Each game guide is researched using a combination of official game wikis, community-maintained resources, developer patch notes, and direct gameplay knowledge. We do not publish claims that cannot be verified against at least one reliable source.
+            </p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: "var(--text)" }}>Drafting and review:</strong> Guide drafts are produced with AI assistance and then reviewed by the BloxQuiz editorial team before publication. The review process checks for factual accuracy, outdated mechanics, unsourced specific claims, and whether the advice is genuinely useful to the target audience. No guide is published without human sign-off.
+            </p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: "var(--text)" }}>What gets updated after patches:</strong> When a Roblox game receives a major update that changes core mechanics — starting items, progression systems, economy resets, or entity behavior — the affected guide sections are flagged for review. The "Last verified" date on each guide reflects when the content was last confirmed accurate against the current version of the game.
+            </p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: "var(--text)" }}>Game-specific claims:</strong> Specific mechanic claims — spawn items, currency systems, entity behavior, stat thresholds — are cross-checked against official developer announcements, the game's official wiki where available, or well-established community wikis such as the Blox Fruits Wiki and Doors Wiki on Fandom. Claims we cannot verify with confidence are either omitted or clearly framed as community-observed rather than developer-confirmed.
+            </p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: "var(--text)" }}>Corrections:</strong> If you find a factual error in a guide — an incorrect mechanic, an outdated progression path, or a claim that no longer reflects the current game — please use our <a href="/contact" style={{ color: "var(--neon-green)", textDecoration: "none" }}>Contact page</a>. We will review and correct within 48 hours of confirmation.
+            </p>
+          </div>
+        </section>
+
+        <div style={{ height: 1, background: "var(--border, rgba(255,255,255,0.07))" }} />
         <section>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16, color: "var(--text)" }}>
             Use of AI in Content Creation
@@ -127,7 +151,7 @@ export default function EditorialPage() {
         <div style={{ height: 1, background: "var(--border, rgba(255,255,255,0.07))" }} />
 
         {/* Affiliate */}
-        <section>
+        <section id="affiliate">
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16, color: "var(--text)" }}>
             Affiliate Links & Monetization
           </h2>
