@@ -224,7 +224,7 @@ export default function AdminClient({
   allSeasons: any[],
   prizeClaims: any[],
 }) {
-  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "codes" | "submit">("overview");
+  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "codes" | "submit" | "guides">("overview");
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -557,11 +557,10 @@ export default function AdminClient({
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        {(["overview", "seasons", "codes", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
+        {(["overview", "seasons", "codes", "guides", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t}
-          </button>
+              {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t === "guides" ? "📖 Guides" : t}            </button>
         ))}
       </div>
 
@@ -1182,7 +1181,23 @@ ON CONFLICT DO NOTHING;`}</pre>
           </div>
         </div>
       )}
-
+      {tab === "guides" && (
+  <div>
+    <div style={{ background: "var(--bg-card)", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 12, padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4 }}>Manage game guides — review drafts, edit metadata, publish when ready.</div>
+        <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>To edit section content, update the JSON in Supabase → game_guides → content column.</div>
+      </div>
+      <a href="/admin/guides" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #00f5a0, #b84cff)", color: "#0a0a14", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
+        📖 Open Guides Manager →
+      </a>
+    </div>
+    <div style={{ display: "flex", gap: 12 }}>
+      <a href="/guides" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>View published guides →</a>
+      <a href="/editorial" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>Editorial standards →</a>
+    </div>
+  </div>
+)}
       {/* Submit Quiz Tab */}
       {tab === "submit" && <SubmitQuizTab />}
 
