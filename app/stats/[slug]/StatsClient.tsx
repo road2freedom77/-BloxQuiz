@@ -17,6 +17,7 @@ import {
 import type { GameRow, SnapshotRow, DailyStatRow } from "./page";
 import QuizCTA from "../../components/QuizCTA";
 import FollowButton from "../../components/FollowButton";
+import RobuxCTA from "../../components/RobuxCTA";
 
 interface StatsClientProps {
   game: GameRow;
@@ -101,6 +102,108 @@ const customTooltipStyle = {
   fontSize: 13,
 };
 
+// Builds a dynamic editorial analysis paragraph from available stats data
+function buildEditorialAnalysis(
+  game: GameRow,
+  snapshots: SnapshotRow[],
+  dailyStats: DailyStatRow[],
+  rank: number | null,
+  peak24h: number | null,
+): string {
+  const current = game.current_players;
+  const name = game.name;
+
+  if (!current) return "";
+
+  const paragraphs: string[] = [];
+
+  // 1. Current status paragraph
+  const rankText = rank ? ` ranking #${rank} among all tracked Roblox games` : "";
+  const peakGap = peak24h && current ? Math.round(((peak24h - current) / peak24h) * 100) : null;
+  const peakText = peakGap && peakGap > 10
+    ? ` The 24-hour peak was ${formatNumber(peak24h)}, meaning the game is currently at ${100 - peakGap}% of its recent high — typical for off-peak hours.`
+    : peakGap !== null && peakGap <= 10
+    ? ` The 24-hour peak was ${formatNumber(peak24h)}, so the game is running close to its recent high — servers are active right now.`
+    : "";
+
+  paragraphs.push(
+    `${name} currently has ${formatNumber(current)} concurrent players${rankText}.${peakText}`
+  );
+
+  // 2. Trend analysis from hourly snapshots
+  if (snapshots.length >= 6) {
+    const recent = snapshots.slice(0, 3).map(s => s.concurrent_players);
+    const older = snapshots.slice(3, 6).map(s => s.concurrent_players);
+    const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+    const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+    const changePct = Math.round(((recentAvg - olderAvg) / olderAvg) * 100);
+
+    if (Math.abs(changePct) >= 5) {
+      const direction = changePct > 0 ? "up" : "down";
+      const strength = Math.abs(changePct) > 20 ? "significantly" : Math.abs(changePct) > 10 ? "notably" : "slightly";
+      paragraphs.push(
+        `Over the last few hours, player counts have trended ${direction} ${strength} — ${Math.abs(changePct)}% compared to earlier in the day. ${changePct > 0
+          ? "Momentum is building, which often means active events, updates, or content drops are drawing players in."
+          : "This dip is consistent with normal daily cycles — player counts typically recover during evening peak hours."
+        }`
+      );
+    } else {
+      paragraphs.push(
+        `Player counts have remained stable over the past several hours, varying less than 5% from the current level. This suggests steady, consistent engagement rather than a spike driven by a specific event.`
+      );
+    }
+  }
+
+  // 3. 30-day daily average trend
+  if (dailyStats.length >= 7) {
+    const lastWeek = dailyStats.slice(0, 7);
+    const prevWeek = dailyStats.slice(7, 14);
+    if (prevWeek.length >= 7) {
+      const lastAvg = lastWeek.reduce((a, b) => a + b.avg_players, 0) / lastWeek.length;
+      const prevAvg = prevWeek.reduce((a, b) => a + b.avg_players, 0) / prevWeek.length;
+      const weekChange = Math.round(((lastAvg - prevAvg) / prevAvg) * 100);
+
+      if (weekChange > 5) {
+        paragraphs.push(
+          `Looking at the 30-day trend, ${name}'s average daily player count is up ${weekChange}% compared to the previous week. This kind of week-over-week growth typically signals a recent content update, new season launch, or viral moment driving new players into the game.`
+        );
+      } else if (weekChange < -5) {
+        paragraphs.push(
+          `The 30-day chart shows ${name}'s average daily players are down ${Math.abs(weekChange)}% compared to the previous week. This is a normal pattern between major updates — player counts typically stabilize and recover when new content drops.`
+        );
+      } else {
+        paragraphs.push(
+          `The 30-day daily average has been consistent week-over-week, showing a stable and engaged playerbase. ${name} isn't in a growth spike, but it isn't declining either — this kind of plateau often reflects a game with a loyal core community.`
+        );
+      }
+    }
+  }
+
+  // 4. Should you play now?
+  const isHighRank = rank && rank <= 10;
+  const isGoodTime = peakGap !== null && peakGap <= 15;
+
+  if (isHighRank && isGoodTime) {
+    paragraphs.push(
+      `With ${formatNumber(current)} active players and a top-10 ranking, ${name} has full servers and short matchmaking times right now. If you've been thinking about jumping in, this is a good time — the community is active and the game is performing near its peak.`
+    );
+  } else if (isHighRank) {
+    paragraphs.push(
+      `Despite the slight dip from its 24-hour peak, ${name}'s top-10 ranking means servers remain populated with active players. Matchmaking and community activity should be strong regardless of the hour.`
+    );
+  } else if (current && current > 10000) {
+    paragraphs.push(
+      `With ${formatNumber(current)} concurrent players, ${name} maintains a healthy active population. Servers are populated and the community is engaged, making it a solid time to jump in whether you're a returning player or trying the game for the first time.`
+    );
+  } else {
+    paragraphs.push(
+      `${name} has a smaller but dedicated community. If you enjoy this type of game, the playerbase is active enough for a good experience — and smaller communities often mean more experienced and friendly players in each session.`
+    );
+  }
+
+  return paragraphs.join("\n\n");
+}
+
 export default function StatsClient({ game, snapshots, dailyStats, rank, approvalRate, peak24h, slug, quizCount, compareGames, allFaqs }: StatsClientProps) {
   const hourlyData = useMemo(() => [...snapshots].reverse().map((s) => ({ time: formatHour(s.captured_at), players: s.concurrent_players })), [snapshots]);
   const dailyData = useMemo(() => [...dailyStats].reverse().map((d) => ({ date: formatDate(d.date), avg: d.avg_players, peak: d.peak_players, visitsGained: d.total_visits_delta })), [dailyStats]);
@@ -108,6 +211,11 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
   const hasHourly = hourlyData.length > 1;
   const hasDaily = dailyData.length > 1;
   const robloxUrl = game.place_id ? `https://www.roblox.com/games/${game.place_id}` : null;
+
+  const editorialAnalysis = useMemo(
+    () => buildEditorialAnalysis(game, snapshots, dailyStats, rank, peak24h),
+    [game, snapshots, dailyStats, rank, peak24h]
+  );
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a14", color: "#fff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
@@ -215,6 +323,30 @@ export default function StatsClient({ game, snapshots, dailyStats, rank, approva
             <p style={{ margin: 0, fontSize: 15 }}>📡 Collecting data... Charts will appear after the first few hourly snapshots.</p>
           </div>
         )}
+
+        {/* Editorial analysis block — dynamic interpretation of the stats */}
+        {editorialAnalysis && (
+          <div style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "28px 28px", marginBottom: 32 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
+              🔍 {game.name} Player Count Analysis
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {editorialAnalysis.split("\n\n").map((para, i) => (
+                <p key={i} style={{ margin: 0, fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>
+                  {para}
+                </p>
+              ))}
+            </div>
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 12, color: "rgba(255,255,255,0.25)" }}>
+              Analysis generated from live data · Updated hourly · BloxQuiz.gg
+            </div>
+          </div>
+        )}
+
+        {/* Affiliate placement */}
+        <div style={{ marginBottom: 32 }}>
+          <RobuxCTA variant="card" game={game.name} />
+        </div>
 
         {/* Quiz CTA */}
         <QuizCTA gameName={game.name} gameSlug={slug} gameEmoji={game.emoji} quizCount={quizCount} />
