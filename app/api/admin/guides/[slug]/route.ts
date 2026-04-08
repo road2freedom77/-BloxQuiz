@@ -20,11 +20,17 @@ export async function PATCH(
   const { slug } = await params;
   const body = await req.json();
 
-  const allowed = ["title", "meta_title", "meta_description", "excerpt", "difficulty", "status", "review_notes", "last_verified_at"];
+  const allowedMeta = ["title", "meta_title", "meta_description", "excerpt", "difficulty", "status", "review_notes", "last_verified_at"];
   const update: Record<string, any> = { updated_at: new Date().toISOString() };
 
-  for (const key of allowed) {
+  // Meta fields
+  for (const key of allowedMeta) {
     if (key in body) update[key] = body[key];
+  }
+
+  // Content field — full jsonb replacement
+  if ("content" in body) {
+    update.content = body.content;
   }
 
   // Set published_at when first publishing
