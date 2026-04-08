@@ -516,6 +516,19 @@ async function getActiveCodes(slug: string): Promise<number> {
   }
 }
 
+async function getGuideForGame(gameSlug: string): Promise<{ slug: string; title: string } | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("game_guides")
+      .select("slug, title")
+      .eq("game_slug", gameSlug)
+      .eq("status", "published")
+      .limit(1)
+      .single();
+    return data ?? null;
+  } catch { return null; }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
   const config = slugToGame()[game] ?? buildFallbackConfig(game);
@@ -538,11 +551,12 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
   const config = slugToGame()[game] ?? buildFallbackConfig(game);
   const isCommandCenter = COMMAND_CENTER_SLUGS.includes(game);
 
-  const [quizzes, statsData, insights, activeCodes] = await Promise.all([
+  const [quizzes, statsData, insights, activeCodes, guide] = await Promise.all([
     getQuizzesForGame(config.displayName),
     getGameStats(game),
     isCommandCenter ? getHistoryInsights(game) : Promise.resolve(null),
     isCommandCenter ? getActiveCodes(game) : Promise.resolve(0),
+    getGuideForGame(game),
   ]);
 
   const jsonLd = {
@@ -607,6 +621,20 @@ export default async function GamePage({ params }: { params: Promise<{ game: str
         insights={insights}
         activeCodes={activeCodes}
       />
+      {guide && (
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px 16px" }}>
+          <a href={`/guides/${guide.slug}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, rgba(0,180,216,0.08), rgba(184,76,255,0.06))", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 14, padding: "18px 24px", textDecoration: "none", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{ fontSize: 28 }}>📖</span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#00b4d8", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>Beginner's Guide</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{guide.title}</div>
+              </div>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#00b4d8", whiteSpace: "nowrap" }}>Read Guide →</span>
+          </a>
+        </div>
+      )}
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px 40px" }}>
         <RobuxCTA variant="card" />
       </div>

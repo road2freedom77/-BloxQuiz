@@ -115,6 +115,19 @@ async function hasCodes(slug: string): Promise<boolean> {
   return (count ?? 0) > 0;
 }
 
+async function getGuideForGame(gameSlug: string): Promise<{ slug: string; title: string } | null> {
+  try {
+    const { data } = await supabase
+      .from("game_guides")
+      .select("slug, title")
+      .eq("game_slug", gameSlug)
+      .eq("status", "published")
+      .limit(1)
+      .single();
+    return data ?? null;
+  } catch { return null; }
+}
+
 export async function generateStaticParams() {
   const slugs = await getAllSlugs();
   return slugs.map((slug) => ({ slug }));
@@ -180,12 +193,13 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
   const game = await getGame(slug);
   if (!game) notFound();
 
-  const [snapshots, dailyStats, quizCount, compareGames, codesExist] = await Promise.all([
+  const [snapshots, dailyStats, quizCount, compareGames, codesExist, guide] = await Promise.all([
     getRecentSnapshots(game.universe_id),
     getDailyStats(game.universe_id),
     getQuizCount(game.name),
     getCompareGames(slug),
     hasCodes(slug),
+    getGuideForGame(slug),
   ]);
 
   const latestSnapshot = snapshots[0] ?? null;
@@ -285,6 +299,18 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
         <div style={{ marginTop: 16 }}>
           <RobuxCTA variant="card" game={game.name} />
         </div>
+        {guide && (
+          <a href={`/guides/${guide.slug}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, rgba(0,180,216,0.08), rgba(184,76,255,0.06))", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 14, padding: "18px 24px", textDecoration: "none", flexWrap: "wrap", marginTop: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{ fontSize: 28 }}>📖</span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#00b4d8", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>Beginner's Guide</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{guide.title}</div>
+              </div>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#00b4d8", whiteSpace: "nowrap" }}>Read Guide →</span>
+          </a>
+        )}
       </div>
       <StatsClient
         game={gameWithLiveData}

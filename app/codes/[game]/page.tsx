@@ -119,6 +119,19 @@ async function getActiveCodeGames(excludeSlug: string): Promise<{ slug: string; 
   }
 }
 
+async function getGuideForGame(gameSlug: string): Promise<{ slug: string; title: string } | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("game_guides")
+      .select("slug, title")
+      .eq("game_slug", gameSlug)
+      .eq("status", "published")
+      .limit(1)
+      .single();
+    return data ?? null;
+  } catch { return null; }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
 
@@ -148,12 +161,13 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
 export default async function CodesGamePage({ params }: { params: Promise<{ game: string }> }) {
   const { game } = await params;
 
-  const [{ data: gameData }, { data: codesData }, statsData, quizCount, activeCodeGames] = await Promise.all([
+  const [{ data: gameData }, { data: codesData }, statsData, quizCount, activeCodeGames, guide] = await Promise.all([
     supabase.from("code_games").select("*").eq("slug", game).single(),
     supabase.from("codes").select("*").eq("slug", game).order("is_new", { ascending: false }),
     getGameStats(game),
     getQuizCount(game),
     getActiveCodeGames(game),
+    getGuideForGame(game),
   ]);
 
   if (!gameData) notFound();
@@ -221,6 +235,18 @@ export default async function CodesGamePage({ params }: { params: Promise<{ game
           hasStats={true}
           activeTab="codes"
         />
+        {guide && (
+          <a href={`/guides/${guide.slug}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, rgba(0,180,216,0.08), rgba(184,76,255,0.06))", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 14, padding: "18px 24px", textDecoration: "none", flexWrap: "wrap", marginTop: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{ fontSize: 28 }}>📖</span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#00b4d8", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>Beginner's Guide</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{guide.title}</div>
+              </div>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#00b4d8", whiteSpace: "nowrap" }}>Read Guide →</span>
+          </a>
+        )}
       </div>
       <CodesClient
         data={data}
