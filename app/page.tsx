@@ -67,7 +67,9 @@ function GuidesSection({ guides }: { guides: any[] }) {
                 <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{guide.game_name}</span>
                 <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "#00f5a0", border: "1px solid rgba(0,245,160,0.2)" }}>{guide.difficulty}</span>
               </div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>{guide.title}</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>
+                {guide.title.replace(new RegExp(`^${guide.game_name}\\s*`, 'i'), '')}
+              </h3>
               {guide.excerpt && (
                 <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 12, flex: 1 }}>{guide.excerpt.substring(0, 90)}...</p>
               )}

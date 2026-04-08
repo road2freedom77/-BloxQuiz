@@ -28,7 +28,7 @@ export default async function Hero() {
 
   const proofBlocks = [
     { value: `${quizCount}+`, label: `Quizzes Across ${gameCount} Games` },
-    { value: `${codeCount}`,  label: "Active Codes Updated Daily" },
+    { value: `${codeCount}`,  label: "Active Roblox Codes" },
     { value: "LIVE",          label: "Player Counts from Roblox" },
   ];
 
