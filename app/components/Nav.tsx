@@ -16,9 +16,9 @@ const TOOLS = [
   { href: "/roblox-bio-generator", label: "Bio Generator", emoji: "✍️" },
   { href: "/roblox-group-name-generator", label: "Group Name Generator", emoji: "🏰" },
   { href: "/roblox-duo-names", label: "Duo & Matching Names", emoji: "👥" },
+  { href: "/guides", label: "Game Guides", emoji: "📖" },
 ];
 
-// Easter event window — update or remove each year
 const EASTER_START = new Date("2026-04-03");
 const EASTER_END = new Date("2026-04-07T23:59:59");
 
@@ -113,7 +113,7 @@ export default function Nav() {
               </button>
               {toolsOpen && (
                 <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, background: "rgba(11,14,23,0.97)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "8px", minWidth: 240, boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 200 }}>
-                  {TOOLS.map((tool, i) => (
+                  {TOOLS.map((tool) => (
                     <div key={tool.href}>
                       <a href={tool.href} onClick={() => setToolsOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, textDecoration: "none", color: tool.divider ? "var(--neon-green)" : "var(--text-muted)", fontSize: 13, fontWeight: tool.divider ? 800 : 700 }}>
                         <span>{tool.emoji}</span>

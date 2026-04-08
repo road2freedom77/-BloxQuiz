@@ -10,6 +10,7 @@ export default function Footer() {
   const featureLinks = [
     { label: "All Quizzes", href: "/browse" },
     { label: "Roblox Codes", href: "/codes" },
+    { label: "Game Guides", href: "/guides" },
     { label: "Leaderboard", href: "/leaderboard" },
     { label: "Stats", href: "/stats" },
   ];
