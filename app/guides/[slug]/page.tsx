@@ -112,10 +112,10 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           {guide.title}
         </h1>
 
-        {/* Badges — difficulty and game only */}
+        {/* Badges — "Beginner Guide" not just "Beginner" */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
           <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 12px", borderRadius: 100, background: `${diffColor[guide.difficulty] || "#fff"}20`, color: diffColor[guide.difficulty] || "#fff", border: `1px solid ${diffColor[guide.difficulty] || "#fff"}40` }}>
-            {guide.difficulty}
+            {guide.difficulty} Guide
           </span>
           <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
             🎮 {guide.game_name}
@@ -170,7 +170,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           </div>
         )}
 
-        {/* Main sections — no mid-article CTA */}
+        {/* Main sections */}
         {content.sections?.map((section: any, i: number) => (
           <div key={i} id={`section-${i}`} style={{ marginBottom: 48 }}>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16, color: "var(--text)" }}>
@@ -245,7 +245,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                 <a key={g.slug} href={`/guides/${g.slug}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 12, padding: "14px 18px", textDecoration: "none", flexWrap: "wrap" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{g.title}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>🎮 {g.game_name} · {g.difficulty}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>🎮 {g.game_name} · {g.difficulty} Guide</div>
                   </div>
                   <span style={{ fontSize: 12, fontWeight: 700, color: "#00b4d8", whiteSpace: "nowrap" }}>Read Guide →</span>
                 </a>
@@ -258,13 +258,15 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
         <div style={{ borderTop: "1px solid var(--border, rgba(255,255,255,0.07))", paddingTop: 32, marginBottom: 24 }}>
           <RobuxCTA variant="card" game={guide.game_name} />
           <p style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginTop: 10, textAlign: "center" }}>
-            BloxQuiz participates in the Amazon Associates program. If you purchase through our link, we earn a small commission at no extra cost to you. <a href="/editorial#affiliate" style={{ color: "var(--text-dim)" }}>Affiliate disclosure</a>
+            BloxQuiz participates in the Amazon Associates program. If you purchase through our link, we earn a small commission at no extra cost to you.{" "}
+            <a href="/editorial#affiliate" style={{ color: "var(--text-dim)" }}>Affiliate disclosure</a>
           </p>
         </div>
 
         {/* Footer attribution */}
         <p style={{ fontSize: 12, color: "var(--text-dim)", textAlign: "center", fontWeight: 600 }}>
-          Written by the BloxQuiz Editorial Team · Last verified {lastVerified} · <a href="/editorial" style={{ color: "var(--text-dim)" }}>Editorial Standards</a>
+          Written by the BloxQuiz Editorial Team · Last verified {lastVerified} ·{" "}
+          <a href="/editorial" style={{ color: "var(--text-dim)" }}>Editorial Standards</a>
         </p>
       </div>
     </>
