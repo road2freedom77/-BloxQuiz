@@ -4,7 +4,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
-import RobuxCTA from "./components/RobuxCTA";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -46,21 +45,11 @@ export const metadata: Metadata = {
   }
 };
 
-const EASTER_START = new Date("2026-04-02");
-const EASTER_END = new Date("2026-04-07T23:59:59");
-
-function isEasterActive() {
-  const now = new Date();
-  return now >= EASTER_START && now <= EASTER_END;
-}
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const easter = isEasterActive();
-
   return (
     <ClerkProvider
       appearance={{
@@ -132,27 +121,8 @@ export default function RootLayout({
           ></script>
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
-          {easter && (
-            <div
-              aria-hidden="true"
-              style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 0,
-                pointerEvents: "none",
-                backgroundImage: "url('/easter-bg.png')",
-                backgroundSize: "100% auto",
-                backgroundPosition: "bottom center",
-                backgroundRepeat: "no-repeat",
-                opacity: 0.18,
-                mixBlendMode: "screen",
-              }}
-            />
-          )}
           <div style={{ position: "relative", zIndex: 1 }}>
             <Nav />
-            {/* Global affiliate banner — appears on every page below nav */}
-            <RobuxCTA variant="banner" />
             {children}
             <Footer />
           </div>
