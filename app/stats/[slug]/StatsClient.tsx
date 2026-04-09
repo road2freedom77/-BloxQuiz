@@ -116,7 +116,7 @@ function buildEditorialAnalysis(
 
   const paragraphs: string[] = [];
 
-  // 1. Current status
+  // 1. Current status + peak context
   const rankText = rank ? ` ranking #${rank} among all tracked Roblox games` : "";
   const peakGap = peak24h && current ? Math.round(((peak24h - current) / peak24h) * 100) : null;
   const peakText = peakGap && peakGap > 10
@@ -129,7 +129,19 @@ function buildEditorialAnalysis(
     `${name} currently has ${formatNumber(current)} concurrent players${rankText}.${peakText}`
   );
 
-  // 2. Hourly trend — what the data shows, no cause speculation
+  // 2. Rank context
+  if (rank) {
+    const rankContext = rank === 1
+      ? `${name} is the most-played tracked game on BloxQuiz right now.`
+      : rank <= 5
+      ? `A #${rank} ranking means ${rank - 1} tracked game${rank - 1 > 1 ? "s have" : " has"} more concurrent players than ${name} at this moment.`
+      : rank <= 20
+      ? `A #${rank} ranking places ${name} in the top 20 most-played tracked games right now.`
+      : `${rank - 1} tracked games currently have more concurrent players than ${name}.`;
+    paragraphs.push(rankContext);
+  }
+
+  // 3. Hourly trend — what the data shows, no cause speculation
   if (snapshots.length >= 6) {
     const recent = snapshots.slice(0, 3).map(s => s.concurrent_players);
     const older = snapshots.slice(3, 6).map(s => s.concurrent_players);
@@ -141,7 +153,7 @@ function buildEditorialAnalysis(
       const direction = changePct > 0 ? "up" : "down";
       const strength = Math.abs(changePct) > 20 ? "significantly" : Math.abs(changePct) > 10 ? "notably" : "slightly";
       paragraphs.push(
-        `Over the last few hours, player counts have moved ${direction} ${strength} — ${Math.abs(changePct)}% compared to earlier readings. Check the hourly chart above for the full picture.`
+        `Over the last few hours, player counts have moved ${direction} ${strength} — ${Math.abs(changePct)}% compared to earlier readings. The hourly chart above shows the full shape of today's curve.`
       );
     } else {
       paragraphs.push(
@@ -150,7 +162,7 @@ function buildEditorialAnalysis(
     }
   }
 
-  // 3. Week-over-week — data only, no cause claims
+  // 4. Week-over-week — data only, no cause claims
   if (dailyStats.length >= 14) {
     const lastWeek = dailyStats.slice(0, 7);
     const prevWeek = dailyStats.slice(7, 14);
@@ -173,7 +185,26 @@ function buildEditorialAnalysis(
     }
   }
 
-  // 4. Server status — factual only
+  // 5. Visit velocity from daily stats
+  if (dailyStats.length >= 1) {
+    const recentDays = dailyStats.slice(0, 7);
+    const totalDelta = recentDays.reduce((a, b) => a + (b.total_visits_delta ?? 0), 0);
+    if (totalDelta > 0) {
+      const perDay = Math.round(totalDelta / recentDays.length);
+      paragraphs.push(
+        `${name} has added an average of ${formatVisits(perDay)} visits per day over the past ${recentDays.length} days, based on tracked visit snapshots.`
+      );
+    }
+  }
+
+  // 6. Favorites context
+  if (game.favorites && game.favorites > 0) {
+    paragraphs.push(
+      `${formatNumber(game.favorites)} players have added ${name} to their Roblox favorites, meaning they have bookmarked it for return visits.`
+    );
+  }
+
+  // 7. Server status — factual only
   const isGoodTime = peakGap !== null && peakGap <= 15;
 
   if (rank && rank <= 10 && isGoodTime) {
