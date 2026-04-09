@@ -10,6 +10,16 @@ const diffColors: Record<string, { color: string; bg: string }> = {
 };
 
 const difficulties = ["All", "Easy", "Medium", "Hard"];
+
+const INTENTS = [
+  { id: "all", label: "All Quizzes", emoji: "🎮", keywords: [] },
+  { id: "new-player", label: "New Player", emoji: "🚀", keywords: ["beginner", "starter", "new player", "first steps", "essentials", "basics", "getting started", "newcomer"] },
+  { id: "lore", label: "Lore & Story", emoji: "📖", keywords: ["lore", "story", "history", "legend", "mystery", "secret", "hidden", "origin", "chronicles", "mysteries"] },
+  { id: "trading", label: "Trading", emoji: "💱", keywords: ["trading", "trade", "values", "market", "economy", "rarity", "rare", "worth"] },
+  { id: "updates", label: "Updates", emoji: "🔄", keywords: ["update", "updates", "new content", "latest", "patch", "season", "new features"] },
+  { id: "hard", label: "Expert Only", emoji: "💀", keywords: ["expert", "advanced", "master", "elite", "ultimate", "champion", "hardest"] },
+];
+
 const PAGE_SIZE = 12;
 
 type Quiz = {
@@ -48,6 +58,7 @@ export default function BrowseClient({
       ? initialDifficulty.charAt(0).toUpperCase() + initialDifficulty.slice(1)
       : "All"
   );
+  const [intentFilter, setIntentFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [hydrated, setHydrated] = useState(false);
@@ -87,12 +98,19 @@ export default function BrowseClient({
 
   useEffect(() => {
     setPage(1);
-  }, [gameFilter, diffFilter, search]);
+  }, [gameFilter, diffFilter, intentFilter, search]);
+
+  const activeIntent = INTENTS.find(i => i.id === intentFilter) || INTENTS[0];
 
   const filtered = quizzes.filter((q) => {
     if (gameFilter !== "All" && q.game !== gameFilter) return false;
     if (diffFilter !== "All" && q.difficulty !== diffFilter) return false;
     if (search && !q.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (activeIntent.keywords.length > 0) {
+      const titleLower = q.title.toLowerCase();
+      const matches = activeIntent.keywords.some(kw => titleLower.includes(kw));
+      if (!matches) return false;
+    }
     return true;
   });
 
@@ -112,7 +130,7 @@ export default function BrowseClient({
           disabled={page === 1}
           style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: page === 1 ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: "var(--surface)", color: page === 1 ? "var(--text-dim)" : "var(--text-muted)", opacity: page === 1 ? 0.4 : 1 }}
         >{"← Prev"}</button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
           <button
             key={p}
             onClick={() => { setPage(p); scrollToGrid(); }}
@@ -130,6 +148,8 @@ export default function BrowseClient({
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 40px" }}>
+
+      {/* Search */}
       <div className="quiz-grid-top" style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
         <input
           type="text"
@@ -139,6 +159,34 @@ export default function BrowseClient({
           style={{ padding: "10px 20px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 100, color: "var(--text)", fontSize: 14, fontFamily: "var(--font-body)", fontWeight: 600, outline: "none", minWidth: 240 }}
         />
       </div>
+
+      {/* Intent filter — what are you looking for? */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-dim)", marginBottom: 8 }}>
+          What are you looking for?
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {INTENTS.map((intent) => {
+            const active = intentFilter === intent.id;
+            return (
+              <button
+                key={intent.id}
+                onClick={() => setIntentFilter(intent.id)}
+                style={{
+                  padding: "7px 16px", borderRadius: 100, border: active ? "1px solid rgba(0,212,255,0.4)" : "1px solid var(--border)",
+                  cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12,
+                  background: active ? "rgba(0,212,255,0.12)" : "var(--surface)",
+                  color: active ? "var(--neon-blue)" : "var(--text-muted)",
+                }}
+              >
+                {intent.emoji} {intent.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Game filter */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         {gamesList.map((g) => (
           <button key={g} onClick={() => setGameFilter(g)}
@@ -146,6 +194,8 @@ export default function BrowseClient({
           >{g}</button>
         ))}
       </div>
+
+      {/* Difficulty filter */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {difficulties.map((d) => (
           <button key={d} onClick={() => setDiffFilter(d)}
@@ -154,15 +204,28 @@ export default function BrowseClient({
         ))}
       </div>
 
+      {/* Results count */}
       {hydrated && filtered.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>
             {"Showing " + ((page - 1) * PAGE_SIZE + 1) + "–" + Math.min(page * PAGE_SIZE, filtered.length) + " of " + filtered.length + " quizzes"}
+            {intentFilter !== "all" && (
+              <span style={{ marginLeft: 8, color: "var(--neon-blue)" }}>· {activeIntent.emoji} {activeIntent.label}</span>
+            )}
           </div>
           <Pagination />
         </div>
       )}
 
+      {hydrated && filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: "48px 0", color: "var(--text-muted)", fontWeight: 700 }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
+          <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>No quizzes found</div>
+          <div style={{ fontSize: 14 }}>Try adjusting your filters or search term</div>
+        </div>
+      )}
+
+      {/* Quiz grid */}
       {hydrated && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
           {paginated.map((quiz) => {
