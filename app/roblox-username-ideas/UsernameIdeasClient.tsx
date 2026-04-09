@@ -46,21 +46,21 @@ const CATEGORIES = [
       "MidnightRose", "SilkMoon", "CloudPetal", "GlowingSoul", "IvoryDream",
       "LavenderMist", "PeachBloom", "AngelsWing", "SoftNova", "BlossomsEnd",
       "TwilightPetal", "DewdropSoul", "MoonflowerX", "CandyCloud", "GlitterMist",
-      "RosyDawn", "SilkPetal", "LunarDream", "CrystalMist", "AuroraBloom",
-      "StarPetal", "MidnightDew", "IvorySoul", "LavenderBloom", "PeachMist",
-      "CloudDream", "GlowPetal", "SoftBloom", "BlossomsGlow", "TwilightMist",
-      "DewdropDream", "MoonflowerSoft", "CandyPetal", "GlitterBloom", "RosyMist",
-      "SilkDream", "LunarPetal", "CrystalBloom", "AuroraMist", "StarDream",
-      "MidnightPetal", "IvoryBloom", "LavenderDream", "PeachBloom", "CloudMist",
-      "GlowDream", "SoftMist", "BlossomsDew", "TwilightBloom", "DewdropMist",
-      "MoonflowerDream", "CandyMist", "GlitterDream", "RosyBloom", "SilkBloom",
-      "LunarMist", "CrystalDream", "AuroraPetal", "StarBloom", "MidnightBloom",
-      "IvoryMist", "LavenderPetal", "PeachDream", "CloudBloom", "GlowMist",
-      "SoftDream", "BlossomsPetal", "TwilightDream", "DewdropBloom", "MoonflowerMist",
-      "CandyBloom", "GlitterPetal", "RosyDream", "SilkMist", "LunarBloom",
-      "CrystalPetal", "AuroraDream", "StarMist", "MidnightMist", "IvoryPetal",
-      "LavenderMist", "PeachPetal", "CloudPetal", "GlowBloom", "SoftPetal",
-      "BlossomsBloom", "TwilightPetal", "DewdropPetal", "MoonflowerBloom", "CandyDream",
+      "RosyDawn", "SilkPetal", "CrystalMist", "AuroraBloom", "StarPetal",
+      "MidnightDew", "IvorySoul", "PeachMist", "CloudDream", "GlowPetal",
+      "SoftBloom", "BlossomsGlow", "TwilightMist", "DewdropDream", "MoonflowerSoft",
+      "CandyPetal", "GlitterBloom", "RosyMist", "SilkDream", "CrystalBloom",
+      "AuroraMist", "StarDream", "MidnightPetal", "IvoryBloom", "PeachDream",
+      "CloudMist", "GlowDream", "SoftMist", "BlossomsDew", "TwilightBloom",
+      "DewdropMist", "MoonflowerDream", "CandyMist", "GlitterDream", "RosyBloom",
+      "SilkBloom", "CrystalDream", "AuroraPetal", "StarBloom", "MidnightBloom",
+      "IvoryMist", "PeachPetal", "CloudBloom", "GlowMist", "SoftDream",
+      "BlossomsPetal", "TwilightDream", "DewdropBloom", "MoonflowerMist", "CandyBloom",
+      "GlitterPetal", "RosyDream", "SilkMist", "CrystalPetal", "AuroraDream",
+      "StarMist", "MidnightMist", "IvoryPetal", "PetalDrift", "CloudPetal",
+      "GlowBloom", "SoftPetal", "BlossomsBloom", "TwilightPetal", "DewdropPetal",
+      "MoonflowerBloom", "CandyDream", "SnowblossomX", "VioletMist", "RoseEther",
+      "LunarPetal", "FrostBloom", "PastelHaze", "CherryMist", "DawnRose",
     ],
   },
   {
@@ -78,8 +78,8 @@ const CATEGORIES = [
       "SpaghettiStrike", "RavioliRaider", "GnocchiGhost", "LasagnaLord", "PennePhantom",
       "UnicornDestroyer", "FluffyDarkLord", "CuddleReaper", "SleepyAssassin", "LazySlayer",
       "AngryToaster", "GrumpyCactus", "SassyPotato", "ChunkyMonkey", "TinyDestroyer",
-      "MightyMuffin", "FerocioousKitten", "DangerousDaisy", "DeadlyBunny", "FuriousPuppy",
-      "ChaosNoodle", "SilentFart", "LoudBurp", "SneezyNinja", "ClumsySword",
+      "MightyMuffin", "FerociousKitten", "DangerousDaisy", "DeadlyBunny", "FuriousPuppy",
+      "ChaosNoodle", "LoudBurp", "SneezyNinja", "ClumsySword",
       "WobblyKnight", "SlipperyMage", "ConfusedWarrior", "LostPaladin", "BrokenQuest",
       "AFK_Again", "WrongButton", "OopsILied", "TryingMyBest", "NotANoob",
       "TotallySkilled", "ProGamerMoves", "CarryMePlz", "NeedMoreCoffee", "SendHelp",
@@ -90,7 +90,7 @@ const CATEGORIES = [
       "EnterKeyMaster", "ShiftLockKing", "CapsLockCrazy", "DeleteButton", "BackspaceWarrior",
       "TabNavigation", "ScrollWheelGod", "RightClickPro", "DoubleClicker", "DragAndDrop",
       "CopyPasteNinja", "UndoPro", "RedoWarrior", "SelectAllHero", "FindAndReplace",
-      "AutoCorrectFail", "SpellCheckOff", "GrammarNazi", "PunctuationKing", "EllipsisUser",
+      "AutoCorrectFail", "SpellCheckOff", "PunctuationKing", "EllipsisUser", "TypoMaster",
     ],
   },
   {
@@ -110,7 +110,7 @@ const CATEGORIES = [
       "MaxDamage", "CriticalHit", "InstaDeath", "SwiftElim", "QuickScope",
       "NightVision", "WallBanger", "DropShot", "JigglePeak", "CounterStrike",
       "FragMaster", "ElimChain", "KillStreak", "MultiFrag", "UltraKill",
-      "MegaKill", "MonsterKill", "GodlikeKill", "HolyShit", "BeyondGodlike",
+      "MegaKill", "MonsterKill", "GodlikeKill", "BeyondGodlike", "UltraInstinct",
       "UnrealKill", "WickedSick", "LudicrisSpeed", "RampageKill", "DominatingKill",
       "KillingSpree", "UnstoppableKill", "FrenzyKill", "BloodBathKill", "WarCryKill",
       "BerserkKill", "CarryHard", "SmurfAccount", "EasyGame", "GGnoRe",
@@ -200,17 +200,17 @@ const CATEGORIES = [
       "Byte", "Bit", "Bool", "Base", "Bash",
       "Core", "Code", "Coil", "Coin", "Cope",
       "Dark", "Dusk", "Dust", "Daze", "Dare",
-      "Edge", "Echo", "Even", "Evil", "Epic",
+      "Edge", "Echo", "Even", "Epic", "Ember",
       "Fade", "Fall", "Fast", "Fate", "Fire",
       "Glow", "Gloom", "Grid", "Grim", "Grip",
       "Haze", "Heat", "Heel", "Hero", "High",
-      "Iron", "Ire", "Icon", "Idle", "Iota",
+      "Iron", "Icon", "Idle", "Iota", "Iris",
       "Jade", "Jolt", "Jump", "Just", "Jest",
-      "Keen", "Kill", "King", "Knot", "Know",
+      "Keen", "Kill", "King", "Knot", "Knox",
       "Lash", "Last", "Lean", "Lore", "Lost",
       "Mach", "Mark", "Meld", "Melt", "Mesh",
       "Neon", "Nite", "Node", "Noir", "Null",
-      "Onyx", "Orb", "Ore", "Omen", "Only",
+      "Onyx", "Orb", "Ore", "Omen", "Opal",
     ],
   },
   {
@@ -290,7 +290,7 @@ const CATEGORIES = [
       "GraveDigger", "CoffinNail", "BodySnatcher", "SoulStealer", "LifeTaker",
       "DeathBringer", "DoomBringer", "CurseBringer", "PlagueBringer", "ChaosMonger",
       "FearMonger", "DreadMonger", "HorrorMonger", "TerrorMonger", "PanicMonger",
-      "CreepyCrawler", "NightCrawler", "DarkCrawler", "ShadowCrawler", "VoidCrawler",
+      "CreepyCrawler", "NightCrawler", "DarkCrawler", "ShadowCrawler", "DarkLurker",
       "BloodyMary", "SlenderWalks", "JeffTheKnight", "JaneTheReaper", "BenDrowning",
       "SCP173", "SCP096", "SCP049", "SCP682", "SCP2399",
       "Enderman", "HerobrineSees", "NullAndVoid", "EntityUnknown", "ErrorEntity",
@@ -387,7 +387,6 @@ export default function UsernameIdeasClient() {
         <p style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, maxWidth: 700, marginBottom: 24 }}>
           Finding the perfect Roblox username is hard — especially when everything seems taken. Browse our massive list of cool, aesthetic, funny, tryhard, and themed username ideas. Click any name to copy it instantly.
         </p>
-        {/* Stats row */}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           {[
             { label: "Total Names", value: TOTAL.toLocaleString(), color: "var(--neon-blue)" },
@@ -415,7 +414,6 @@ export default function UsernameIdeasClient() {
             color: "var(--text)", outline: "none", boxSizing: "border-box",
           }}
         />
-        {/* Category filter pills */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button
             onClick={() => setActiveCategory("all")}
@@ -511,7 +509,6 @@ export default function UsernameIdeasClient() {
 
       {/* SEO content section */}
       <div style={{ marginTop: 64, display: "flex", flexDirection: "column", gap: 32 }}>
-
         <section>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 12 }}>How to Pick the Perfect Roblox Username</h2>
           <p style={{ fontSize: 15, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.8 }}>
@@ -540,7 +537,6 @@ export default function UsernameIdeasClient() {
           </p>
         </section>
 
-        {/* CTA */}
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "32px 28px", textAlign: "center" }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🎮</div>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>Ready to Test Your Roblox Knowledge?</h2>
@@ -557,7 +553,6 @@ export default function UsernameIdeasClient() {
           </div>
         </div>
 
-        {/* FAQ */}
         <section>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16 }}>Frequently Asked Questions</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -575,7 +570,6 @@ export default function UsernameIdeasClient() {
             ))}
           </div>
         </section>
-
       </div>
     </div>
   );
