@@ -15,6 +15,14 @@ export const metadata = {
   },
 };
 
+function stripGameName(title: string, gameName: string): string {
+  // Remove leading game name (and variants) from title
+  return title
+    .replace(new RegExp(`^${gameName}[!]?\\s*`, "i"), "")
+    .replace(/^Beginner\s+/i, "")
+    .trim();
+}
+
 export default async function GuidesHubPage() {
   const { data: guides } = await supabaseAdmin
     .from("game_guides")
@@ -24,6 +32,11 @@ export default async function GuidesHubPage() {
 
   const allGuides = guides ?? [];
   const guideCount = allGuides.length;
+
+  // Most recently updated guide date for hub freshness signal
+  const lastReviewed = allGuides.length > 0
+    ? new Date(allGuides[0].updated_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "April 2026";
 
   const diffColor: Record<string, string> = {
     Beginner: "#00f5a0",
@@ -40,6 +53,13 @@ export default async function GuidesHubPage() {
     "adopt-me": "🐾",
     "brookhaven-rp": "🏠",
     "royale-high": "👑",
+    "grow-a-garden": "🌱",
+    "tower-of-hell": "🏗️",
+    "arsenal": "🔫",
+    "berry-avenue": "🏙️",
+    "anime-defenders": "⚡",
+    "da-hood": "🎯",
+    "fisch": "🎣",
   };
 
   return (
@@ -60,7 +80,7 @@ export default async function GuidesHubPage() {
         Free beginner guides for the most popular Roblox games. Each guide covers getting started, key mechanics, best strategies, common mistakes, and a clear progression path. Written and reviewed by the BloxQuiz editorial team.
       </p>
       <div style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, marginBottom: 40 }}>
-        {guideCount} {guideCount === 1 ? "guide" : "guides"} available · Updated regularly · <a href="/editorial" style={{ color: "var(--text-dim)" }}>Editorial Standards</a>
+        {guideCount} {guideCount === 1 ? "guide" : "guides"} available · Last reviewed {lastReviewed} · <a href="/editorial" style={{ color: "var(--text-dim)" }}>Editorial Standards</a>
       </div>
 
       {/* Guides grid */}
@@ -75,12 +95,12 @@ export default async function GuidesHubPage() {
           {allGuides.map((guide: any) => {
             const emoji = gameEmoji[guide.game_slug] || "🎮";
             const lastUpdated = new Date(guide.updated_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+            const cardTitle = stripGameName(guide.title, guide.game_name);
             return (
               <a
                 key={guide.slug}
                 href={`/guides/${guide.slug}`}
-                style={{ display: "flex", flexDirection: "column", background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 16, padding: "24px", textDecoration: "none" }}
-              >
+                style={{ display: "flex", flexDirection: "column", background: "var(--bg-card, #111827)", border: "1px solid var(--border, rgba(255,255,255,0.07))", borderRadius: 16, padding: "24px", textDecoration: "none" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 28 }}>{emoji}</span>
@@ -91,7 +111,7 @@ export default async function GuidesHubPage() {
                   </span>
                 </div>
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text)", marginBottom: 10, lineHeight: 1.3 }}>
-                  {guide.title}
+                  {cardTitle}
                 </h2>
                 {guide.excerpt && (
                   <p style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 16, flex: 1 }}>
