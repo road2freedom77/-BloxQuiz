@@ -44,6 +44,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/roblox-bio-generator`,                lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/roblox-group-name-generator`,         lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/roblox-duo-names`,                    lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    // Guides hub
+    { url: `${BASE}/guides`,                              lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
     // Other static
     { url: `${BASE}/champions`,                           lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/rules`,                               lastModified: now, changeFrequency: "monthly", priority: 0.6 },
@@ -150,13 +152,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (_) {}
 
+  // ─── Guide pages ──────────────────────────────────────────────────
+  let guidePages: MetadataRoute.Sitemap = [];
+  try {
+    const { data: guides } = await supabaseAdmin
+      .from("game_guides")
+      .select("slug, updated_at")
+      .eq("status", "published");
+    if (guides) {
+      guidePages = guides.map(g => ({
+        url: `${BASE}/guides/${g.slug}`,
+        lastModified: g.updated_at ? new Date(g.updated_at) : now,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      }));
+    }
+  } catch (_) {}
+
   return [
-    ...staticPages,   // ~35 URLs
+    ...staticPages,   // ~36 URLs
     ...codesPages,    // ~96 URLs
     ...quizPages,     // ~373 URLs
     ...gameHubPages,  // ~97 URLs
     ...statsPages,    // ~190 URLs (95 games × 2: stats + history)
     ...comparePages,  // ~990 URLs (top 45 games, 5K+ players, all pairs)
+    ...guidePages,    // ~5 URLs (grows as drafts are published)
   ];
-  // Target total: ~1,781 URLs
+  // Target total: ~1,787 URLs
 }
