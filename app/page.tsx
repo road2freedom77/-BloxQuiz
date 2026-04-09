@@ -18,6 +18,7 @@ const EDITOR_PICK = {
   title: "Best Blox Fruits Quiz Set",
   description: "34 quizzes covering fruits, combat, trading, and lore — the deepest quiz collection on BloxQuiz.",
   href: "/games/blox-fruits",
+  timestamp: "Updated Apr 2026",
 };
 
 const GAME_EMOJI: Record<string, string> = {
@@ -37,6 +38,20 @@ const GAME_EMOJI: Record<string, string> = {
   "da-hood": "🎯",
   "fisch": "🎣",
 };
+
+function formatFreshTimestamp(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 60) return `Updated ${diffMins}m ago`;
+  if (diffHours < 24) return `Updated ${diffHours}h ago`;
+  if (diffDays === 1) return "Updated yesterday";
+  return `Updated ${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+}
 
 function GuidesSection({ guides }: { guides: any[] }) {
   if (guides.length === 0) return null;
@@ -58,7 +73,7 @@ function GuidesSection({ guides }: { guides: any[] }) {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 <span style={{ fontSize: 24 }}>{emoji}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{guide.game_name}</span>
-                <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "#00f5a0", border: "1px solid rgba(0,245,160,0.2)" }}>{guide.difficulty}</span>
+                <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "#00f5a0", border: "1px solid rgba(0,245,160,0.2)" }}>{guide.difficulty} Guide</span>
               </div>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>
                 {cardTitle}
@@ -79,8 +94,8 @@ function FreshOnBloxQuiz({
   newestGuide,
   trendingGame,
 }: {
-  newestGuide: { slug: string; title: string; game_name: string; game_slug: string } | null;
-  trendingGame: { name: string; slug: string; current_players: number | null } | null;
+  newestGuide: { slug: string; title: string; game_name: string; game_slug: string; created_at: string } | null;
+  trendingGame: { name: string; slug: string; current_players: number | null; last_updated: string | null } | null;
 }) {
   const cards = [
     newestGuide ? {
@@ -89,6 +104,7 @@ function FreshOnBloxQuiz({
       title: newestGuide.title.replace(new RegExp(`^${newestGuide.game_name}[!]?\\s*`, "i"), "").trim(),
       description: `A new ${newestGuide.game_name} beginner's guide just landed — tips, strategies, and a full progression path.`,
       href: `/guides/${newestGuide.slug}`,
+      timestamp: formatFreshTimestamp(newestGuide.created_at),
     } : null,
     trendingGame ? {
       label: "Trending Now",
@@ -96,6 +112,7 @@ function FreshOnBloxQuiz({
       title: `${trendingGame.name} is moving`,
       description: `${trendingGame.current_players ? `${Math.round(trendingGame.current_players / 1000)}K players online right now.` : "Player count rising."} Check the live stats.`,
       href: `/stats/${trendingGame.slug}`,
+      timestamp: trendingGame.last_updated ? formatFreshTimestamp(trendingGame.last_updated) : "Updated hourly",
     } : null,
     {
       label: EDITOR_PICK.label,
@@ -103,8 +120,9 @@ function FreshOnBloxQuiz({
       title: EDITOR_PICK.title,
       description: EDITOR_PICK.description,
       href: EDITOR_PICK.href,
+      timestamp: EDITOR_PICK.timestamp,
     },
-  ].filter(Boolean) as { label: string; emoji: string; title: string; description: string; href: string }[];
+  ].filter(Boolean) as { label: string; emoji: string; title: string; description: string; href: string; timestamp: string }[];
 
   if (cards.length === 0) return null;
 
@@ -131,7 +149,10 @@ function FreshOnBloxQuiz({
             <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 12, flex: 1 }}>
               {card.description}
             </p>
-            <span style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)" }}>View →</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto" }}>
+              <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{card.timestamp}</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)" }}>View →</span>
+            </div>
           </a>
         ))}
       </div>
@@ -193,7 +214,7 @@ async function getNewestGuide() {
   try {
     const { data } = await supabaseAdmin
       .from("game_guides")
-      .select("slug, title, game_name, game_slug")
+      .select("slug, title, game_name, game_slug, created_at")
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(1)
@@ -204,15 +225,13 @@ async function getNewestGuide() {
 
 async function getTrendingGame() {
   try {
-    // Get the game with the biggest player count increase in last 2 snapshots
     const { data: games } = await supabaseAdmin
       .from("roblox_games")
-      .select("slug, name, current_players")
+      .select("slug, name, current_players, last_updated")
       .eq("is_tracked", true)
       .order("current_players", { ascending: false, nullsFirst: false })
       .limit(20);
     if (!games || games.length === 0) return null;
-    // Return #2 ranked game (not #1 which is always dominant) for variety
     return games[1] ?? games[0];
   } catch { return null; }
 }
