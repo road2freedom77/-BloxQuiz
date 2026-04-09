@@ -105,7 +105,7 @@ export default async function GuidesHubPage() {
                     <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>{guide.game_name}</span>
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: `${diffColor[guide.difficulty] || "#fff"}20`, color: diffColor[guide.difficulty] || "#fff", border: `1px solid ${diffColor[guide.difficulty] || "#fff"}40` }}>
-                    {guide.difficulty}
+                    {guide.difficulty} Guide
                   </span>
                 </div>
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text)", marginBottom: 10, lineHeight: 1.3 }}>
