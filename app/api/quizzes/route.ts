@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../lib/supabase";
 import { supabaseAdmin } from "../../lib/supabase";
-import fs from "fs";
-import path from "path";
-
-const staticQuizzes = [
-  { slug: "blox-fruits-ultimate", title: "Ultimate Blox Fruits Expert Quiz", game: "Blox Fruits", difficulty: "Hard", questions: 10, emoji: "🍎⚔️🌊", thumb: "linear-gradient(135deg, #1a0a2e, #3d1a5c)" },
-  { slug: "brookhaven-secrets", title: "Brookhaven Secrets You Didn't Know", game: "Brookhaven", difficulty: "Easy", questions: 10, emoji: "🏠🚗👨‍👩‍👧", thumb: "linear-gradient(135deg, #0a1628, #1a3a5c)" },
-  { slug: "adopt-me-pets", title: "Name That Pet! — Adopt Me Edition", game: "Adopt Me!", difficulty: "Medium", questions: 10, emoji: "🐶🦄🥚✨", thumb: "linear-gradient(135deg, #2a1a0a, #5c3a1a)" },
-];
 
 const gameEmojis: Record<string, string> = {
   "Blox Fruits": "⚔️",
@@ -54,7 +46,7 @@ const gameThumbs: Record<string, string> = {
   "Fisch": "linear-gradient(135deg, #0a1a2a, #0a3a5c)",
 };
 
-async function getThumbnailsBySlug(): Promise<Record<string, string>> {
+async function getThumbnailsByName(): Promise<Record<string, string>> {
   try {
     const { data } = await supabaseAdmin
       .from("roblox_games")
@@ -76,7 +68,7 @@ export async function GET(request: Request) {
   const limit = parseInt(searchParams.get("limit") || "200");
   const game = searchParams.get("game") || null;
 
-  const [thumbnails] = await Promise.all([getThumbnailsBySlug()]);
+  const thumbnails = await getThumbnailsByName();
 
   function getThumb(gameName: string): string {
     return thumbnails[gameName]
@@ -84,80 +76,33 @@ export async function GET(request: Request) {
       : gameThumbs[gameName] || "linear-gradient(135deg, #1a1a2e, #3d1a5c)";
   }
 
-  const slugsSeen = new Set<string>();
-  const allQuizzes: any[] = [];
-
-  // Load JSON quizzes
   try {
-    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const files = fs.readdirSync(quizzesDir).reverse();
-    for (const file of files) {
-      if (!file.endsWith(".json")) continue;
-      const content = JSON.parse(fs.readFileSync(path.join(quizzesDir, file), "utf8"));
-      const slug = file.replace(".json", "");
-      if (!slugsSeen.has(slug)) {
-        allQuizzes.push({
-          slug,
-          title: content.title,
-          game: content.game,
-          difficulty: content.difficulty,
-          questions: content.questions?.length || 10,
-          emoji: gameEmojis[content.game] || "🎮",
-          thumb: getThumb(content.game),
-          thumbIsImage: !!thumbnails[content.game],
-          source: "json",
-        });
-        slugsSeen.add(slug);
-      }
-    }
-  } catch (e) {}
-
-  // Load Supabase quizzes
-  try {
-    const { data } = await supabase
+    let query = supabase
       .from("quizzes")
       .select("slug, title, game, difficulty, questions, published_at")
-      .neq("status", "draft")
+      .eq("status", "published")
       .order("published_at", { ascending: false });
 
-    if (data) {
-      for (const q of data) {
-        if (!slugsSeen.has(q.slug)) {
-          allQuizzes.push({
-            slug: q.slug,
-            title: q.title,
-            game: q.game,
-            difficulty: q.difficulty,
-            questions: Array.isArray(q.questions) ? q.questions.length : 10,
-            emoji: gameEmojis[q.game] || "🎮",
-            thumb: getThumb(q.game),
-            thumbIsImage: !!thumbnails[q.game],
-            source: "generated",
-            published_at: q.published_at,
-          });
-          slugsSeen.add(q.slug);
-        }
-      }
+    if (game) {
+      query = query.ilike("game", `%${game}%`);
     }
-  } catch (e) {}
 
-  // Add static quizzes not already included
-  for (const q of staticQuizzes) {
-    if (!slugsSeen.has(q.slug)) {
-      allQuizzes.push({
-        ...q,
-        thumb: getThumb(q.game),
-        thumbIsImage: !!thumbnails[q.game],
-        source: "static",
-      });
-      slugsSeen.add(q.slug);
-    }
+    const { data } = await query.limit(limit);
+
+    const quizzes = (data ?? []).map(q => ({
+      slug: q.slug,
+      title: q.title,
+      game: q.game,
+      difficulty: q.difficulty,
+      questions: Array.isArray(q.questions) ? q.questions.length : 10,
+      emoji: gameEmojis[q.game] || "🎮",
+      thumb: getThumb(q.game),
+      thumbIsImage: !!thumbnails[q.game],
+      published_at: q.published_at,
+    }));
+
+    return NextResponse.json({ quizzes });
+  } catch {
+    return NextResponse.json({ quizzes: [] });
   }
-
-  let result = allQuizzes;
-  if (game) {
-    result = result.filter(q => q.game.toLowerCase().includes(game.toLowerCase()));
-  }
-
-  return NextResponse.json({ quizzes: result.slice(0, limit) });
 }
