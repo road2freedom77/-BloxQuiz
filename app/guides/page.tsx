@@ -16,10 +16,8 @@ export const metadata = {
 };
 
 function stripGameName(title: string, gameName: string): string {
-  // Remove leading game name (and variants) from title
   return title
     .replace(new RegExp(`^${gameName}[!]?\\s*`, "i"), "")
-    .replace(/^Beginner\s+/i, "")
     .trim();
 }
 
