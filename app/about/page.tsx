@@ -7,7 +7,7 @@ export const metadata = {
 
 const STATS = [
   { value: "95+", label: "Games Tracked" },
-  { value: "400+", label: "Free Quizzes" },
+  { value: "550+", label: "Free Quizzes" },
   { value: "Hourly", label: "Stats Updates" },
   { value: "15", label: "Game Guides" },
 ];
