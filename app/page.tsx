@@ -8,7 +8,6 @@ import EmailSignup from "./components/EmailSignup";
 import UsernameGeneratorBanner from "./components/UsernameGeneratorBanner";
 import { supabase, supabaseAdmin } from "./lib/supabase";
 import WhySignUp from "./components/WhySignUp";
-import RobuxCTA from "./components/RobuxCTA";
 
 const DAILY_CHALLENGE_THRESHOLD = 50;
 
@@ -239,9 +238,6 @@ export default async function Home() {
       <GameCategories />
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
-      <div style={{ maxWidth: 1200, margin: "16px auto 0", padding: "0 24px 32px" }}>
-        <RobuxCTA variant="default" />
-      </div>
       <WhySignUp />
       {showDailyChallenge && <DailyChallenge initialDaily={initialDaily} />}
       <Codes />
