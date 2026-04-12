@@ -67,27 +67,6 @@ const gameEmojis: Record<string, string> = {
   "Dress to Impress": "👗",
 };
 
-const whatYouLearn: Record<string, string> = {
-  "Blox Fruits": "Covers fruits, combat mechanics, sea progression, boss strategies and awakening requirements.",
-  "Brookhaven RP": "Covers locations, hidden secrets, vehicles, roleplay scenarios and game mechanics.",
-  "Adopt Me!": "Covers pets, eggs, trading values, legendary rarities and game currency.",
-  "Tower of Hell": "Covers stages, modifiers, rings, obstacle types and section mechanics.",
-  "Murder Mystery 2": "Covers weapons, maps, roles, godly items and trading strategies.",
-  "Grow a Garden": "Covers plants, seeds, tools, harvesting mechanics and rare crop mutations.",
-  "Royale High": "Covers diamonds, halos, trading, realms and seasonal event rewards.",
-  "Doors": "Covers entities, floors, items, hidden secrets and survival strategies.",
-  "Arsenal": "Covers weapons, maps, game modes, killstreaks and combat mechanics.",
-  "Anime Fighting Simulator": "Covers stands, transformations, training zones, quirks and benchmarks.",
-  "Berry Avenue": "Covers locations, roleplay scenarios, vehicles, jobs and hidden features.",
-  "Livetopia": "Covers locations, activities, jobs, vehicles and game secrets.",
-  "Natural Disaster Survival": "Covers disasters, survival strategies, maps and rare events.",
-  "Anime Defenders": "Covers units, traits, evolutions, stages and summon mechanics.",
-  "Funky Friday": "Covers songs, arrow patterns, ranks, characters and battle mechanics.",
-  "Kick Off": "Covers teams, skills, tactics, power shots and tournament mechanics.",
-  "Bee Swarm Simulator": "Covers bee types, hive mechanics, field pollen values, NPC quests, amulet crafting and seasonal events.",
-  "Dress to Impress": "Covers themes, outfit scoring, accessories, runway mechanics, VIP items and styling strategies.",
-};
-
 function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionIndex: number }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -195,9 +174,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   }, [user?.id]);
 
   async function saveScore(finalScore: number) {
-    // Guard against corrupted scores — must be integer between 0 and total questions
     const safeScore = Math.min(Math.max(0, Math.round(finalScore)), quiz.questions.length);
-
     const today = new Date().toISOString().split("T")[0];
     const month = today.substring(0, 7);
     const basePoints = safeScore * 10;
@@ -446,7 +423,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
         </ol>
       </nav>
 
-      {/* H1 intro block */}
+      {/* Badges + cross-links — title/intro already rendered server-side in page.tsx */}
       {!finished && current === 0 && !answered && (
         <div style={{ marginBottom: 24, textAlign: "center" }}>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
@@ -457,16 +434,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
               <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(184,76,255,0.15)", color: "#B84CFF" }}>{multiplier + "x Points"}</span>
             )}
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 8 }}>{quiz.title}</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: 14, fontWeight: 600, maxWidth: 500, margin: "0 auto 8px" }}>
-            {quiz.intro || ("Test your " + quiz.game + " knowledge across " + quiz.questions.length + " questions. Can you get a perfect score?")}
-          </p>
-          {whatYouLearn[quiz.game] && (
-            <p style={{ color: "var(--text-dim)", fontSize: 13, fontWeight: 600, maxWidth: 500, margin: "0 auto 12px", fontStyle: "italic" }}>
-              {"📚 " + whatYouLearn[quiz.game]}
-            </p>
-          )}
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 4, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <a href={"/games/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-green)", textDecoration: "none" }}>{"More " + quiz.game + " Quizzes →"}</a>
             <span style={{ color: "var(--text-dim)" }}>·</span>
             <a href={"/codes/" + gameSlug} style={{ fontSize: 12, fontWeight: 700, color: "var(--neon-yellow)", textDecoration: "none" }}>{"Free Codes →"}</a>
@@ -528,7 +496,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, background: "var(--gradient-main)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>{score + "/" + quiz.questions.length}</div>
             <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{getResultLabel().label}</div>
 
-            {/* Percentile */}
             {percentile !== null && (
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)", marginBottom: 20 }}>
                 You scored better than{" "}
@@ -616,7 +583,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
               <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>Share your score card on TikTok, Discord or Reddit!</p>
             </div>
 
-            {/* Next quiz + action row */}
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
               {nextQuiz ? (
                 <a href={"/quiz/" + nextQuiz.slug}
