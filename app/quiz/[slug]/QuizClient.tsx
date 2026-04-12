@@ -409,24 +409,13 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   const nextQuiz = relatedQuizzes.find(rq => !playedSlugs.has(rq.slug));
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: "16px 24px 80px", position: "relative", zIndex: 1 }}>
       <canvas ref={canvasRef} style={{ display: "none" }} />
 
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumb" style={{ marginBottom: 16, fontSize: 13, fontWeight: 700, color: "var(--text-dim)" }}>
-        <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-          <li><a href="/" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Home</a></li>
-          <li style={{ color: "var(--text-dim)" }}>{"›"}</li>
-          <li><a href={"/games/" + gameSlug} style={{ color: "var(--text-muted)", textDecoration: "none" }}>{quiz.game}</a></li>
-          <li style={{ color: "var(--text-dim)" }}>{"›"}</li>
-          <li style={{ color: "var(--text)", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{quiz.title}</li>
-        </ol>
-      </nav>
-
-      {/* Badges + cross-links — title/intro already rendered server-side in page.tsx */}
+      {/* Cross-links — shown before quiz starts only */}
       {!finished && current === 0 && !answered && (
         <div style={{ marginBottom: 24, textAlign: "center" }}>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 10, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "rgba(0,217,255,0.1)", color: "var(--neon-blue)" }}>{quiz.game}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: diff.bg, color: diff.color }}>{quiz.difficulty}</span>
             <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, textTransform: "uppercase", background: "var(--surface)", color: "var(--text-muted)" }}>{quiz.questions.length + " Questions"}</span>
