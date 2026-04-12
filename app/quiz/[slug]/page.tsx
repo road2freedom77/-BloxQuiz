@@ -24,6 +24,7 @@ const HOW_IT_WORKS: Record<string, string> = {
   "Kick Off": "Kick Off is a competitive soccer game on Roblox where players score goals using skill moves, passes, and power shots. Team coordination and individual dribbling skill determine match outcomes.",
   "Natural Disaster Survival": "Natural Disaster Survival drops players onto a map and hits them with a random disaster — tornado, earthquake, tsunami, and more. Survival depends on reading the disaster type quickly and finding the right cover or high ground before time runs out.",
   "Livetopia": "Livetopia is a life roleplay game with a fully explorable city, working jobs, vehicles, and homes. Players earn money through jobs and activities, then spend it on upgrades and cosmetics.",
+  "Grand Piece Online": "Grand Piece Online is a Roblox RPG inspired by the One Piece anime, where players explore islands, hunt for Devil Fruits, fight bosses, and unlock powerful races and fighting styles. Progression is tied to your level, gear, and the abilities you unlock as you sail further across the seas.",
 };
 
 const BEGINNER_MISTAKES: Record<string, string[]> = {
@@ -111,6 +112,11 @@ const BEGINNER_MISTAKES: Record<string, string[]> = {
     "Not identifying the disaster type fast enough — the first few seconds are critical for positioning",
     "Staying at ground level during floods and tsunamis — always seek the highest available point immediately",
     "Grouping with other players during lightning storms — spread out to avoid chain deaths",
+  ],
+  "Grand Piece Online": [
+    "Eating the first Devil Fruit you find instead of researching which fruits suit your playstyle — some are far more useful than others",
+    "Skipping island bosses early on, which drop key items and give the fastest XP for your level range",
+    "Ignoring your race and fighting style choices, which have a significant impact on your combat effectiveness in later content",
   ],
 };
 
