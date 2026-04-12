@@ -136,6 +136,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   relatedQuizzes: any[],
   currentSeason?: { name: string, status: string } | null,
 }) {
+  // ── HOOKS — must all come before any early return ──────────────────────────
   const { user } = useUser();
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
@@ -151,17 +152,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   const [percentile, setPercentile] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const q = quiz.questions[current];
-  const letters = ["A", "B", "C", "D"];
-  const pct = Math.round(score / quiz.questions.length * 100);
-  const gameSlug = gameSlugMap[quiz.game] || slugify(quiz.game);
-  const diff = diffColors[quiz.difficulty] || diffColors.Medium;
-  const multiplier = DIFFICULTY_MULTIPLIER[quiz.difficulty] || 1;
-
-  function slugify(text: string) {
-    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  }
-
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -172,6 +162,25 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
         if (data) setPlayedSlugs(new Set(data.map((r: any) => r.quiz_slug)));
       });
   }, [user?.id]);
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // Guard — after ALL hooks
+  if (!quiz || !quiz.questions || !Array.isArray(quiz.questions) || quiz.questions.length === 0) {
+    return null;
+  }
+
+  // Derived values — safe because guard passed
+  function slugify(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  const q = quiz.questions[current];
+  const letters = ["A", "B", "C", "D"];
+  const pct = Math.round(score / quiz.questions.length * 100);
+  const gameSlug = gameSlugMap[quiz.game] || slugify(quiz.game);
+  const diff = diffColors[quiz.difficulty] || diffColors.Medium;
+  const multiplier = DIFFICULTY_MULTIPLIER[quiz.difficulty] || 1;
+  const nextQuiz = relatedQuizzes.find(rq => !playedSlugs.has(rq.slug));
 
   async function saveScore(finalScore: number) {
     const safeScore = Math.min(Math.max(0, Math.round(finalScore)), quiz.questions.length);
@@ -406,13 +415,10 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
     setShared(true);
   }
 
-  const nextQuiz = relatedQuizzes.find(rq => !playedSlugs.has(rq.slug));
-
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "16px 24px 80px", position: "relative", zIndex: 1 }}>
       <canvas ref={canvasRef} style={{ display: "none" }} />
 
-      {/* Cross-links — shown before quiz starts only */}
       {!finished && current === 0 && !answered && (
         <div style={{ marginBottom: 24, textAlign: "center" }}>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 10, flexWrap: "wrap" }}>
@@ -622,7 +628,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
         )}
       </div>
 
-      {/* FAQ */}
       <div style={{ marginTop: 32 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"❓ Frequently Asked Questions"}</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -641,7 +646,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
         </div>
       </div>
 
-      {/* Related Quizzes */}
       {relatedQuizzes.length > 0 && (
         <div style={{ marginTop: 40 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 16 }}>{"🎮 More " + quiz.game + " Quizzes"}</h2>
