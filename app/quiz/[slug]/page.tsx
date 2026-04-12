@@ -52,7 +52,6 @@ async function getCurrentSeason() {
   }
 }
 
-// Derive "what this tests" bullets from quiz metadata
 function buildWhatThisTestes(title: string, game: string, difficulty: string, questionCount: number): string[] {
   const text = (title + " " + game).toLowerCase();
   const bullets: string[] = [];
@@ -84,7 +83,6 @@ function buildWhatThisTestes(title: string, game: string, difficulty: string, qu
   return bullets.slice(0, 4);
 }
 
-// Derive "who should play" from difficulty
 function buildWhoShouldPlay(game: string, difficulty: string, title: string): string {
   const text = (title + " " + game).toLowerCase();
 
@@ -233,8 +231,6 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
     ]
   };
 
-  const letters = ["A", "B", "C", "D"];
-
   return (
     <>
       <script
@@ -242,7 +238,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Visible server-rendered editorial block — crawlable by Google */}
+      {/* Server-rendered editorial block — crawlable by Google */}
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px 0" }}>
 
         {/* Breadcrumb */}
@@ -301,59 +297,6 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
           </p>
         </div>
       </div>
-
-      {/* noscript fallback */}
-      <noscript>
-        <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px" }}>
-          <h1>{quiz.title}</h1>
-          <p>
-            {quiz.intro || `${quiz.game} — ${quiz.difficulty} difficulty — ${questionCount} multiple choice questions. Free ${quiz.game} trivia quiz on BloxQuiz.gg. Test your knowledge, earn XP and compete on the leaderboard.`}
-          </p>
-          <ol>
-            {quiz.questions.map((question: any, i: number) => (
-              <li key={i} style={{ marginBottom: 16 }}>
-                <p><strong>Question {i + 1}:</strong> {question.q}</p>
-                <ul style={{ listStyle: "none", padding: 0 }}>
-                  {question.a.map((answer: string, j: number) => (
-                    <li key={j}>{letters[j]}. {answer}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </noscript>
-
-      {/* Hidden crawlable content */}
-      <section
-        aria-label={`${quiz.title} - All Questions`}
-        style={{
-          position: "absolute",
-          width: 1,
-          height: 1,
-          padding: 0,
-          margin: -1,
-          overflow: "hidden",
-          clip: "rect(0, 0, 0, 0)",
-          whiteSpace: "nowrap",
-          borderWidth: 0,
-        }}
-      >
-        <h2>{quiz.title}</h2>
-        <p>
-          {quiz.intro || `${quiz.game} ${quiz.difficulty} quiz with ${questionCount} questions. Topics covered include ${quiz.game} gameplay, strategies, items, and mechanics. Play free on BloxQuiz.gg and compete on the leaderboard.`}
-        </p>
-        {quiz.questions.map((question: any, i: number) => (
-          <div key={i}>
-            <h3>Question {i + 1}: {question.q}</h3>
-            <ul>
-              {question.a.map((answer: string, j: number) => (
-                <li key={j}>{letters[j]}. {answer}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
 
       <QuizClient quiz={quiz} slug={slug} faqs={faqs} relatedQuizzes={relatedQuizzes} currentSeason={currentSeason} />
     </>
