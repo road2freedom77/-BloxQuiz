@@ -200,16 +200,16 @@ async function getPublishedGuides() {
   try {
     const { data } = await supabaseAdmin
       .from("game_guides")
-      .select("slug, title, game_name, game_slug, difficulty, excerpt")
+      .select("slug, title, game_name, game_slug, difficulty, excerpt, created_at")
       .eq("status", "published")
-      .order("game_slug", { ascending: true });
+      .order("created_at", { ascending: false })
+      .limit(10);
     if (!data || data.length === 0) return [];
     const seed = parseInt(new Date().toISOString().split("T")[0].replace(/-/g, "")) % data.length;
     const rotated = [...data.slice(seed), ...data.slice(0, seed)];
     return rotated.slice(0, 3);
   } catch { return []; }
 }
-
 async function getNewestGuide() {
   try {
     const { data } = await supabaseAdmin

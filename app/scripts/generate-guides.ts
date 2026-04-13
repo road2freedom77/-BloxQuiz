@@ -1,7 +1,7 @@
 /**
  * scripts/generate-guides.ts
  *
- * Generates game guide DRAFTS for the top 5 Roblox games.
+ * Generates game guide DRAFTS for the next 10 Roblox games.
  * Saves to game_guides table with status='draft' — never auto-publishes.
  * Review each guide in Supabase and flip status to 'published' manually.
  *
@@ -19,83 +19,11 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 
 const GAMES = [
   {
-    slug: "adopt-me",
-    name: "Adopt Me!",
-    genre: "Life Sim / Trading",
-    guideSlug: "adopt-me-beginners-guide",
-    title: "Adopt Me! Beginner's Guide (2026) — Pets, Trading & How to Get Started",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "brookhaven-rp",
-    name: "Brookhaven RP",
-    genre: "Roleplay / Social",
-    guideSlug: "brookhaven-rp-beginners-guide",
-    title: "Brookhaven RP Beginner's Guide (2026) — Houses, Jobs & Roleplay Tips",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "grow-a-garden",
-    name: "Grow a Garden",
-    genre: "Farming / Idle",
-    guideSlug: "grow-a-garden-beginners-guide",
-    title: "Grow a Garden Beginner's Guide (2026) — Crops, Upgrades & How to Progress Fast",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "tower-of-hell",
-    name: "Tower of Hell",
-    genre: "Obby / Platformer",
-    guideSlug: "tower-of-hell-beginners-guide",
-    title: "Tower of Hell Beginner's Guide (2026) — How to Climb, Tips & Winning Strategies",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "royale-high",
-    name: "Royale High",
-    genre: "Fantasy / Roleplay",
-    guideSlug: "royale-high-beginners-guide",
-    title: "Royale High Beginner's Guide (2026) — Diamonds, Campus & How to Level Up Fast",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "arsenal",
-    name: "Arsenal",
-    genre: "FPS / Shooter",
-    guideSlug: "arsenal-beginners-guide",
-    title: "Arsenal Beginner's Guide (2026) — Weapons, Kills & How to Win Matches",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "berry-avenue",
-    name: "Berry Avenue",
-    genre: "Roleplay / Social",
-    guideSlug: "berry-avenue-beginners-guide",
-    title: "Berry Avenue Beginner's Guide (2026) — Jobs, Homes & Roleplay Essentials",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "anime-defenders",
-    name: "Anime Defenders",
-    genre: "Tower Defense",
-    guideSlug: "anime-defenders-beginners-guide",
-    title: "Anime Defenders Beginner's Guide (2026) — Units, Summons & How to Progress",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "da-hood",
-    name: "Da Hood",
-    genre: "Action / PvP",
-    guideSlug: "da-hood-beginners-guide",
-    title: "Da Hood Beginner's Guide (2026) — Combat, Money & How to Survive",
-    difficulty: "Beginner",
-  },
-  {
-    slug: "fisch",
-    name: "Fisch",
-    genre: "Fishing / Simulator",
-    guideSlug: "fisch-beginners-guide",
-    title: "Fisch Beginner's Guide (2026) — How to Fish, Rare Catches & Progression Tips",
+    slug: "funky-friday",
+    name: "Funky Friday",
+    genre: "Rhythm / Music",
+    guideSlug: "funky-friday-beginners-guide",
+    title: "Funky Friday Beginner's Guide (2026) — How to Play, Rank Up & Hit Better Notes",
     difficulty: "Beginner",
   },
 ];
@@ -233,8 +161,8 @@ async function saveGuide(game: typeof GAMES[0], content: object) {
 }
 
 async function main() {
-  console.log("BloxQuiz Guide Generator");
-  console.log("========================");
+  console.log("BloxQuiz Guide Generator — Batch 2");
+  console.log("====================================");
   console.log(`Generating ${GAMES.length} guide drafts using Claude Sonnet...`);
   console.log("All guides saved as DRAFT — review in Supabase before publishing.\n");
 
@@ -253,14 +181,13 @@ async function main() {
     await new Promise(r => setTimeout(r, 1000));
   }
 
-  console.log(`\n========================`);
+  console.log(`\n====================================`);
   console.log(`Done. ${success} guides saved as drafts, ${failed} failed.`);
   console.log(`\nNext steps:`);
   console.log(`1. Open Supabase > game_guides table`);
   console.log(`2. Review each guide for factual accuracy`);
   console.log(`3. Edit content directly in Supabase or via admin panel`);
   console.log(`4. Flip status from 'draft' to 'published' when ready`);
-  console.log(`5. Build app/guides/[slug]/page.tsx to render the guides`);
 }
 
 main();
