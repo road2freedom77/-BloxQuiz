@@ -1,28 +1,21 @@
 import { redirect } from "next/navigation";
-import fs from "fs";
-import path from "path";
+import { supabase } from "../../lib/supabase";
 
 export const dynamic = 'force-dynamic';
-export default function RandomQuiz() {
-  const staticSlugs = [
-    "blox-fruits-ultimate",
-    "brookhaven-secrets",
-    "adopt-me-pets",
-    "which-roblox-game",
-  ];
 
-  // Get dynamic quiz slugs
-  const dynamicSlugs: string[] = [];
+export default async function RandomQuiz() {
   try {
-    const quizzesDir = path.join(process.cwd(), "app/data/quizzes");
-    const files = fs.readdirSync(quizzesDir);
-    files.forEach(f => {
-      if (f.endsWith(".json")) dynamicSlugs.push(f.replace(".json", ""));
-    });
+    const { data, count } = await supabase
+      .from("quizzes")
+      .select("slug", { count: "exact" })
+      .eq("status", "published");
+
+    if (data && data.length > 0) {
+      const randomIndex = Math.floor(Math.random() * data.length);
+      redirect(`/quiz/${data[randomIndex].slug}`);
+    }
   } catch (e) {}
 
-  const allSlugs = [...staticSlugs, ...dynamicSlugs];
-  const randomSlug = allSlugs[Math.floor(Math.random() * allSlugs.length)];
-
-  redirect(`/quiz/${randomSlug}`);
+  // Fallback
+  redirect("/browse");
 }
