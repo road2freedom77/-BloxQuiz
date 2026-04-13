@@ -106,7 +106,7 @@ async function generateGuide(game: typeof GAMES[0]): Promise<object | null> {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 4000,
+        max_tokens: 6000,
         messages: [{ role: "user", content: GUIDE_PROMPT(game) }],
       }),
     });
