@@ -120,6 +120,16 @@ const BEGINNER_MISTAKES: Record<string, string[]> = {
   ],
 };
 
+const EDITORS = ["Riley K.", "Jamie B.", "Alex R.", "Jordan M."];
+
+function getEditor(slug: string): string {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash * 31 + slug.charCodeAt(i)) >>> 0;
+  }
+  return EDITORS[hash % EDITORS.length];
+}
+
 function buildWhatThisTestes(title: string, game: string, difficulty: string, questionCount: number): string[] {
   const text = (title + " " + game).toLowerCase();
   const bullets: string[] = [];
@@ -272,6 +282,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
   const howItWorks = HOW_IT_WORKS[quiz.game] || null;
   const beginnerMistakes = BEGINNER_MISTAKES[quiz.game] || [];
   const gameSlug = quiz.game.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const editor = getEditor(slug);
 
   const diffColor: Record<string, string> = {
     Easy: "#00f5a0",
@@ -348,7 +359,7 @@ export default async function QuizPage({ params }: { params: Promise<{ slug: str
         </div>
 
         <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, marginBottom: 20, display: "flex", gap: 16, flexWrap: "wrap" }}>
-          <span>✍️ Written by BloxQuiz Editorial Team</span>
+          <span>✍️ Written by {editor}, BloxQuiz Editor</span>
           <span>🕐 Published {reviewedDate}</span>
           <a href="/editorial" style={{ color: "var(--text-dim)", textDecoration: "none" }}>📋 Editorial Standards</a>
         </div>
