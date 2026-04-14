@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.bloxquiz.gg/editorial" },
 };
 
-const LAST_UPDATED = "April 8, 2026";
+const LAST_UPDATED = "April 14, 2026";
 
 export default function EditorialPage() {
   return (
