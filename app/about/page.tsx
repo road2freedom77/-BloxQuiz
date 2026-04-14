@@ -1,39 +1,33 @@
+import { supabaseAdmin } from "../lib/supabase";
+
+export const revalidate = 3600;
+
 export const metadata = {
   title: "About BloxQuiz — Roblox Quizzes, Live Stats, Codes & Guides",
-  description: "BloxQuiz covers 95+ Roblox games with free quizzes, hourly live stats, verified codes, and beginner guides. Learn how our data is sourced and why players trust us.",
+  description: "BloxQuiz covers 90+ Roblox games with free quizzes, hourly live stats, verified codes, and beginner guides. Learn how our data is sourced and why players trust us.",
   alternates: { canonical: "https://www.bloxquiz.gg/about" },
   robots: { index: true },
 };
 
-const STATS = [
-  { value: "95+", label: "Games Tracked" },
-  { value: "550+", label: "Free Quizzes" },
-  { value: "Hourly", label: "Stats Updates" },
-  { value: "15", label: "Game Guides" },
-];
-
-const CONTENT_TYPES = [
-  {
-    emoji: "🧠",
-    title: "Quizzes",
-    body: "400+ free trivia quizzes across 95+ Roblox games. Every quiz is 10 questions, takes under 5 minutes, and covers a specific angle — beginner basics, advanced mechanics, lore, trading, or update history. Quizzes are drafted using current game wikis, community knowledge, and patch notes, then reviewed for factual accuracy before publication.",
-  },
-  {
-    emoji: "📊",
-    title: "Live Player Stats",
-    body: "BloxQuiz tracks hourly player counts, 24-hour peaks, total visits, favorites, and ranking data for 95+ Roblox games. Stats are pulled from the Roblox API and updated every hour. History pages show 14-day trends, volatility scores, weekend lift, and 7-day averages — useful for players deciding when to play and for tracking how games grow over time.",
-  },
-  {
-    emoji: "🎁",
-    title: "Verified Codes",
-    body: "Active codes are verified before publication and tagged with a last-checked date. Expired codes are separated from active ones so players never waste time on dead codes. We track codes across 95+ games and update them when new codes drop or existing ones expire.",
-  },
-  {
-    emoji: "📖",
-    title: "Game Guides",
-    body: "Beginner guides for the most popular Roblox games, covering getting started, key mechanics, best early strategies, common mistakes, and a clear progression path. Every guide includes a last-reviewed date and is updated when major patches change core mechanics. Guides are written for players who want to improve, not just for search engines.",
-  },
-];
+async function getSiteStats() {
+  const [
+    { count: quizCount },
+    { count: gamesTracked },
+    { count: activeCodeCount },
+    { count: guideCount },
+  ] = await Promise.all([
+    supabaseAdmin.from("quizzes").select("*", { count: "exact", head: true }).eq("status", "published"),
+    supabaseAdmin.from("roblox_games").select("*", { count: "exact", head: true }).eq("is_tracked", true),
+    supabaseAdmin.from("codes").select("*", { count: "exact", head: true }).eq("active", true),
+    supabaseAdmin.from("game_guides").select("*", { count: "exact", head: true }).eq("status", "published"),
+  ]);
+  return {
+    quizCount: quizCount ?? 0,
+    gamesTracked: gamesTracked ?? 0,
+    activeCodeCount: activeCodeCount ?? 0,
+    guideCount: guideCount ?? 0,
+  };
+}
 
 const TRUST = [
   {
@@ -58,26 +52,55 @@ const TRUST = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { quizCount, gamesTracked, activeCodeCount, guideCount } = await getSiteStats();
+
+  const STATS = [
+    { value: `${gamesTracked}+`, label: "Games Tracked" },
+    { value: `${quizCount}+`, label: "Free Quizzes" },
+    { value: "Hourly", label: "Stats Updates" },
+    { value: `${guideCount}`, label: "Game Guides" },
+  ];
+
+  const CONTENT_TYPES = [
+    {
+      emoji: "🧠",
+      title: "Quizzes",
+      body: `${quizCount}+ free trivia quizzes across ${gamesTracked}+ Roblox games. Every quiz is 10 questions, takes under 5 minutes, and covers a specific angle — beginner basics, advanced mechanics, lore, trading, or update history. Quizzes are drafted using current game wikis, community knowledge, and patch notes, then reviewed for factual accuracy before publication.`,
+    },
+    {
+      emoji: "📊",
+      title: "Live Player Stats",
+      body: `BloxQuiz tracks hourly player counts, 24-hour peaks, total visits, favorites, and ranking data for ${gamesTracked}+ Roblox games. Stats are pulled from the Roblox API and updated every hour. History pages show 14-day trends, volatility scores, weekend lift, and 7-day averages — useful for players deciding when to play and for tracking how games grow over time.`,
+    },
+    {
+      emoji: "🎁",
+      title: "Verified Codes",
+      body: `${activeCodeCount} active codes verified and ready to redeem across ${gamesTracked}+ games. Codes are tagged with a last-checked date. Expired codes are separated from active ones so players never waste time on dead codes. We update them when new codes drop or existing ones expire.`,
+    },
+    {
+      emoji: "📖",
+      title: "Game Guides",
+      body: `${guideCount} beginner guides for the most popular Roblox games, covering getting started, key mechanics, best early strategies, common mistakes, and a clear progression path. Every guide includes a last-reviewed date and is updated when major patches change core mechanics. Guides are written for players who want to improve, not just for search engines.`,
+    },
+  ];
+
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: "60px 24px 80px", position: "relative", zIndex: 1 }}>
 
-      {/* Breadcrumb */}
       <nav style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, marginBottom: 28 }}>
         <a href="/" style={{ color: "var(--text-dim)", textDecoration: "none" }}>Home</a>
         <span style={{ margin: "0 8px" }}>›</span>
         <span style={{ color: "var(--text-muted)" }}>About</span>
       </nav>
 
-      {/* Hero */}
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(30px, 5vw, 48px)", marginBottom: 16, lineHeight: 1.1 }}>
         About BloxQuiz 🎮
       </h1>
       <p style={{ color: "var(--text-muted)", fontSize: 17, fontWeight: 600, marginBottom: 40, lineHeight: 1.7, maxWidth: 680 }}>
-        BloxQuiz is a free Roblox resource covering 95+ games with quizzes, hourly live stats, verified codes, and beginner guides. Everything on the site is designed to help players learn, track, and enjoy Roblox games — not just to rank in search.
+        BloxQuiz is a free Roblox resource covering {gamesTracked}+ games with quizzes, hourly live stats, verified codes, and beginner guides. Everything on the site is designed to help players learn, track, and enjoy Roblox games — not just to rank in search.
       </p>
 
-      {/* Stats bar */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 12, marginBottom: 56 }}>
         {STATS.map(({ value, label }) => (
           <div key={label} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "18px 16px", textAlign: "center" }}>
@@ -87,7 +110,6 @@ export default function AboutPage() {
         ))}
       </div>
 
-      {/* What BloxQuiz covers */}
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 20, color: "var(--neon-green)" }}>What BloxQuiz Covers</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 56 }}>
         {CONTENT_TYPES.map(({ emoji, title, body }) => (
@@ -101,7 +123,6 @@ export default function AboutPage() {
         ))}
       </div>
 
-      {/* How we source data */}
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 8, color: "var(--neon-green)" }}>How We Source Our Data</h2>
       <p style={{ color: "var(--text-muted)", fontSize: 15, fontWeight: 600, lineHeight: 1.7, marginBottom: 24 }}>
         Accuracy matters more than volume. Here is how each content type on BloxQuiz is sourced and reviewed.
@@ -118,7 +139,6 @@ export default function AboutPage() {
         ))}
       </div>
 
-      {/* Mission */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 14, padding: "28px 32px", marginBottom: 40 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 10 }}>Our Mission</h2>
         <p style={{ color: "var(--text-muted)", fontSize: 15, fontWeight: 600, lineHeight: 1.8, margin: 0 }}>
@@ -126,12 +146,10 @@ export default function AboutPage() {
         </p>
       </div>
 
-      {/* Disclaimer */}
       <p style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.7, marginBottom: 48 }}>
         BloxQuiz is an independent fan site and is not affiliated with, endorsed by, or connected to Roblox Corporation in any way. Roblox and all related game names are trademarks of their respective owners.
       </p>
 
-      {/* CTA */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <a href="/browse" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "13px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>Browse All Quizzes →</a>
         <a href="/guides" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)", fontWeight: 800, fontSize: 14, padding: "13px 28px", borderRadius: 100, textDecoration: "none" }}>Game Guides →</a>
