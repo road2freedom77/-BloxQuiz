@@ -602,10 +602,12 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* PLACEMENT 1 — Banner after hero, before codes */}
-      <div style={{ marginBottom: 24 }}>
-        <RobuxCTA variant="banner" game={data.game} />
-      </div>
+     {/* PLACEMENT 1 — Banner after hero, before codes — only shown when codes exist */}
+{activeCodes.length > 0 && (
+  <div style={{ marginBottom: 24 }}>
+    <RobuxCTA variant="banner" game={data.game} />
+  </div>
+)}
 
       {/* Latest code highlight */}
       {newestCode && (
@@ -823,10 +825,12 @@ export default function CodesClient({ data, game, description, activeCodes, expi
         </div>
       </div>
 
-      {/* PLACEMENT 3 — Default above bottom CTA */}
-      <div style={{ marginBottom: 24 }}>
-        <RobuxCTA variant="default" game={data.game} />
-      </div>
+      {/* PLACEMENT 3 — Default above bottom CTA — only shown when codes exist */}
+{activeCodes.length > 0 && (
+  <div style={{ marginBottom: 24 }}>
+    <RobuxCTA variant="default" game={data.game} />
+  </div>
+)}
 
       {/* Bottom CTA */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
