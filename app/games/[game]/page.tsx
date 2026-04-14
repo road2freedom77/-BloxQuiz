@@ -29,6 +29,12 @@ const gameEmojis: Record<string, string> = {
   "Bee Swarm Simulator": "🐝",
   "Dress to Impress": "👗",
   "Fisch": "🎣",
+  "Grand Piece Online": "🏴‍☠️",
+  "Deepwoken": "⚔️",
+  "Jujutsu Infinite": "💥",
+  "Flee the Facility": "🏃",
+  "Pet Simulator 99": "🐶",
+  "RIVALS": "🎮",
 };
 
 const gameData: Record<string, {
@@ -267,6 +273,86 @@ const gameData: Record<string, {
       { q: "How often are new Fisch quizzes added?", a: "New quizzes are added regularly, especially after updates introduce new fish species and locations." },
     ],
   },
+
+  // ─── New entries ──────────────────────────────────────────────────────────
+
+  "Grand Piece Online": {
+    intro: "Grand Piece Online is one of Roblox's most beloved One Piece-inspired RPGs, sending players across a vast ocean world to hunt for Devil Fruits, unlock powerful races and fighting styles, and take on legendary bosses. With multiple seas to explore and a deep progression system, GPO rewards players who understand its mechanics inside and out. Our quizzes cover everything from Devil Fruit abilities and island knowledge to boss strategies and fighting style requirements.",
+    whatIs: "Grand Piece Online is a Roblox RPG set in a world inspired by the One Piece anime. Players sail between islands, battle powerful enemies, and hunt for rare Devil Fruits that grant unique combat abilities. The game features a race and fighting style system that significantly affects your combat potential, as well as multiple seas with progressively harder content. Regular updates add new fruits, bosses, and islands to explore.",
+    whatTests: "GPO quizzes test knowledge of Devil Fruits and their abilities, island locations and progression order, boss mechanics, race and fighting style requirements, and sea-specific content. From beginner knowledge about starting islands to expert questions about rare fruit locations, these quizzes cover the full GPO experience.",
+    topics: ["Devil Fruits and abilities", "Island locations and order", "Boss mechanics and drops", "Races and fighting styles", "Sea progression", "Rare fruit locations", "Combat mechanics"],
+    whyPlay: "GPO quizzes help players understand the game's complex progression system and discover powerful abilities they may have missed. Knowing which islands to visit and which Devil Fruits to prioritize can dramatically speed up your progression through the seas.",
+    faqs: [
+      { q: "What do Grand Piece Online quizzes cover?", a: "Quizzes cover Devil Fruits, island progression, boss mechanics, races, fighting styles, and sea-specific content." },
+      { q: "Are GPO quizzes good for beginners?", a: "Yes — we have beginner quizzes covering essential first-sea knowledge as well as harder challenges for veteran players." },
+      { q: "How often are new GPO quizzes added?", a: "New quizzes are added regularly, especially after updates introduce new fruits, islands, and bosses." },
+    ],
+  },
+
+  "Deepwoken": {
+    intro: "Deepwoken is one of Roblox's most challenging and rewarding RPGs, featuring a permadeath system that punishes mistakes and rewards mastery. With a deep character build system, vast world to explore, and a dedicated community of veterans, Deepwoken demands serious investment to understand. Our quizzes cover builds, mechanics, world knowledge, and the game's complex progression systems.",
+    whatIs: "Deepwoken is a hardcore Roblox RPG where death is permanent unless you use specific revival mechanics. Players build characters by investing in stats and unlocking mantras, weapons, and talents through a deep skill system. The game features a vast world with multiple biomes, factions, and hidden secrets. Combat is skill-based and unforgiving, rewarding players who master their build and understand enemy patterns.",
+    whatTests: "Deepwoken quizzes test knowledge of stat builds, mantras, talents, weapon types, world locations, factions, and survival mechanics. From understanding the difference between build paths to identifying locations and enemy types, these quizzes challenge players at every level of experience.",
+    topics: ["Stat builds and progression", "Mantras and abilities", "Weapons and combat", "World locations and biomes", "Factions and lore", "Survival and permadeath mechanics", "Talents and synergies"],
+    whyPlay: "Deepwoken quizzes help players understand the game's complex systems before committing to a build — saving hours of lost progress from poor choices. Knowledge of talents, mantra synergies, and world mechanics is essential for success in this unforgiving game.",
+    faqs: [
+      { q: "What do Deepwoken quizzes cover?", a: "Quizzes cover builds, mantras, weapons, world locations, factions, and the game's permadeath mechanics." },
+      { q: "Is Deepwoken suitable for beginner Roblox players?", a: "Deepwoken is a challenging game — our quizzes can help new players learn the systems before diving in, reducing costly early mistakes." },
+      { q: "How often are new Deepwoken quizzes added?", a: "New quizzes are added regularly, especially after major updates introduce new content and mechanics." },
+    ],
+  },
+
+  "Jujutsu Infinite": {
+    intro: "Jujutsu Infinite is one of Roblox's most exciting anime RPGs, bringing the world of Jujutsu Kaisen to life with cursed techniques, grade progression, and intense combat. With a constantly expanding roster of techniques and a deep progression system, there's always more to master in JJI. Our quizzes cover techniques, grades, progression mechanics, and the game's ever-growing content.",
+    whatIs: "Jujutsu Infinite is a Roblox RPG inspired by the Jujutsu Kaisen anime where players unlock and master cursed techniques, progress through sorcerer grades, and battle powerful enemies. The game features technique-based combat that rewards understanding each ability's range and timing. Regular updates add new techniques, bosses, and story content tied to the source material.",
+    whatTests: "JJI quizzes test knowledge of cursed techniques and their mechanics, grade progression requirements, boss abilities, and anime-specific knowledge. From identifying techniques by their effects to understanding optimal grade progression strategies, these quizzes challenge both anime fans and dedicated players.",
+    topics: ["Cursed techniques and abilities", "Grade progression system", "Boss mechanics", "Anime lore connections", "Combat mechanics", "Progression strategies", "Update content"],
+    whyPlay: "Jujutsu Infinite quizzes help players understand technique mechanics and progression requirements before investing time in a particular build. Knowing which techniques synergize and how grade progression works can give you a significant head start.",
+    faqs: [
+      { q: "What do Jujutsu Infinite quizzes cover?", a: "Quizzes cover cursed techniques, grade progression, boss mechanics, anime lore, and combat strategies." },
+      { q: "Do I need to watch Jujutsu Kaisen to play these quizzes?", a: "Not required — many questions focus on in-game mechanics, though anime knowledge adds extra context." },
+      { q: "How often are new JJI quizzes added?", a: "New quizzes are added regularly as the game expands with new techniques and content." },
+    ],
+  },
+
+  "Flee the Facility": {
+    intro: "Flee the Facility is one of Roblox's most thrilling asymmetric survival games, pitting a team of survivors against a powerful Beast in a tense race to hack computers and escape. With 24K concurrent players and over 5.5 billion total visits, it has built one of Roblox's most dedicated horror game communities. Our quizzes cover survivor strategies, Beast mechanics, map knowledge, and the game's competitive meta.",
+    whatIs: "Flee the Facility is a Roblox asymmetric survival game where one player is assigned the role of Beast while the rest play as survivors. Survivors must locate and hack a set number of computers to unlock the exits before the Beast catches and freezes them inside cryo-pods. Frozen survivors can be freed by teammates who break them out. The tension between hacking efficiently and rescuing teammates creates a constantly shifting strategic dynamic.",
+    whatTests: "Flee the Facility quizzes test knowledge of survivor strategies, Beast mechanics, map layouts, hacking priorities, and rescue tactics. From understanding when to hack versus when to free a teammate to knowing the best hiding spots on each map, these quizzes challenge players of all experience levels.",
+    topics: ["Survivor strategies and roles", "Beast mechanics and abilities", "Map layouts and hiding spots", "Hacking priorities", "Rescue and teamwork tactics", "Competitive meta knowledge"],
+    whyPlay: "Flee the Facility quizzes help players understand the game's strategic depth and improve both their survivor and Beast play. Knowing the optimal hacking order and rescue timing can be the difference between a successful escape and a full team freeze.",
+    faqs: [
+      { q: "What do Flee the Facility quizzes cover?", a: "Quizzes cover survivor strategies, Beast mechanics, map layouts, hacking priorities, and rescue tactics." },
+      { q: "Are there quizzes for both survivors and the Beast role?", a: "Yes — our quizzes cover both perspectives, helping players understand the full strategic picture from both sides." },
+      { q: "How often are new Flee the Facility quizzes added?", a: "New quizzes are added regularly as the game receives updates and new maps." },
+    ],
+  },
+
+  "Pet Simulator 99": {
+    intro: "Pet Simulator 99 is one of Roblox's most active pet collection games, combining addictive grinding with a deep pet upgrade system and a thriving trading economy. With 30K+ concurrent players and regular content updates, PS99 keeps its massive community engaged with new eggs, areas, and exclusive pets. Our quizzes cover pet rarities, upgrade mechanics, currency systems, and the best strategies for efficient progression.",
+    whatIs: "Pet Simulator 99 is a Roblox game where players hatch eggs to collect pets of varying rarities, then use those pets to collect coins and gems from different biomes. Pets can be upgraded through enchanting and fusing, and the rarest pets command significant trading value. The game features seasonal events with exclusive pets, a merchant system, and a constantly expanding world with new areas and egg types.",
+    whatTests: "PS99 quizzes test knowledge of pet rarities and types, egg mechanics, upgrade paths, currency systems, biome progression, and trading values. From identifying pets by rarity to understanding the most efficient upgrade strategies, these quizzes challenge collectors at all stages of the game.",
+    topics: ["Pet rarities and types", "Egg mechanics and hatching", "Upgrade and enchanting systems", "Currency and biome progression", "Trading values", "Seasonal event pets", "Merchant and economy mechanics"],
+    whyPlay: "Pet Simulator 99 quizzes help players understand the game's complex upgrade systems and make smarter decisions about which pets to keep, upgrade, and trade. Knowing pet values and upgrade efficiency can save hours of grinding.",
+    faqs: [
+      { q: "What do Pet Simulator 99 quizzes cover?", a: "Quizzes cover pet rarities, egg mechanics, upgrade systems, currency progression, trading values, and seasonal event content." },
+      { q: "Are PS99 quizzes good for new players?", a: "Yes — beginner quizzes cover essential mechanics while harder quizzes test advanced upgrade and trading knowledge." },
+      { q: "How often are new PS99 quizzes added?", a: "New quizzes are added regularly, especially after seasonal updates introduce new pets and areas." },
+    ],
+  },
+
+  "RIVALS": {
+    intro: "RIVALS is one of Roblox's most competitive and fast-paced action games, drawing players in with its fluid movement system, diverse weapon roster, and intense PvP matches. With a dedicated community and regular updates, RIVALS has established itself as a premier destination for competitive Roblox players. Our quizzes cover weapons, movement mechanics, maps, competitive strategies, and game knowledge that separates good players from great ones.",
+    whatIs: "RIVALS is a competitive Roblox action game where players battle in fast-paced matches using a variety of weapons and movement abilities. The game is known for its high skill ceiling, rewarding players who master movement tech, weapon switching, and map control. Regular updates add new weapons, maps, and seasonal content that keep the competitive meta evolving.",
+    whatTests: "RIVALS quizzes test knowledge of weapons and their stats, movement mechanics, map layouts, competitive strategies, and meta knowledge. From understanding weapon matchups to knowing optimal movement routes, these quizzes challenge competitive players at all skill levels.",
+    topics: ["Weapons and their stats", "Movement mechanics and tech", "Map layouts and callouts", "Competitive strategies", "Meta knowledge", "Seasonal content and updates"],
+    whyPlay: "RIVALS quizzes help players deepen their understanding of the game's mechanics and competitive meta. Knowing weapon matchups, movement options, and map control strategies gives you a genuine edge in matches.",
+    faqs: [
+      { q: "What do RIVALS quizzes cover?", a: "Quizzes cover weapons, movement mechanics, map layouts, competitive strategies, and meta knowledge." },
+      { q: "Are RIVALS quizzes good for improving at the game?", a: "Yes — understanding weapon stats, movement options, and map control tested in our quizzes directly translates to better match performance." },
+      { q: "How often are new RIVALS quizzes added?", a: "New quizzes are added regularly as the meta evolves and new content is added." },
+    ],
+  },
 };
 
 const relatedGames: Record<string, string[]> = {
@@ -279,7 +365,7 @@ const relatedGames: Record<string, string[]> = {
   "Royale High": ["Adopt Me!", "Berry Avenue", "Dress to Impress"],
   "Doors": ["Murder Mystery 2", "Natural Disaster Survival", "Arsenal"],
   "Arsenal": ["Murder Mystery 2", "Tower of Hell", "Kick Off"],
-  "Anime Fighting Simulator": ["Anime Defenders", "Blox Fruits", "Arsenal"],
+  "Anime Fighting Simulator": ["Anime Defenders", "Blox Fruits", "Jujutsu Infinite"],
   "Berry Avenue": ["Brookhaven RP", "Livetopia", "Royale High"],
   "Livetopia": ["Berry Avenue", "Brookhaven RP", "Adopt Me!"],
   "Natural Disaster Survival": ["Doors", "Tower of Hell", "Arsenal"],
@@ -289,6 +375,12 @@ const relatedGames: Record<string, string[]> = {
   "Bee Swarm Simulator": ["Grow a Garden", "Adopt Me!", "Natural Disaster Survival"],
   "Dress to Impress": ["Royale High", "Berry Avenue", "Brookhaven RP"],
   "Fisch": ["Bee Swarm Simulator", "Grow a Garden", "Adopt Me!"],
+  "Grand Piece Online": ["Blox Fruits", "Jujutsu Infinite", "Deepwoken"],
+  "Deepwoken": ["Grand Piece Online", "Blox Fruits", "Jujutsu Infinite"],
+  "Jujutsu Infinite": ["Anime Fighting Simulator", "Grand Piece Online", "Blox Fruits"],
+  "Flee the Facility": ["Doors", "Murder Mystery 2", "Natural Disaster Survival"],
+  "Pet Simulator 99": ["Adopt Me!", "Bee Swarm Simulator", "Grow a Garden"],
+  "RIVALS": ["Arsenal", "Flee the Facility", "Murder Mystery 2"],
 };
 
 const gameSlugMap: Record<string, string> = {
