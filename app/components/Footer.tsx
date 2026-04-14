@@ -29,6 +29,7 @@ export default function Footer() {
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
     { label: "Editorial Standards", href: "/editorial" },
+    { label: "How It Works", href: "/how-it-works" }, 
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
     { label: "Advertise", href: "/advertise" },
