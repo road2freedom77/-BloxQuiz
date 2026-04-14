@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
-import { supabase } from "../../lib/supabase";
+import { supabaseAdmin } from "../../lib/supabase";
 
 export const dynamic = 'force-dynamic';
 
 export default async function RandomQuiz() {
   try {
-    const { data, count } = await supabase
+    const { data } = await supabaseAdmin
       .from("quizzes")
-      .select("slug", { count: "exact" })
+      .select("slug")
       .eq("status", "published");
 
     if (data && data.length > 0) {
@@ -16,6 +16,5 @@ export default async function RandomQuiz() {
     }
   } catch (e) {}
 
-  // Fallback
   redirect("/browse");
 }
