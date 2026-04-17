@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export default clerkMiddleware((auth, request: NextRequest) => {
-  // 301 redirect timestamp-suffixed quiz slugs to canonical slug
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/quiz/")) {
     const slug = pathname.replace("/quiz/", "");
@@ -19,7 +18,7 @@ export default clerkMiddleware((auth, request: NextRequest) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|txt)).*)",
     "/(api|trpc)(.*)",
   ],
 };
