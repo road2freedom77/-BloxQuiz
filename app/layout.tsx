@@ -114,11 +114,13 @@ export default function RootLayout({
               gtag('config', 'G-X1WQ0GMZDN');
             `}
           </Script>
-          <script
+          <Script
+            id="google-adsense"
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4722330934533465"
             crossOrigin="anonymous"
-          ></script>
+            strategy="afterInteractive"
+          />
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
           <div style={{ position: "relative", zIndex: 1 }}>
