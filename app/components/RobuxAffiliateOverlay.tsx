@@ -30,30 +30,49 @@ function getOrAssignVariant(): Variant {
   return fresh;
 }
 
+function isMobile(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < 768;
+}
+
 export default function RobuxAffiliateOverlay() {
   const [variant, setVariant] = useState<Variant | null>(null);
+  const [mobile, setMobile] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const v = getOrAssignVariant();
+    const m = isMobile();
+    setMobile(m);
+
+    // Mobile always gets gift-card-strip (top banner)
+    // Desktop rotates between all 4 variants
+    const v: Variant = m ? "gift-card-strip" : getOrAssignVariant();
     setVariant(v);
-    trackEvent("variant_impression", v);
-    const dismissedKey = `robux_dismissed_${v}`;
+    trackEvent("variant_impression", v, m ? "mobile_top_banner" : v);
+
+    const dismissedKey = `robux_dismissed_${m ? "mobile" : v}`;
     if (sessionStorage.getItem(dismissedKey) === "1") setDismissed(true);
   }, []);
 
   if (!variant || dismissed) return null;
 
-  const handleClick = () => trackEvent("affiliate_click", variant);
+  const handleClick = () => {
+    trackEvent("affiliate_click", variant, mobile ? "mobile_top_banner" : variant);
+  };
 
   const handleDismiss = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    sessionStorage.setItem(`robux_dismissed_${variant}`, "1");
+    const dismissedKey = `robux_dismissed_${mobile ? "mobile" : variant}`;
+    sessionStorage.setItem(dismissedKey, "1");
     setDismissed(true);
-    trackEvent("variant_dismissed", variant);
+    trackEvent("variant_dismissed", variant, mobile ? "mobile_top_banner" : variant);
   };
 
+  // Mobile always shows top banner
+  if (mobile) return <GiftCardStrip onClick={handleClick} onDismiss={handleDismiss} />;
+
+  // Desktop rotates
   if (variant === "coin-stack") return <CoinStack onClick={handleClick} onDismiss={handleDismiss} />;
   if (variant === "gift-card-strip") return <GiftCardStrip onClick={handleClick} onDismiss={handleDismiss} />;
   if (variant === "side-sticker") return <SideSticker onClick={handleClick} onDismiss={handleDismiss} />;
@@ -96,7 +115,7 @@ function CoinStack({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e:
   );
 }
 
-/* ─────────────────────── VARIANT B: Gift Card Strip ─────────────────────── */
+/* ─────────────────────── VARIANT B: Gift Card Strip (also mobile default) ─────────────────────── */
 function GiftCardStrip({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
     <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
@@ -111,7 +130,7 @@ function GiftCardStrip({ onClick, onDismiss }: { onClick: () => void; onDismiss:
   );
 }
 
-/* ─────────────────────── VARIANT C: Side Sticker — now bottom-right pill ─────────────────────── */
+/* ─────────────────────── VARIANT C: Side Sticker — bottom-right pill ─────────────────────── */
 function SideSticker({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
     <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
