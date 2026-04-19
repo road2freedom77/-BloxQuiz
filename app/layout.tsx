@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
+import RobuxAffiliateOverlay from "./components/RobuxAffiliateOverlay";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -128,6 +129,7 @@ export default function RootLayout({
             {children}
             <Footer />
           </div>
+          <RobuxAffiliateOverlay />
         </body>
       </html>
     </ClerkProvider>
