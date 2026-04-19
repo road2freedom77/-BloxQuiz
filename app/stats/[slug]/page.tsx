@@ -164,8 +164,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const totalVisits = latestSnapshot?.total_visits ?? game.total_visits;
 
   const month = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-  const title = game.meta_title || `${game.name} Player Count — ${formatNumber(currentPlayers)} Playing Now (${month}) | BloxQuiz`;
-  const description = game.meta_description || `${game.name} has ${formatNumber(currentPlayers)} active players right now and ${formatVisits(totalVisits)} total visits. Live player count, historical charts, and ranking vs other Roblox games. Updated hourly.`;
+  const title = game.meta_title || `How Many People Play ${game.name}? — ${formatNumber(currentPlayers)} Players (${month}) | BloxQuiz`;
+  const description = game.meta_description || `How many people play ${game.name} right now? ${formatNumber(currentPlayers)} players are active now with ${formatVisits(totalVisits)} total visits. Live count updated hourly — BloxQuiz.`;
 
   return {
     title,
@@ -265,7 +265,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
       },
       {
         "@type": "Article",
-        headline: `${game.name} Player Count & Live Stats — ${month}`,
+        headline: `How Many People Play ${game.name}? — Live Player Count (${month})`,
         dateModified: lastUpdated ?? new Date().toISOString(),
         author: { "@type": "Organization", name: "BloxQuiz" },
         publisher: { "@type": "Organization", name: "BloxQuiz" },
@@ -295,7 +295,6 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
           hasStats={true}
           activeTab="stats"
         />
-        {/* Affiliate placement — below cross-links, above stats hero */}
         <div style={{ marginTop: 16 }}>
           <RobuxCTA variant="card" game={game.name} />
         </div>
