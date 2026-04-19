@@ -5,6 +5,7 @@ import Script from "next/script";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import RobuxAffiliateOverlay from "./components/RobuxAffiliateOverlay";
+import RobuxBackground from "./components/RobuxBackground";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -124,6 +125,7 @@ export default function RootLayout({
           />
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
+          <RobuxBackground />
           <div style={{ position: "relative", zIndex: 1 }}>
             <Nav />
             {children}
