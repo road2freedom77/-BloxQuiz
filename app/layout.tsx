@@ -116,6 +116,7 @@ export default function RootLayout({
               gtag('config', 'G-X1WQ0GMZDN');
             `}
           </Script>
+          {/* AdSense disabled — Mediavine Journey review in progress
           <Script
             id="google-adsense"
             async
@@ -123,6 +124,7 @@ export default function RootLayout({
             crossOrigin="anonymous"
             strategy="afterInteractive"
           />
+          */}
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
           {/* <RobuxBackground /> */}
