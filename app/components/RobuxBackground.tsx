@@ -137,7 +137,7 @@ export default function RobuxBackground() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          opacity: 0.06,
+          opacity: 0.28,
           mixBlendMode: "screen",
         }}
       />
