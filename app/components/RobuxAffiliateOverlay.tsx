@@ -119,7 +119,7 @@ function CoinStack({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e:
 function GiftCardStrip({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
     <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
-      style={{ position: "sticky", top: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", gap: 16, background: "linear-gradient(90deg, #00a86b 0%, #00d084 50%, #00a86b 100%)", color: "#fff", padding: "10px 20px", textDecoration: "none", fontWeight: 800, fontSize: 13, boxShadow: "0 2px 12px rgba(0,168,107,0.3)", flexWrap: "wrap" }}>
+      style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", gap: 16, background: "linear-gradient(90deg, #00a86b 0%, #00d084 50%, #00a86b 100%)", color: "#fff", padding: "10px 20px", textDecoration: "none", fontWeight: 800, fontSize: 13, boxShadow: "0 2px 12px rgba(0,168,107,0.3)", flexWrap: "wrap" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ width: 48, height: 30, background: "linear-gradient(135deg, #1a1a1a, #333)", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 900, color: "#fff", boxShadow: "0 2px 6px rgba(0,0,0,0.3)", flexShrink: 0 }}>R$</div>
         <span>🎁 Roblox Gift Cards on Amazon — Free shipping with Prime</span>
