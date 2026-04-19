@@ -44,9 +44,7 @@ export default function RobuxAffiliateOverlay() {
 
   if (!variant || dismissed) return null;
 
-  const handleClick = () => {
-    trackEvent("affiliate_click", variant);
-  };
+  const handleClick = () => trackEvent("affiliate_click", variant);
 
   const handleDismiss = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,7 +65,6 @@ export default function RobuxAffiliateOverlay() {
 function CoinStack({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
     <>
-      {/* Decorative floating coins (non-interactive) */}
       <div aria-hidden style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1, overflow: "hidden" }}>
         {[
           { top: "8%", left: "3%", size: 48, delay: "0s" },
@@ -77,74 +74,24 @@ function CoinStack({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e:
           { top: "85%", left: "5%", size: 32, delay: "0.3s" },
           { top: "12%", right: "12%", size: 24, delay: "2.1s" },
         ].map((c, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              top: c.top,
-              left: (c as any).left,
-              right: (c as any).right,
-              width: c.size,
-              height: c.size,
-              borderRadius: "50%",
-              background: "radial-gradient(circle at 30% 30%, #ffe066, #d4a017)",
-              boxShadow: "0 4px 16px rgba(212, 160, 23, 0.4), inset 0 -3px 6px rgba(0,0,0,0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 900,
-              color: "#5c3d00",
-              fontSize: c.size * 0.5,
-              animation: `coin-float 4s ease-in-out infinite`,
-              animationDelay: c.delay,
-              opacity: 0.85,
-            }}
-          >
-            R$
-          </div>
+          <div key={i} style={{
+            position: "absolute", top: c.top, left: (c as any).left, right: (c as any).right,
+            width: c.size, height: c.size, borderRadius: "50%",
+            background: "radial-gradient(circle at 30% 30%, #ffe066, #d4a017)",
+            boxShadow: "0 4px 16px rgba(212,160,23,0.4), inset 0 -3px 6px rgba(0,0,0,0.2)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 900, color: "#5c3d00", fontSize: c.size * 0.5,
+            animation: `coin-float 4s ease-in-out infinite`, animationDelay: c.delay, opacity: 0.85,
+          }}>R$</div>
         ))}
       </div>
-
-      {/* Sticky CTA bottom-right */}
-      <a
-        href={AMAZON_URL}
-        target="_blank"
-        rel="noopener sponsored"
-        onClick={onClick}
-        style={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          zIndex: 9999,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          background: "linear-gradient(135deg, #ffd700 0%, #d4a017 100%)",
-          color: "#1a1a1a",
-          padding: "14px 22px",
-          borderRadius: 100,
-          textDecoration: "none",
-          fontWeight: 900,
-          fontSize: 14,
-          boxShadow: "0 8px 24px rgba(212, 160, 23, 0.5)",
-          border: "2px solid rgba(255,255,255,0.3)",
-        }}
-      >
+      <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
+        style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg, #ffd700 0%, #d4a017 100%)", color: "#1a1a1a", padding: "14px 22px", borderRadius: 100, textDecoration: "none", fontWeight: 900, fontSize: 14, boxShadow: "0 8px 24px rgba(212,160,23,0.5)", border: "2px solid rgba(255,255,255,0.3)" }}>
         <span style={{ fontSize: 18 }}>💰</span>
         Get Robux on Amazon →
-        <button
-          onClick={onDismiss}
-          style={{ background: "transparent", border: "none", color: "#1a1a1a", cursor: "pointer", padding: "0 0 0 8px", fontSize: 18, opacity: 0.6, lineHeight: 1 }}
-          aria-label="Dismiss"
-        >×</button>
+        <button onClick={onDismiss} style={{ background: "transparent", border: "none", color: "#1a1a1a", cursor: "pointer", padding: "0 0 0 8px", fontSize: 18, opacity: 0.6, lineHeight: 1 }} aria-label="Dismiss">×</button>
       </a>
-
-      <style>{`
-        @keyframes coin-float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-12px) rotate(8deg); }
-        }
-      `}</style>
+      <style>{`@keyframes coin-float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-12px) rotate(8deg)} }`}</style>
     </>
   );
 }
@@ -152,124 +99,30 @@ function CoinStack({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e:
 /* ─────────────────────── VARIANT B: Gift Card Strip ─────────────────────── */
 function GiftCardStrip({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
-    <a
-      href={AMAZON_URL}
-      target="_blank"
-      rel="noopener sponsored"
-      onClick={onClick}
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 16,
-        background: "linear-gradient(90deg, #00a86b 0%, #00d084 50%, #00a86b 100%)",
-        color: "#fff",
-        padding: "10px 20px",
-        textDecoration: "none",
-        fontWeight: 800,
-        fontSize: 13,
-        boxShadow: "0 2px 12px rgba(0, 168, 107, 0.3)",
-        flexWrap: "wrap",
-      }}
-    >
+    <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
+      style={{ position: "sticky", top: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", gap: 16, background: "linear-gradient(90deg, #00a86b 0%, #00d084 50%, #00a86b 100%)", color: "#fff", padding: "10px 20px", textDecoration: "none", fontWeight: 800, fontSize: 13, boxShadow: "0 2px 12px rgba(0,168,107,0.3)", flexWrap: "wrap" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {/* Mini gift card mockup */}
-        <div style={{
-          width: 48,
-          height: 30,
-          background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)",
-          borderRadius: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 16,
-          fontWeight: 900,
-          color: "#fff",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-          flexShrink: 0,
-        }}>
-          R$
-        </div>
+        <div style={{ width: 48, height: 30, background: "linear-gradient(135deg, #1a1a1a, #333)", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 900, color: "#fff", boxShadow: "0 2px 6px rgba(0,0,0,0.3)", flexShrink: 0 }}>R$</div>
         <span>🎁 Roblox Gift Cards on Amazon — Free shipping with Prime</span>
       </div>
-      <span style={{
-        background: "#fff",
-        color: "#00a86b",
-        padding: "6px 16px",
-        borderRadius: 100,
-        fontWeight: 900,
-        fontSize: 12,
-        whiteSpace: "nowrap",
-      }}>
-        Shop Now →
-      </span>
-      <button
-        onClick={onDismiss}
-        style={{ background: "transparent", border: "none", color: "#fff", cursor: "pointer", padding: 4, fontSize: 18, opacity: 0.7, lineHeight: 1 }}
-        aria-label="Dismiss"
-      >×</button>
+      <span style={{ background: "#fff", color: "#00a86b", padding: "6px 16px", borderRadius: 100, fontWeight: 900, fontSize: 12, whiteSpace: "nowrap" }}>Shop Now →</span>
+      <button onClick={onDismiss} style={{ background: "transparent", border: "none", color: "#fff", cursor: "pointer", padding: 4, fontSize: 18, opacity: 0.7, lineHeight: 1 }} aria-label="Dismiss">×</button>
     </a>
   );
 }
 
-/* ─────────────────────── VARIANT C: Side Sticker ─────────────────────── */
+/* ─────────────────────── VARIANT C: Side Sticker — now bottom-right pill ─────────────────────── */
 function SideSticker({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
-    <>
-      <a
-        href={AMAZON_URL}
-        target="_blank"
-        rel="noopener sponsored"
-        onClick={onClick}
-        className="robux-side-sticker"
-        style={{
-          position: "fixed",
-          right: 0,
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 9999,
-          background: "linear-gradient(135deg, #ff9500 0%, #ff6b00 100%)",
-          color: "#fff",
-          padding: "20px 14px",
-          borderRadius: "12px 0 0 12px",
-          textDecoration: "none",
-          fontWeight: 900,
-          fontSize: 13,
-          boxShadow: "-4px 4px 16px rgba(0,0,0,0.3)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 8,
-          width: 64,
-        }}
-      >
-        <div style={{
-          fontSize: 28,
-          animation: "sticker-bounce 1.6s ease-in-out infinite",
-        }}>💰</div>
-        <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", textOrientation: "mixed", letterSpacing: "0.05em" }}>
-          BUY ROBUX
-        </div>
-        <button
-          onClick={onDismiss}
-          style={{ background: "rgba(0,0,0,0.2)", border: "none", color: "#fff", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
-          aria-label="Dismiss"
-        >×</button>
-      </a>
-
-      <style>{`
-        @keyframes sticker-bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-        }
-        @media (max-width: 768px) {
-          .robux-side-sticker { display: none !important; }
-        }
-      `}</style>
-    </>
+    <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
+      style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, display: "flex", alignItems: "center", gap: 10, background: "linear-gradient(135deg, #ff9500, #ff6b00)", color: "#fff", padding: "12px 18px", borderRadius: 100, textDecoration: "none", fontWeight: 900, fontSize: 13, boxShadow: "0 8px 24px rgba(255,149,0,0.45)", border: "2px solid rgba(255,255,255,0.2)" }}>
+      <span style={{ fontSize: 20 }}>💰</span>
+      <div>
+        <div style={{ fontSize: 10, color: "rgba(255,255,255,0.8)", fontWeight: 700, lineHeight: 1.2 }}>Amazon</div>
+        <div style={{ fontSize: 13, fontWeight: 900, lineHeight: 1.2 }}>Buy Robux →</div>
+      </div>
+      <button onClick={onDismiss} style={{ background: "rgba(0,0,0,0.15)", border: "none", color: "#fff", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1, width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginLeft: 4 }} aria-label="Dismiss">×</button>
+    </a>
   );
 }
 
@@ -277,61 +130,16 @@ function SideSticker({ onClick, onDismiss }: { onClick: () => void; onDismiss: (
 function FloatingBubble({ onClick, onDismiss }: { onClick: () => void; onDismiss: (e: React.MouseEvent) => void }) {
   return (
     <>
-      <a
-        href={AMAZON_URL}
-        target="_blank"
-        rel="noopener sponsored"
-        onClick={onClick}
-        style={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          zIndex: 9999,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          background: "#fff",
-          color: "#1a1a1a",
-          padding: "14px 18px 14px 14px",
-          borderRadius: 100,
-          textDecoration: "none",
-          fontWeight: 800,
-          fontSize: 13,
-          boxShadow: "0 8px 28px rgba(0,0,0,0.25), 0 0 0 4px rgba(0, 245, 160, 0.2)",
-          border: "2px solid #00f5a0",
-        }}
-      >
-        <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #ffd700, #d4a017)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 18,
-          fontWeight: 900,
-          color: "#5c3d00",
-          flexShrink: 0,
-          animation: "bubble-pulse 2s ease-in-out infinite",
-        }}>R$</div>
+      <a href={AMAZON_URL} target="_blank" rel="noopener sponsored" onClick={onClick}
+        style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, display: "flex", alignItems: "center", gap: 10, background: "#fff", color: "#1a1a1a", padding: "14px 18px 14px 14px", borderRadius: 100, textDecoration: "none", fontWeight: 800, fontSize: 13, boxShadow: "0 8px 28px rgba(0,0,0,0.25), 0 0 0 4px rgba(0,245,160,0.2)", border: "2px solid #00f5a0" }}>
+        <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #ffd700, #d4a017)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 900, color: "#5c3d00", flexShrink: 0, animation: "bubble-pulse 2s ease-in-out infinite" }}>R$</div>
         <div>
           <div style={{ fontSize: 11, color: "#888", fontWeight: 700, lineHeight: 1.2 }}>Need Robux?</div>
           <div style={{ fontSize: 13, fontWeight: 900, color: "#1a1a1a", lineHeight: 1.2 }}>Buy on Amazon →</div>
         </div>
-        <button
-          onClick={onDismiss}
-          style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", padding: "0 4px", fontSize: 18, opacity: 0.6, lineHeight: 1 }}
-          aria-label="Dismiss"
-        >×</button>
+        <button onClick={onDismiss} style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", padding: "0 4px", fontSize: 18, opacity: 0.6, lineHeight: 1 }} aria-label="Dismiss">×</button>
       </a>
-
-      <style>{`
-        @keyframes bubble-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 160, 0.5); }
-          50% { box-shadow: 0 0 0 8px rgba(0, 245, 160, 0); }
-        }
-      `}</style>
+      <style>{`@keyframes bubble-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,245,160,0.5)} 50%{box-shadow:0 0 0 8px rgba(0,245,160,0)} }`}</style>
     </>
   );
 }
