@@ -4,8 +4,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
-// import RobuxAffiliateOverlay from "./components/RobuxAffiliateOverlay";
-// import RobuxBackground from "./components/RobuxBackground";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -116,25 +114,13 @@ export default function RootLayout({
               gtag('config', 'G-X1WQ0GMZDN');
             `}
           </Script>
-          <script data-grow-initializer="" dangerouslySetInnerHTML={{ __html: `!(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","U2l0ZToxMWI5YzM4ZS01OWFjLTQ1YjMtYjA0ZC0wNTYzNzI4YjY2ZTQ=");var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t);})();` }} />
-          {/* AdSense disabled — Mediavine Journey review in progress
-          <Script
-            id="google-adsense"
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4722330934533465"
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-          */}
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
-          {/* <RobuxBackground /> */}
           <div style={{ position: "relative", zIndex: 1 }}>
             <Nav />
             {children}
             <Footer />
           </div>
-          {/* <RobuxAffiliateOverlay /> */}
         </body>
       </html>
     </ClerkProvider>
