@@ -172,6 +172,8 @@ async function getAllUsers() {
     .order("created_at", { ascending: false });
   return data || [];
 }
+
+async function getPrizeClaims() {
   const { data: claims } = await supabaseAdmin
     .from("prize_claims")
     .select("id, user_id, season_id, roblox_username, email, discord, status, submitted_at")
