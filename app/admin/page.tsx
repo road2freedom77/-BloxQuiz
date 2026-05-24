@@ -97,19 +97,26 @@ async function getAllSeasons() {
   const { data } = await supabase
     .from("seasons")
     .select("*")
-    .order("start_date", { ascending: false });
+    .order("created_at", { ascending: false });
   return data || [];
 }
 
-async function getSeasonStandings(seasonStartDate?: string, seasonId?: string) {
-  const currentMonth = seasonStartDate
-    ? seasonStartDate.substring(0, 7)
-    : new Date().toISOString().substring(0, 7);
+async function getSeasonStandings(seasonStartDate?: string, seasonEndDate?: string, seasonId?: string) {
+  // Build all YYYY-MM months between start and end date
+  const start = new Date(seasonStartDate ? seasonStartDate + (seasonStartDate.length === 7 ? "-01" : "") : new Date().toISOString().substring(0, 7) + "-01");
+  const end = new Date(seasonEndDate ? seasonEndDate : new Date().toISOString().substring(0, 7) + "-01");
+  const months: string[] = [];
+  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cursor <= end) {
+    months.push(cursor.toISOString().substring(0, 7));
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  if (months.length === 0) months.push(new Date().toISOString().substring(0, 7));
 
   const { data: scores } = await supabase
     .from("scores")
     .select("user_id, weighted_score, score, total_questions")
-    .eq("month", currentMonth)
+    .in("month", months)
     .eq("is_first_attempt", true);
 
   if (!scores || scores.length === 0) return [];
@@ -128,7 +135,6 @@ async function getSeasonStandings(seasonStartDate?: string, seasonId?: string) {
   const usersById: Record<string, any> = {};
   for (const u of users || []) usersById[u.id] = u;
 
-  // Fetch reward_status scoped to this season
   const { data: results } = await supabase
     .from("season_results")
     .select("user_id, reward_status, rank")
@@ -192,7 +198,7 @@ export default async function AdminPage() {
 
   const allSeasons = await getAllSeasons();
 
-  // Active season = first active one, fallback to most recent
+  // Active season first, fallback to most recently created
   const activeSeason = allSeasons.find(s => s.status === "active") || allSeasons[0] || null;
 
   const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, prizeClaims] = await Promise.all([
@@ -201,7 +207,7 @@ export default async function AdminPage() {
     getFlags(),
     getTopQuizzes(),
     getCronLogs(),
-    getSeasonStandings(activeSeason?.start_date, activeSeason?.id),
+    getSeasonStandings(activeSeason?.start_date, activeSeason?.end_date, activeSeason?.id),
     getFlaggedUsers(),
     getPrizeClaims(),
   ]);

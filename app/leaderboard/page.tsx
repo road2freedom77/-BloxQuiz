@@ -13,9 +13,22 @@ async function getCurrentSeason() {
   const { data } = await supabaseAdmin
     .from("seasons")
     .select("*")
-    .order("start_date", { ascending: false })
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
     .limit(1)
     .single();
+
+  // Fallback to most recent if no active season
+  if (!data) {
+    const { data: fallback } = await supabaseAdmin
+      .from("seasons")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+    return fallback;
+  }
+
   return data;
 }
 
