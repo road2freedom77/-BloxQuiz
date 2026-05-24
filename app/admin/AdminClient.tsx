@@ -212,6 +212,7 @@ export default function AdminClient({
   season,
   allSeasons,
   prizeClaims: initialClaims,
+  allUsers,
 }: {
   quizzes: any[],
   stats: any,
@@ -223,8 +224,9 @@ export default function AdminClient({
   season: any,
   allSeasons: any[],
   prizeClaims: any[],
+  allUsers: any[],
 }) {
-  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "codes" | "submit" | "guides">("overview");
+  const [tab, setTab] = useState<"overview" | "silos" | "quizzes" | "flags" | "logs" | "seasons" | "codes" | "submit" | "guides" | "users">("overview");
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -577,10 +579,10 @@ export default function AdminClient({
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        {(["overview", "seasons", "codes", "guides", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
+        {(["overview", "seasons", "codes", "guides", "silos", "quizzes", "flags", "logs", "users", "submit"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t === "guides" ? "📖 Guides" : t}
+            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t === "guides" ? "📖 Guides" : t === "users" ? "👤 Users" : t}
           </button>
         ))}
       </div>
@@ -1240,6 +1242,59 @@ ON CONFLICT DO NOTHING;`}</pre>
           <div style={{ display: "flex", gap: 12 }}>
             <a href="/guides" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>View published guides →</a>
             <a href="/editorial" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>Editorial standards →</a>
+          </div>
+        </div>
+      )}
+
+      {/* Users Tab */}
+      {tab === "users" && (
+        <div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0 }}>👤 All Users ({allUsers.length})</h2>
+          </div>
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 80px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+              <div>Username</div>
+              <div>XP</div>
+              <div>Streak</div>
+              <div>Level</div>
+              <div>Registered</div>
+              <div>Status</div>
+            </div>
+            {allUsers.length === 0 ? (
+              <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No users yet.</div>
+            ) : (
+              allUsers.map((u: any, i: number) => {
+                const xp = u.xp || 0;
+                const level = xp >= 10000 ? 50 : xp >= 5000 ? 30 : xp >= 2000 ? 20 : xp >= 1000 ? 15 : xp >= 500 ? 10 : xp >= 100 ? 5 : 1;
+                const regDate = u.created_at
+                  ? new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                  : "—";
+                return (
+                  <div key={u.id} style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 80px", alignItems: "center", padding: "12px 20px", borderBottom: i < allUsers.length - 1 ? "1px solid var(--border)" : "none", background: u.is_flagged ? "rgba(255,60,172,0.02)" : "transparent" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "var(--text-muted)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
+                        {u.username?.[0]?.toUpperCase() || "?"}
+                      </div>
+                      <a href={"/profile/" + u.username} target="_blank" style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", textDecoration: "none" }}>
+                        {u.username || "—"}
+                      </a>
+                      {u.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
+                    </div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 14, color: "var(--neon-green)" }}>{xp.toLocaleString()}</div>
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{u.streak || 0}🔥</div>
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>Lv {level}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{regDate}</div>
+                    <div>
+                      {u.is_flagged
+                        ? <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)" }}>Flagged</span>
+                        : <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)" }}>Active</span>
+                      }
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       )}

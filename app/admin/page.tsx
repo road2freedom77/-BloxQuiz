@@ -165,7 +165,13 @@ async function getFlaggedUsers() {
   return data || [];
 }
 
-async function getPrizeClaims() {
+async function getAllUsers() {
+  const { data } = await supabaseAdmin
+    .from("users")
+    .select("id, username, xp, streak, is_flagged, created_at")
+    .order("created_at", { ascending: false });
+  return data || [];
+}
   const { data: claims } = await supabaseAdmin
     .from("prize_claims")
     .select("id, user_id, season_id, roblox_username, email, discord, status, submitted_at")
@@ -201,7 +207,7 @@ export default async function AdminPage() {
   // Active season first, fallback to most recently created
   const activeSeason = allSeasons.find(s => s.status === "active") || allSeasons[0] || null;
 
-  const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, prizeClaims] = await Promise.all([
+  const [quizzes, stats, flags, topQuizzes, cronLogs, seasonStandings, flaggedUsers, prizeClaims, allUsers] = await Promise.all([
     getAllQuizzes(),
     getStats(),
     getFlags(),
@@ -210,6 +216,7 @@ export default async function AdminPage() {
     getSeasonStandings(activeSeason?.start_date, activeSeason?.end_date, activeSeason?.id),
     getFlaggedUsers(),
     getPrizeClaims(),
+    getAllUsers(),
   ]);
 
   return (
@@ -224,6 +231,7 @@ export default async function AdminPage() {
       season={activeSeason}
       allSeasons={allSeasons}
       prizeClaims={prizeClaims}
+      allUsers={allUsers}
     />
   );
 }
