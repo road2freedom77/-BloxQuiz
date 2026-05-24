@@ -261,6 +261,10 @@ export default function AdminClient({
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>(season?.id || "");
   const [loadingSeasonData, setLoadingSeasonData] = useState(false);
 
+  // New season state
+  const [creatingNewSeason, setCreatingNewSeason] = useState(false);
+  const [newSeasonResult, setNewSeasonResult] = useState<{ name: string } | null>(null);
+
   const selectedSeason = allSeasons.find(s => s.id === selectedSeasonId) || season;
 
   async function switchSeason(seasonId: string) {
@@ -280,7 +284,6 @@ export default function AdminClient({
     setLoadingSeasonData(false);
   }
 
-  // Draft/edit state
   const [editingQuiz, setEditingQuiz] = useState<string | null>(null);
   const [quizEditData, setQuizEditData] = useState<{ questions: any[], loadError?: string } | null>(null);
   const [loadingQuiz, setLoadingQuiz] = useState<string | null>(null);
@@ -394,7 +397,6 @@ export default function AdminClient({
     else alert("Save failed: " + data.error);
   }
 
-  // Quiz edit functions (works for both drafts and published)
   async function loadQuizForEdit(slug: string) {
     if (editingQuiz === slug) { setEditingQuiz(null); setQuizEditData(null); return; }
     setLoadingQuiz(slug);
@@ -480,17 +482,35 @@ export default function AdminClient({
   }
 
   async function closeSeason() {
-    if (!confirm("Close Season 1 and snapshot final results? This cannot be undone.")) return;
+    if (!confirm("Close " + (selectedSeason?.name || "this season") + " and snapshot final results? This cannot be undone.")) return;
     setClosingSeason(true);
-    await fetch("/api/season/close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: season?.id }) });
+    await fetch("/api/season/close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: selectedSeason?.id }) });
     setClosingSeason(false);
     setSeasonClosed(true);
+  }
+
+  async function createNewSeason() {
+    if (!confirm("Create next quarterly season? This will start a new Q-based season automatically.")) return;
+    setCreatingNewSeason(true);
+    const res = await fetch("/api/season/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    setCreatingNewSeason(false);
+    if (data.success) {
+      setNewSeasonResult({ name: data.season.name });
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      alert("Failed to create season: " + data.error);
+    }
   }
 
   async function notifyWinners() {
     if (!confirm("Send prize notification emails to all pending winners?")) return;
     setNotifyingWinners(true);
-    const res = await fetch("/api/notify-winners", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: season?.id }) });
+    const res = await fetch("/api/notify-winners", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: selectedSeason?.id }) });
     const data = await res.json();
     setNotifyingWinners(false);
     setNotifyResult({ sent: data.sent || [], failed: data.failed || [] });
@@ -560,7 +580,8 @@ export default function AdminClient({
         {(["overview", "seasons", "codes", "guides", "silos", "quizzes", "flags", "logs", "submit"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ padding: "8px 20px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 13, background: tab === t ? "var(--gradient-main)" : "var(--surface)", color: tab === t ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: tab === t ? "var(--bg)" : "var(--text-muted)", textTransform: "capitalize" }}>
-              {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t === "guides" ? "📖 Guides" : t}            </button>
+            {t === "flags" && flags.length > 0 ? "flags (" + flags.length + ")" : t === "seasons" ? "🏆 Seasons" : t === "codes" ? "🎁 Codes" : t === "submit" ? "✍️ Submit Quiz" : t === "guides" ? "📖 Guides" : t}
+          </button>
         ))}
       </div>
 
@@ -608,7 +629,6 @@ export default function AdminClient({
       {/* Seasons Tab */}
       {tab === "seasons" && (
         <div>
-          {/* Season selector */}
           {allSeasons.length > 1 && (
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
               <span style={{ fontSize: 12, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>Season:</span>
@@ -626,8 +646,8 @@ export default function AdminClient({
           <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: "var(--radius)", padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Current Season</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 4 }}>{selectedSeason?.name || "Season 1"}</div>
-              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{selectedSeason?.start_date + " → " + selectedSeason?.end_date}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 4 }}>{selectedSeason?.name || "No Active Season"}</div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>{selectedSeason ? selectedSeason.start_date + " → " + selectedSeason.end_date : "—"}</div>
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ fontSize: 12, fontWeight: 800, padding: "6px 16px", borderRadius: 100, background: seasonClosed ? "rgba(255,60,172,0.1)" : "rgba(0,245,160,0.1)", color: seasonClosed ? "var(--neon-pink)" : "var(--neon-green)" }}>{seasonClosed ? "⛔ Closed" : "🟢 Active"}</span>
@@ -677,32 +697,13 @@ export default function AdminClient({
                   );
                 })}
               </div>
-              {qualifiedStandings.length > 3 && (
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-                  <div style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>Runners Up</div>
-                  {qualifiedStandings.slice(3, 10).map((player: any, i: number) => (
-                    <div key={player.user_id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px", borderBottom: i < Math.min(qualifiedStandings.length - 4, 6) ? "1px solid var(--border)" : "none", gap: 12 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text-dim)", minWidth: 24 }}>{"#" + (i + 4)}</span>
-                        <a href={"/profile/" + player.username} target="_blank" style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", textDecoration: "none" }}>{player.username}</a>
-                        {player.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
-                      </div>
-                      <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-                        <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>{player.quizzes_completed} quizzes</span>
-                        <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>{player.avg_accuracy}% acc</span>
-                        <span style={{ fontFamily: "var(--font-display)", fontSize: 14, color: "var(--neon-green)" }}>{(player.monthly_score || 0).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
             {(["standings", "flagged", "claims", "close"] as const).map(t => (
               <button key={t} onClick={() => setSeasonTab(t)} style={{ padding: "8px 18px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: seasonTab === t ? "#B84CFF" : "var(--surface)", color: seasonTab === t ? "#fff" : "var(--text-muted)", WebkitTextFillColor: seasonTab === t ? "#fff" : "var(--text-muted)", textTransform: "capitalize" }}>
-                {t === "flagged" ? "⚠️ Flagged (" + flaggedUsers.length + ")" : t === "close" ? "⛔ Close Season" : t === "claims" ? "🎁 Claims" + (pendingClaims > 0 ? " (" + pendingClaims + ")" : "") : "🏆 Standings"}
+                {t === "flagged" ? "⚠️ Flagged (" + flaggedUsers.length + ")" : t === "close" ? "⛔ Season Management" : t === "claims" ? "🎁 Claims" + (pendingClaims > 0 ? " (" + pendingClaims + ")" : "") : "🏆 Standings"}
               </button>
             ))}
           </div>
@@ -812,13 +813,7 @@ export default function AdminClient({
                           <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, minWidth: 200 }}>
                             {claim.status === "pending" && (
                               <>
-                                <input
-                                  type="text"
-                                  placeholder="Gift card code..."
-                                  value={giftCardCodes[claim.id] || ""}
-                                  onChange={e => setGiftCardCodes(prev => ({ ...prev, [claim.id]: e.target.value }))}
-                                  style={{ padding: "8px 12px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "monospace", fontWeight: 700, outline: "none", letterSpacing: 2 }}
-                                />
+                                <input type="text" placeholder="Gift card code..." value={giftCardCodes[claim.id] || ""} onChange={e => setGiftCardCodes(prev => ({ ...prev, [claim.id]: e.target.value }))} style={{ padding: "8px 12px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: 13, fontFamily: "monospace", fontWeight: 700, outline: "none", letterSpacing: 2 }} />
                                 <button onClick={() => sendGiftCard(claim.id)} disabled={sendingGiftCard === claim.id || !giftCardCodes[claim.id]?.trim()} style={{ padding: "10px 20px", borderRadius: 100, border: "none", background: giftCardCodes[claim.id]?.trim() ? "var(--gradient-main)" : "var(--surface)", color: "var(--bg)", fontWeight: 900, fontSize: 13, cursor: giftCardCodes[claim.id]?.trim() ? "pointer" : "default", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: sendingGiftCard === claim.id ? 0.7 : 1 }}>
                                   {sendingGiftCard === claim.id ? "⏳ Sending..." : "🎁 Send Gift Card"}
                                 </button>
@@ -838,24 +833,74 @@ export default function AdminClient({
 
           {seasonTab === "close" && (
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32 }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>⛔ Close Season 1</h2>
-              <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>Closing the season will snapshot the final standings, freeze scores, and mark the top 3 qualifying players as prize winners. This action cannot be undone.</p>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 12 }}>⛔ Season Management</h2>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>
+                Closing the season will snapshot the final standings, freeze scores, and mark the top 3 qualifying players as prize winners. This action cannot be undone.
+              </p>
               <div style={{ background: "var(--surface)", borderRadius: "var(--radius-sm)", padding: 20, marginBottom: 24 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Season 1 Summary</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+                  {selectedSeason?.name} Summary
+                </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {[{ label: "Total players", value: standings.length }, { label: "Qualifying players (10+ quizzes)", value: qualifiedStandings.length }, { label: "Prize winners (top 3)", value: Math.min(3, qualifiedStandings.length) }, { label: "Flagged accounts", value: flaggedUsers.length }, { label: "Prize claims submitted", value: claims.length }].map(({ label, value }) => (
-                    <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700 }}><span style={{ color: "var(--text-muted)" }}>{label}</span><span style={{ color: "var(--text)" }}>{value}</span></div>
+                  {[
+                    { label: "Total players", value: standings.length },
+                    { label: "Qualifying players (10+ quizzes)", value: qualifiedStandings.length },
+                    { label: "Prize winners (top 3)", value: Math.min(3, qualifiedStandings.length) },
+                    { label: "Flagged accounts", value: flaggedUsers.length },
+                    { label: "Prize claims submitted", value: claims.length },
+                  ].map(({ label, value }) => (
+                    <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700 }}>
+                      <span style={{ color: "var(--text-muted)" }}>{label}</span>
+                      <span style={{ color: "var(--text)" }}>{value}</span>
+                    </div>
                   ))}
                 </div>
               </div>
-              {/* Notify button always visible — works before AND after season close */}
+
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <button onClick={notifyWinners} disabled={notifyingWinners} style={{ padding: "14px 32px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, cursor: notifyingWinners ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: notifyingWinners ? 0.7 : 1 }}>{notifyingWinners ? "⏳ Sending emails..." : "📧 Notify Winners via Email"}</button>
-                {notifyResult && <div style={{ padding: "12px 16px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "var(--neon-green)" }}>{"✅ Sent: " + notifyResult.sent.join(", ") + (notifyResult.failed.length > 0 ? " • ❌ Failed: " + notifyResult.failed.join(", ") : "")}</div>}
+                {/* Notify winners */}
+                <button onClick={notifyWinners} disabled={notifyingWinners}
+                  style={{ padding: "14px 32px", borderRadius: 100, border: "none", background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, cursor: notifyingWinners ? "default" : "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--bg)", opacity: notifyingWinners ? 0.7 : 1 }}>
+                  {notifyingWinners ? "⏳ Sending emails..." : "📧 Notify Winners via Email"}
+                </button>
+                {notifyResult && (
+                  <div style={{ padding: "12px 16px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.2)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "var(--neon-green)" }}>
+                    {"✅ Sent: " + notifyResult.sent.join(", ") + (notifyResult.failed.length > 0 ? " • ❌ Failed: " + notifyResult.failed.join(", ") : "")}
+                  </div>
+                )}
+
+                {/* Close season */}
                 {!seasonClosed ? (
-                  <button onClick={closeSeason} disabled={closingSeason} style={{ padding: "14px 32px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", fontWeight: 900, fontSize: 14, cursor: closingSeason ? "default" : "pointer", fontFamily: "var(--font-body)" }}>{closingSeason ? "⏳ Closing Season..." : "⛔ Close Season & Snapshot Results"}</button>
+                  <button onClick={closeSeason} disabled={closingSeason}
+                    style={{ padding: "14px 32px", borderRadius: 100, border: "1px solid rgba(255,60,172,0.3)", background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", fontWeight: 900, fontSize: 14, cursor: closingSeason ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
+                    {closingSeason ? "⏳ Closing Season..." : "⛔ Close Season & Snapshot Results"}
+                  </button>
                 ) : (
-                  <div style={{ padding: "16px 24px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.3)", borderRadius: 12, fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textAlign: "center" }}>✅ Season closed successfully! Results snapshot saved.</div>
+                  <div style={{ padding: "16px 24px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.3)", borderRadius: 12, fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textAlign: "center" }}>
+                    ✅ Season closed successfully! Results snapshot saved.
+                  </div>
+                )}
+
+                {/* Create next quarterly season — only shown when current season is closed */}
+                {seasonClosed && (
+                  <div style={{ marginTop: 8, borderTop: "1px solid var(--border)", paddingTop: 24 }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                      🏆 Start Next Season
+                    </div>
+                    <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600, lineHeight: 1.6, marginBottom: 16 }}>
+                      Creates the next quarterly season (Q1/Q2/Q3/Q4 YYYY) automatically based on today's date. Season runs for 3 months.
+                    </p>
+                    {newSeasonResult ? (
+                      <div style={{ padding: "16px 24px", background: "rgba(0,245,160,0.1)", border: "1px solid rgba(0,245,160,0.3)", borderRadius: 12, fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textAlign: "center" }}>
+                        🎉 {newSeasonResult.name} created! Reloading...
+                      </div>
+                    ) : (
+                      <button onClick={createNewSeason} disabled={creatingNewSeason}
+                        style={{ padding: "14px 32px", borderRadius: 100, border: "none", background: "linear-gradient(135deg, #B84CFF, #00D9FF)", color: "#fff", fontWeight: 900, fontSize: 14, cursor: creatingNewSeason ? "default" : "pointer", fontFamily: "var(--font-body)", opacity: creatingNewSeason ? 0.7 : 1 }}>
+                        {creatingNewSeason ? "⏳ Creating..." : "🚀 Create Next Quarterly Season"}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -867,7 +912,11 @@ export default function AdminClient({
       {tab === "silos" && (
         <div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
-            {[{ label: "🏆 Strong Silos (15+)", value: strongCount, color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" }, { label: "📈 Growing Silos (8-14)", value: growingCount, color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" }, { label: "🔴 Weak Silos (<8)", value: weakCount, color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" }].map(({ label, value, color, bg }) => (
+            {[
+              { label: "🏆 Strong Silos (15+)", value: strongCount, color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
+              { label: "📈 Growing Silos (8-14)", value: growingCount, color: "var(--neon-yellow)", bg: "rgba(255,227,71,0.1)" },
+              { label: "🔴 Weak Silos (<8)", value: weakCount, color: "var(--neon-pink)", bg: "rgba(255,60,172,0.1)" },
+            ].map(({ label, value, color, bg }) => (
               <div key={label} style={{ background: bg, border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 20, textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 36, color, marginBottom: 4 }}>{value}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color, textTransform: "uppercase" }}>{label}</div>
@@ -953,7 +1002,6 @@ export default function AdminClient({
           </div>
 
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-            {/* Table header */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 110px 80px 40px 70px 150px 90px 130px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
               <div>Title</div><div>Game</div><div>Diff</div><div>Qs</div><div>Source</div><div>Angle</div><div>Published</div><div>Actions</div>
             </div>
@@ -966,7 +1014,6 @@ export default function AdminClient({
 
               return (
                 <div key={quiz.slug} style={{ borderBottom: i < paginatedQuizzes.length - 1 ? "1px solid var(--border)" : "none" }}>
-                  {/* Row */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 110px 80px 40px 70px 150px 90px 130px", alignItems: "center", padding: "12px 20px", background: isDraft ? "rgba(255,227,71,0.02)" : "transparent" }}>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
@@ -985,11 +1032,9 @@ export default function AdminClient({
                         {ANGLES.map(a => <option key={a} value={a}>{a}</option>)}
                       </select>
                     </div>
-                    {/* Published date */}
                     <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>
                       {isDraft ? <span style={{ color: "var(--neon-yellow)" }}>Draft</span> : formatDate(quiz.published_at)}
                     </div>
-                    {/* Actions */}
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                       {isEditable && (
                         <button onClick={() => loadQuizForEdit(quiz.slug)} disabled={loadingQuiz === quiz.slug}
@@ -1013,13 +1058,11 @@ export default function AdminClient({
                     </div>
                   </div>
 
-                  {/* Inline Editor */}
                   {isExpanded && quizEditData && (
                     <div style={{ borderTop: "1px solid " + (isDraft ? "rgba(255,227,71,0.2)" : "rgba(0,217,255,0.2)"), background: isDraft ? "rgba(255,227,71,0.03)" : "rgba(0,217,255,0.03)", padding: 24 }}>
                       <div style={{ fontSize: 12, fontWeight: 900, color: isDraft ? "var(--neon-yellow)" : "var(--neon-blue)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 20 }}>
                         {isDraft ? "✏️ Edit Draft Questions" : "✏️ Edit Published Quiz"}
                       </div>
-
                       {quizEditData.loadError ? (
                         <div style={{ color: "var(--neon-pink)", fontWeight: 700, fontSize: 13 }}>{quizEditData.loadError}</div>
                       ) : (
@@ -1045,7 +1088,6 @@ export default function AdminClient({
                           ))}
                         </div>
                       )}
-
                       <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
                         <button onClick={() => saveQuizEdit(quiz.slug, false)} disabled={savingQuiz}
                           style={{ padding: "10px 24px", borderRadius: 100, border: "1px solid " + (isDraft ? "rgba(255,227,71,0.4)" : "rgba(0,217,255,0.4)"), background: quizSaveSuccess === quiz.slug ? "rgba(0,245,160,0.15)" : (isDraft ? "rgba(255,227,71,0.1)" : "rgba(0,217,255,0.1)"), color: quizSaveSuccess === quiz.slug ? "var(--neon-green)" : (isDraft ? "var(--neon-yellow)" : "var(--neon-blue)"), fontWeight: 900, fontSize: 13, cursor: savingQuiz ? "default" : "pointer", fontFamily: "var(--font-body)" }}>
@@ -1141,6 +1183,7 @@ export default function AdminClient({
         </div>
       )}
 
+      {/* Codes Tab */}
       {tab === "codes" && (
         <div style={{ maxWidth: 700 }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>🎁 Code Alerts</h2>
@@ -1181,23 +1224,26 @@ ON CONFLICT DO NOTHING;`}</pre>
           </div>
         </div>
       )}
+
+      {/* Guides Tab */}
       {tab === "guides" && (
-  <div>
-    <div style={{ background: "var(--bg-card)", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 12, padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4 }}>Manage game guides — review drafts, edit metadata, publish when ready.</div>
-        <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>To edit section content, update the JSON in Supabase → game_guides → content column.</div>
-      </div>
-      <a href="/admin/guides" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #00f5a0, #b84cff)", color: "#0a0a14", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
-        📖 Open Guides Manager →
-      </a>
-    </div>
-    <div style={{ display: "flex", gap: 12 }}>
-      <a href="/guides" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>View published guides →</a>
-      <a href="/editorial" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>Editorial standards →</a>
-    </div>
-  </div>
-)}
+        <div>
+          <div style={{ background: "var(--bg-card)", border: "1px solid rgba(0,180,216,0.2)", borderRadius: 12, padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4 }}>Manage game guides — review drafts, edit metadata, publish when ready.</div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>To edit section content, update the JSON in Supabase → game_guides → content column.</div>
+            </div>
+            <a href="/admin/guides" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #00f5a0, #b84cff)", color: "#0a0a14", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none" }}>
+              📖 Open Guides Manager →
+            </a>
+          </div>
+          <div style={{ display: "flex", gap: 12 }}>
+            <a href="/guides" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>View published guides →</a>
+            <a href="/editorial" target="_blank" style={{ display: "block", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 20px", textDecoration: "none", color: "#00b4d8", fontWeight: 700, fontSize: 14 }}>Editorial standards →</a>
+          </div>
+        </div>
+      )}
+
       {/* Submit Quiz Tab */}
       {tab === "submit" && <SubmitQuizTab />}
 
