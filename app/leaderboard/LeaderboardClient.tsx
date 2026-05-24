@@ -32,29 +32,40 @@ const SCORING_RULES = [
   { label: "Daily cap", value: "20 quizzes", color: "var(--neon-blue)" },
 ];
 
-function getDaysUntilReset() {
+// Returns days until end of current quarter
+function getDaysUntilSeasonEnd(seasonEndDate?: string): number {
   const now = new Date();
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const diff = nextMonth.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  if (seasonEndDate) {
+    const end = new Date(seasonEndDate);
+    const diff = end.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
+  // Fallback: calculate end of current quarter
+  const month = now.getMonth();
+  const quarterEndMonth = Math.floor(month / 3) * 3 + 3;
+  const quarterEnd = new Date(now.getFullYear(), quarterEndMonth, 0);
+  const diff = quarterEnd.getTime() - now.getTime();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
 export default function LeaderboardClient({
   allTimeLeaderboard,
   seasonLeaderboard,
   seasonClosed = false,
-  seasonName = "Season 1",
+  seasonName = "Q2 2026",
+  seasonEndDate,
 }: {
   allTimeLeaderboard: any[];
   seasonLeaderboard: any[];
   seasonClosed?: boolean;
   seasonName?: string;
+  seasonEndDate?: string;
 }) {
   const { isSignedIn, user } = useUser();
   const [tab, setTab] = useState<"season" | "alltime">("season");
   const [search, setSearch] = useState("");
   const [mySeasonData, setMySeasonData] = useState<any | null>(null);
-  const daysLeft = getDaysUntilReset();
+  const daysLeft = getDaysUntilSeasonEnd(seasonEndDate);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -74,13 +85,13 @@ export default function LeaderboardClient({
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 1 }}>
 
-      {/* Season banner — dynamic */}
+      {/* Season banner */}
       {seasonClosed ? (
         <div style={{ background: "linear-gradient(135deg, rgba(255,60,172,0.1), rgba(184,76,255,0.08))", border: "1px solid rgba(255,60,172,0.3)", borderRadius: "var(--radius)", padding: "24px 28px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-pink)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>⛔ {seasonName} — Ended</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 6 }}>Final Standings</div>
-            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Season is over. Scores are locked. Season 2 coming soon!</div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>This season is over. Scores are locked. Next season coming soon!</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             <a href="/champions" style={{ fontSize: 13, fontWeight: 900, padding: "10px 22px", borderRadius: 100, background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", border: "1px solid rgba(255,60,172,0.3)", textDecoration: "none" }}>🏆 View Champions →</a>
@@ -92,11 +103,11 @@ export default function LeaderboardClient({
           <div>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>🏆 {seasonName} — Active Now</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 6 }}>Win Roblox Gift Cards</div>
-            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Top players win real prizes. Play quizzes, earn points, claim your reward.</div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>Top players win real prizes this quarter. Play quizzes, earn points, claim your reward.</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--neon-pink)" }}>{daysLeft + " days"}</div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>until season reset</div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 700 }}>left this season</div>
             <a href="/rules" style={{ fontSize: 12, fontWeight: 800, color: "#B84CFF", textDecoration: "none" }}>View Rules →</a>
           </div>
         </div>
@@ -186,11 +197,11 @@ export default function LeaderboardClient({
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 48px)", marginBottom: 12 }}>{"👑 Leaderboard"}</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 48px)", marginBottom: 12 }}>👑 Leaderboard</h1>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 15, maxWidth: 480, margin: "0 auto" }}>
           {seasonClosed
-            ? "Season 1 is over. These are the final standings."
-            : "Compete for Roblox gift cards every month. Hard quizzes = 2x points. Daily streaks = bonus points."}
+            ? `${seasonName} is over. These are the final standings.`
+            : "Compete for Roblox gift cards every quarter. Hard quizzes = 2x points. Daily streaks = bonus points."}
         </p>
       </div>
 
@@ -220,10 +231,12 @@ export default function LeaderboardClient({
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 48, textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🏆</div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>
-                {seasonClosed ? "Season Ended" : seasonName + " Just Started!"}
+                {seasonClosed ? "Season Ended" : `${seasonName} Just Started!`}
               </div>
               <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
-                {seasonClosed ? "No scores were recorded this season." : "No scores yet this month. Be the first to climb the leaderboard!"}
+                {seasonClosed
+                  ? "No scores were recorded this season."
+                  : "No scores yet this season. Be the first to climb the leaderboard!"}
               </div>
               {!seasonClosed && (
                 <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>🎮 Start Playing</a>
@@ -366,12 +379,12 @@ export default function LeaderboardClient({
       {/* CTA */}
       <div style={{ marginTop: 32, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 32, textAlign: "center" }}>
         <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>
-          {seasonClosed ? "Season 2 is coming." : "🏆 Want to win Robux?"}
+          {seasonClosed ? "Next season is coming." : "🏆 Want to win Robux?"}
         </div>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
           {seasonClosed
             ? "Keep playing to get ahead before the next season kicks off."
-            : "Play quizzes, earn points and finish in the top 3 this month to win Roblox gift cards!"}
+            : `Play quizzes, earn points and finish in the top 3 this quarter to win Roblox gift cards!`}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 15, padding: "14px 32px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>🎮 Start Playing</a>

@@ -5,7 +5,7 @@ export const revalidate = 0;
 
 export const metadata = {
   title: "Leaderboard — Top Roblox Quiz Players | BloxQuiz",
-  description: "See the top Roblox quiz players on BloxQuiz.gg. Compete for Roblox gift cards up to $20. Season 1 active now — top 3 players win real prizes!",
+  description: "See the top Roblox quiz players on BloxQuiz.gg. Compete for Roblox gift cards up to $20. Quarterly seasons — top 3 players win real prizes!",
   alternates: { canonical: "https://www.bloxquiz.gg/leaderboard" },
 };
 
@@ -37,8 +37,6 @@ async function getAllTimeLeaderboard() {
 }
 
 async function getSeasonLeaderboard(seasonStartDate?: string) {
-  // Use season's start_date month, not current month.
-  // This ensures leaderboard shows correct data even after season ends.
   const currentMonth = seasonStartDate
     ? seasonStartDate.substring(0, 7)
     : new Date().toISOString().substring(0, 7);
@@ -51,7 +49,6 @@ async function getSeasonLeaderboard(seasonStartDate?: string) {
 
   if (error || !data || data.length === 0) return [];
 
-  // Deduplicate — keep only first attempt per user+quiz combo
   const seen = new Set<string>();
   const firstAttempts = data.filter(row => {
     const key = `${row.user_id}:${row.quiz_slug}`;
@@ -60,7 +57,6 @@ async function getSeasonLeaderboard(seasonStartDate?: string) {
     return true;
   });
 
-  // Aggregate per user
   const userMap: Record<string, {
     total_score: number;
     quizzes: number;
@@ -78,7 +74,6 @@ async function getSeasonLeaderboard(seasonStartDate?: string) {
     userMap[row.user_id].total_questions += row.total_questions || 0;
   }
 
-  // Fetch user details
   const userIds = Object.keys(userMap);
   if (userIds.length === 0) return [];
 
@@ -113,7 +108,6 @@ export default async function LeaderboardPage() {
     getCurrentSeason(),
   ]);
 
-  // Fetch season scores using the season's own month, not today's month
   const season = await getSeasonLeaderboard(currentSeason?.start_date);
 
   return (
@@ -121,7 +115,8 @@ export default async function LeaderboardPage() {
       allTimeLeaderboard={allTime}
       seasonLeaderboard={season}
       seasonClosed={currentSeason?.status === "closed"}
-      seasonName={currentSeason?.name || "Season 1"}
+      seasonName={currentSeason?.name || "Q2 2026"}
+      seasonEndDate={currentSeason?.end_date}
     />
   );
 }
