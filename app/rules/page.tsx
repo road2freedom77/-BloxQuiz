@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contest Rules | BloxQuiz.gg",
-  description: "Official rules for the BloxQuiz.gg Season 2 leaderboard contest. Learn how to qualify, win prizes, and claim your Roblox gift card.",
+  description: "Official rules for the BloxQuiz.gg quarterly leaderboard contest. Learn how to qualify, win prizes, and claim your Roblox gift card.",
 };
 
 export default function RulesPage() {
@@ -11,9 +11,9 @@ export default function RulesPage() {
 
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Official Contest Rules</div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginBottom: 12 }}>Season 2 Rules</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginBottom: 12 }}>Quarterly Season Rules</h1>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 15, lineHeight: 1.7 }}>
-          BloxQuiz.gg Season 2 runs from April 1–30, 2026. Read the full rules before competing.
+          BloxQuiz.gg runs quarterly seasons (Q1–Q4 each year). Each season lasts approximately 3 months. Read the full rules before competing.
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export default function RulesPage() {
           emoji: "🏆",
           title: "How the Leaderboard Works",
           items: [
-            "Season 2 runs April 1–30, 2026. Scores reset on May 1st.",
+            "Seasons run quarterly — Q1 (Jan–Mar), Q2 (Apr–Jun), Q3 (Jul–Sep), Q4 (Oct–Dec). Scores reset at the start of each new season.",
             "Points are awarded based on quiz difficulty: Easy = 1x, Medium = 1.5x, Hard = 2x.",
             "Only your first attempt on each quiz counts toward your season score.",
             "A maximum of 20 quizzes per day count toward your season score.",
@@ -43,7 +43,7 @@ export default function RulesPage() {
             "You must complete at least 10 scored quizzes during the season.",
             "Your account must be at least 24 hours old at the time of season close.",
             "You must have a valid BloxQuiz.gg account with a username set.",
-            "Only the top 3 qualifying players win prizes.",
+            "Only the top 3 qualifying players win prizes each season.",
             "You must claim your prize within 14 days of the season ending.",
           ],
         },
@@ -110,7 +110,7 @@ export default function RulesPage() {
       ))}
 
       <div style={{ marginTop: 24, fontSize: 12, color: "var(--text-dim)", fontWeight: 600, textAlign: "center" }}>
-        Last updated: April 1, 2026 · <a href="/leaderboard" style={{ color: "#B84CFF", textDecoration: "none" }}>View Leaderboard →</a>
+        Last updated: May 2026 · <a href="/leaderboard" style={{ color: "#B84CFF", textDecoration: "none" }}>View Leaderboard →</a>
       </div>
 
     </div>
