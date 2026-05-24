@@ -36,15 +36,22 @@ async function getAllTimeLeaderboard() {
   }));
 }
 
-async function getSeasonLeaderboard(seasonStartDate?: string) {
-  const currentMonth = seasonStartDate
-    ? seasonStartDate.substring(0, 7)
-    : new Date().toISOString().substring(0, 7);
+async function getSeasonLeaderboard(seasonStartDate?: string, seasonEndDate?: string) {
+  // Build all YYYY-MM months between start and end date
+  const start = new Date(seasonStartDate || new Date().toISOString().substring(0, 7) + "-01");
+  const end = new Date(seasonEndDate || new Date().toISOString().substring(0, 7) + "-01");
+  const months: string[] = [];
+  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cursor <= end) {
+    months.push(cursor.toISOString().substring(0, 7));
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  if (months.length === 0) months.push(new Date().toISOString().substring(0, 7));
 
   const { data, error } = await supabaseAdmin
     .from("scores")
     .select("user_id, weighted_score, score, total_questions, quiz_slug, completed_at")
-    .eq("month", currentMonth)
+    .in("month", months)
     .order("completed_at", { ascending: true });
 
   if (error || !data || data.length === 0) return [];
@@ -108,7 +115,7 @@ export default async function LeaderboardPage() {
     getCurrentSeason(),
   ]);
 
-  const season = await getSeasonLeaderboard(currentSeason?.start_date);
+  const season = await getSeasonLeaderboard(currentSeason?.start_date, currentSeason?.end_date);
 
   return (
     <LeaderboardClient
