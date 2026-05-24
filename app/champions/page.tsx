@@ -5,17 +5,29 @@ import { supabase } from "../lib/supabase";
 
 export const metadata: Metadata = {
   title: "Champions | BloxQuiz.gg",
-  description: "BloxQuiz.gg Hall of Fame — past season winners and leaderboard champions.",
+  description: "BloxQuiz.gg Hall of Fame — past quarterly season winners and leaderboard champions.",
 };
 
 async function getCurrentSeason() {
-  const { data } = await supabase
+  // Prefer active season, fallback to most recently created
+  const { data: active } = await supabase
     .from("seasons")
     .select("*")
-    .order("start_date", { ascending: false })
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
     .limit(1)
     .single();
-  return data;
+
+  if (active) return active;
+
+  const { data: fallback } = await supabase
+    .from("seasons")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  return fallback;
 }
 
 async function getPastSeasons() {
@@ -23,7 +35,7 @@ async function getPastSeasons() {
     .from("seasons")
     .select("*")
     .eq("status", "closed")
-    .order("end_date", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (!seasons || seasons.length === 0) return [];
 
@@ -80,13 +92,14 @@ export default async function ChampionsPage() {
         </p>
       </div>
 
+      {/* Current season banner */}
       {seasonClosed ? (
         <div style={{ background: "linear-gradient(135deg, rgba(255,60,172,0.1), rgba(184,76,255,0.08))", border: "1px solid rgba(255,60,172,0.3)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-pink)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>⛔ Season 1 — Ended</div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 6 }}>Season 1 is officially over!</div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-pink)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>⛔ {currentSeason?.name} — Ended</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 6 }}>{currentSeason?.name} is officially over!</div>
             <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, lineHeight: 1.6 }}>
-              Final standings are locked. Winners have been notified. Season 2 coming soon — stay tuned!
+              Final standings are locked. Winners have been notified. Next season coming soon — stay tuned!
             </p>
           </div>
           <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
@@ -99,11 +112,11 @@ export default async function ChampionsPage() {
         <div style={{ background: "linear-gradient(135deg, rgba(184,76,255,0.12), rgba(255,60,172,0.08))", border: "1px solid rgba(184,76,255,0.3)", borderRadius: "var(--radius)", padding: "28px 32px", marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#B84CFF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
-              {currentSeason?.name || "Season 1"} — In Progress
+              {currentSeason?.name || "Current Season"} — In Progress
             </div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 6 }}>Your name could be here</div>
             <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, lineHeight: 1.6 }}>
-              Top 3 players win Roblox gift cards up to $20. Season ends {currentSeason?.end_date || "March 31, 2026"}.
+              Top 3 players win Roblox gift cards up to $20. Season ends {currentSeason?.end_date || "end of quarter"}.
             </p>
           </div>
           <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
@@ -117,14 +130,15 @@ export default async function ChampionsPage() {
         </div>
       )}
 
+      {/* Past seasons */}
       {pastSeasons.length === 0 ? (
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "60px 32px", textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🎮</div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 10 }}>No Champions Yet</div>
           <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 24, maxWidth: 400, margin: "0 auto 24px" }}>
             {seasonClosed
-              ? "Season 1 just ended! Champions will appear here once prizes are sent."
-              : "Season 1 is still running! The first champions will be crowned on April 1, 2026."}
+              ? "This season just ended! Champions will appear here once prizes are sent."
+              : `${currentSeason?.name || "The current season"} is still running! Be the first champion when it ends.`}
           </p>
           <a href="/leaderboard" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
             🏆 {seasonClosed ? "View Final Standings" : "See Current Standings"}
@@ -146,7 +160,7 @@ export default async function ChampionsPage() {
               <div style={{ padding: "28px 28px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                   {winners.map(w => (
-                    <div key={w.rank} style={{ background: "var(--surface)", borderRadius: "var(--radius-sm)", padding: "20px 16px", textAlign: "center", border: "1px solid " + RANK_COLORS[w.rank - 1] + "30", position: "relative" }}>
+                    <div key={w.rank} style={{ background: "var(--surface)", borderRadius: "var(--radius-sm)", padding: "20px 16px", textAlign: "center", border: "1px solid " + RANK_COLORS[w.rank - 1] + "30" }}>
                       <div style={{ fontSize: 32, marginBottom: 8 }}>{MEDALS[w.rank - 1]}</div>
                       <a href={"/profile/" + w.username} style={{ fontFamily: "var(--font-display)", fontSize: 18, color: RANK_COLORS[w.rank - 1], textDecoration: "none", display: "block", marginBottom: 4 }}>
                         {w.username}
@@ -169,14 +183,15 @@ export default async function ChampionsPage() {
         </div>
       )}
 
+      {/* Bottom CTA */}
       <div style={{ marginTop: 40, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "28px 32px", textAlign: "center" }}>
         <div style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 8 }}>
-          {seasonClosed ? "Season 2 is coming." : "Ready to become a champion?"}
+          {seasonClosed ? "Next season is coming." : "Ready to become a champion?"}
         </div>
         <p style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14, marginBottom: 20 }}>
           {seasonClosed
             ? "Keep playing to get ahead before the next season kicks off."
-            : "Play quizzes, climb the leaderboard, and win real Roblox gift cards every month."}
+            : "Play quizzes, climb the leaderboard, and win real Roblox gift cards every quarter."}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a href="/browse" style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "12px 28px", borderRadius: 100, textDecoration: "none", WebkitTextFillColor: "var(--bg)" }}>
