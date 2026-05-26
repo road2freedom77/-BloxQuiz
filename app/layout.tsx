@@ -116,21 +116,15 @@ export default function RootLayout({
           </Script>
           {/* Mediavine Grow script */}
           <script data-grow-initializer="" dangerouslySetInnerHTML={{ __html: `!(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","U2l0ZToxMWI5YzM4ZS01OWFjLTQ1YjMtYjA0ZC0wNTYzNzI4YjY2ZTQ=");var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t);})();` }} />
+          {/* Adsterra 728x90 */}
+          <script dangerouslySetInnerHTML={{ __html: `atOptions = {'key':'b1d2fc9bc2cfc66d77298b4ad9b31bd2','format':'iframe','height':90,'width':728,'params':{}};` }} />
+          <script src="https://www.highperformanceformat.com/b1d2fc9bc2cfc66d77298b4ad9b31bd2/invoke.js" />
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
           <div style={{ position: "relative", zIndex: 1 }}>
             <Nav />
-            {/* Adsterra 728x90 banner */}
-            <div style={{ display: "flex", justifyContent: "center", background: "var(--bg)", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-              <Script id="adsterra-config" strategy="afterInteractive">
-                {`atOptions = {'key':'b1d2fc9bc2cfc66d77298b4ad9b31bd2','format':'iframe','height':90,'width':728,'params':{}};`}
-              </Script>
-              <Script
-                id="adsterra-invoke"
-                src="https://www.highperformanceformat.com/b1d2fc9bc2cfc66d77298b4ad9b31bd2/invoke.js"
-                strategy="afterInteractive"
-              />
-            </div>
+            {/* Adsterra 728x90 banner placeholder — ad renders via head scripts */}
+            <div style={{ display: "flex", justifyContent: "center", minHeight: 90, background: "var(--bg)", padding: "8px 0", borderBottom: "1px solid var(--border)" }} />
             {children}
             <Footer />
           </div>
