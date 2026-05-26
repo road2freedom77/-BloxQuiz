@@ -16,7 +16,7 @@ async function getCurrentSeason() {
     .from("seasons")
     .select("*")
     .eq("status", "active")
-    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(1)
     .single();
   return data || null;
@@ -54,23 +54,19 @@ async function getFollowedGames(userId: string) {
       .order("changed_at", { ascending: false }),
   ]);
 
-  // Active code counts
   const codeCountBySlug: Record<string, number> = {};
   for (const c of codesRes.data || []) {
     codeCountBySlug[c.slug] = (codeCountBySlug[c.slug] || 0) + 1;
   }
 
-  // Game name + icon
   const gamesBySlug: Record<string, any> = {};
   for (const g of gamesRes.data || []) gamesBySlug[g.slug] = g;
 
-  // Trend data
   const trendBySlug: Record<string, { trend_label: string | null; trend_pct_7d: number | null }> = {};
   for (const i of insightsRes.data || []) {
     trendBySlug[i.slug] = { trend_label: i.trend_label, trend_pct_7d: i.trend_pct_7d };
   }
 
-  // Most recent code change per game
   const lastCodeBySlug: Record<string, string | null> = {};
   for (const row of changeLogRes.data || []) {
     if (!lastCodeBySlug[row.game_slug]) {
