@@ -1,26 +1,13 @@
-export const metadata = {
-  title: "Contact BloxQuiz — Get In Touch",
-  description: "Contact the BloxQuiz team for questions, feedback, advertising inquiries or to report issues.",
-  robots: { index: false },
-};
-
-const EMAIL = "bloxquizgg@gmail.com";
-
 "use client";
 import { useState, useEffect } from "react";
 
-function ObfuscatedEmail() {
-  const [email, setEmail] = useState("");
-  useEffect(() => {
-    setEmail(["bloxquizgg", "gmail", "com"].join("@").replace("@gmail", "@gmail"));
-  }, []);
-  if (!email) return <span style={{ color: "var(--neon-green)", fontWeight: 900, fontSize: 20 }}>bloxquizgg [at] gmail.com</span>;
-  return (
-    <a href={"mailto:" + email} style={{ color: "var(--neon-green)", fontWeight: 900, fontSize: 20, textDecoration: "none" }}>{email}</a>
-  );
-}
-
 export default function ContactPage() {
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    setEmail("bloxquizgg" + "@" + "gmail.com");
+  }, []);
+
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: "60px 24px", position: "relative", zIndex: 1 }}>
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 48px)", marginBottom: 16 }}>
@@ -47,7 +34,10 @@ export default function ContactPage() {
 
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 28, textAlign: "center", marginTop: 8 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>For all inquiries email us at</div>
-        <ObfuscatedEmail />
+        {email
+          ? <a href={"mailto:" + email} style={{ color: "var(--neon-green)", fontWeight: 900, fontSize: 20, textDecoration: "none" }}>{email}</a>
+          : <span style={{ color: "var(--neon-green)", fontWeight: 900, fontSize: 20 }}>bloxquizgg [at] gmail.com</span>
+        }
       </div>
     </div>
   );
