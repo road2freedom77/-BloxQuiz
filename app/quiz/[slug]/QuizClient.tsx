@@ -67,6 +67,12 @@ const gameEmojis: Record<string, string> = {
   "Dress to Impress": "👗",
 };
 
+function trackEvent(name: string, params: Record<string, any>) {
+  if (typeof window !== "undefined" && (window as any).gtag) {
+    (window as any).gtag("event", name, params);
+  }
+}
+
 function ReportButton({ quizSlug, questionIndex }: { quizSlug: string, questionIndex: number }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -136,7 +142,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   relatedQuizzes: any[],
   currentSeason?: { name: string, status: string } | null,
 }) {
-  // ── HOOKS — must all come before any early return ──────────────────────────
   const { user } = useUser();
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
@@ -162,14 +167,11 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
         if (data) setPlayedSlugs(new Set(data.map((r: any) => r.quiz_slug)));
       });
   }, [user?.id]);
-  // ──────────────────────────────────────────────────────────────────────────
 
-  // Guard — after ALL hooks
   if (!quiz || !quiz.questions || !Array.isArray(quiz.questions) || quiz.questions.length === 0) {
     return null;
   }
 
-  // Derived values — safe because guard passed
   function slugify(text: string) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   }
@@ -306,6 +308,15 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
       } else {
         const finalScore = score + (isCorrect ? 1 : 0);
         setFinished(true);
+        // GA4 quiz_complete event
+        trackEvent("quiz_complete", {
+          quiz_slug: slug,
+          game: quiz.game,
+          difficulty: quiz.difficulty,
+          score: finalScore,
+          total_questions: quiz.questions.length,
+          pct_correct: Math.round((finalScore / quiz.questions.length) * 100),
+        });
         saveScore(finalScore);
       }
     }, 1200);
