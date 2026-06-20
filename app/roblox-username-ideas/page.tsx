@@ -71,6 +71,11 @@ export default function RobloxUsernameIdeasPage() {
 
       <UsernameIdeasClient />
 
+      {/* Affiliate placement — after username list, high intent moment */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 32px" }}>
+        <RobuxCTA variant="card" />
+      </div>
+
       {/* Game hub cross-links */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 64px" }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>
