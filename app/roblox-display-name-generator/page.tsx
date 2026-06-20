@@ -1,4 +1,5 @@
 import DisplayNameClient from "./DisplayNameClient";
+import RobuxCTA from "../components/RobuxCTA";
 
 export const metadata = {
   title: "Roblox Display Name Generator (2026) — 1,000+ Cool & Aesthetic Ideas",
@@ -62,7 +63,19 @@ export default function RobloxDisplayNamePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      {/* Affiliate placement — top of page */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 24px 0" }}>
+        <RobuxCTA variant="banner" />
+      </div>
+
       <DisplayNameClient />
+
+      {/* Affiliate placement — after generator output */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 32px" }}>
+        <RobuxCTA variant="card" />
+      </div>
+
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 64px" }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginBottom: 8 }}>
           Test Your Knowledge While You're Here
