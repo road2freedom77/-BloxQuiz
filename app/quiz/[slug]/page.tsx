@@ -231,12 +231,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const cleanSlug = slug.replace(/-/g, ' ');
 
   // googlebot-only noindex — Bing and all other crawlers unaffected
-  const robots = quiz.noindex
-    ? { index: true, follow: true, googlebot: { index: false, follow: true } }
-    : { index: true, follow: true };
+  const other = quiz.noindex
+    ? { googlebot: "noindex, follow" }
+    : {};
 
   return {
-    robots,
+    robots: { index: true, follow: true },
+    other,
     title: `${quiz.title} — Free ${quiz.game} Quiz | BloxQuiz`,
     description: quiz.intro
       ? `${quiz.intro.substring(0, 150)}... Play free on BloxQuiz.gg`
