@@ -229,7 +229,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const quiz = await getQuiz(slug);
   if (!quiz) return { title: "Quiz Not Found | BloxQuiz", description: "This quiz could not be found." };
   const cleanSlug = slug.replace(/-/g, ' ');
+
+  // googlebot-only noindex — Bing and all other crawlers unaffected
+  const robots = quiz.noindex
+    ? { index: true, follow: true, googlebot: { index: false, follow: true } }
+    : { index: true, follow: true };
+
   return {
+    robots,
     title: `${quiz.title} — Free ${quiz.game} Quiz | BloxQuiz`,
     description: quiz.intro
       ? `${quiz.intro.substring(0, 150)}... Play free on BloxQuiz.gg`
