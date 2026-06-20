@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabaseAdmin } from "../../lib/supabase";
+import RobuxCTA from "../../components/RobuxCTA";
 
 export const revalidate = 3600;
 
@@ -184,32 +185,41 @@ export default async function MostPlayedPage() {
             </div>
 
             {games.map((game, i) => (
-              <Link key={game.slug} href={`/stats/${game.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-                <div className="stats-row" style={{ display: "grid", gridTemplateColumns: "52px 1fr 140px 140px 120px", padding: "14px 20px", borderBottom: i < games.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center" }}>
-                  <span style={{ fontSize: i < 3 ? 18 : 13, fontWeight: 800, color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(255,255,255,0.3)" }}>
-                    {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    {game.thumbnail_url ? (
-                      <img src={game.thumbnail_url} alt={game.name} width={40} height={40} style={{ borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
-                    ) : (
-                      <div style={{ width: 40, height: 40, borderRadius: 8, background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
-                        {game.emoji ?? "🎮"}
+              <div key={game.slug}>
+                <Link href={`/stats/${game.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                  <div className="stats-row" style={{ display: "grid", gridTemplateColumns: "52px 1fr 140px 140px 120px", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)", alignItems: "center" }}>
+                    <span style={{ fontSize: i < 3 ? 18 : 13, fontWeight: 800, color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(255,255,255,0.3)" }}>
+                      {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      {game.thumbnail_url ? (
+                        <img src={game.thumbnail_url} alt={game.name} width={40} height={40} style={{ borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 40, height: 40, borderRadius: 8, background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                          {game.emoji ?? "🎮"}
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: "#fff" }}>
+                          {game.emoji && <span style={{ marginRight: 6 }}>{game.emoji}</span>}
+                          {game.name}
+                        </div>
+                        {game.genre && <div style={{ fontSize: 11, color: "rgba(0,180,216,0.8)", textTransform: "capitalize", marginTop: 2 }}>{game.genre}</div>}
                       </div>
-                    )}
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: "#fff" }}>
-                        {game.emoji && <span style={{ marginRight: 6 }}>{game.emoji}</span>}
-                        {game.name}
-                      </div>
-                      {game.genre && <div style={{ fontSize: 11, color: "rgba(0,180,216,0.8)", textTransform: "capitalize", marginTop: 2 }}>{game.genre}</div>}
                     </div>
+                    <span style={{ textAlign: "right", fontSize: 15, fontWeight: 800, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(game.current_players)}</span>
+                    <span style={{ textAlign: "right", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontVariantNumeric: "tabular-nums" }}>{formatVisits(game.total_visits)}</span>
+                    <span style={{ textAlign: "right", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>{timeAgo(game.last_updated)}</span>
                   </div>
-                  <span style={{ textAlign: "right", fontSize: 15, fontWeight: 800, color: "#00b4d8", fontVariantNumeric: "tabular-nums" }}>{formatNumber(game.current_players)}</span>
-                  <span style={{ textAlign: "right", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontVariantNumeric: "tabular-nums" }}>{formatVisits(game.total_visits)}</span>
-                  <span style={{ textAlign: "right", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>{timeAgo(game.last_updated)}</span>
-                </div>
-              </Link>
+                </Link>
+
+                {/* Ad after row 3 and row 10 */}
+                {(i === 2 || i === 9) && (
+                  <div style={{ padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <RobuxCTA variant="card" />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
