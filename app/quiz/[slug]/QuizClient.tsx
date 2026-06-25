@@ -152,10 +152,16 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   const [sharing, setSharing] = useState(false);
   const [shared, setShared] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [earnedPoints, setEarnedPoints] = useState<{ weighted: number, streakBonus: number, newStreak: number, capped: boolean } | null>(null);
+  const [earnedPoints, setEarnedPoints] = useState<{ weighted: number, streakBonus: number, newStreak: number, capped: boolean, secondsSpent: number } | null>(null);
   const [playedSlugs, setPlayedSlugs] = useState<Set<string>>(new Set());
   const [percentile, setPercentile] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const startedAtRef = useRef<string>(new Date().toISOString());
+
+  useEffect(() => {
+    // Record when quiz started
+    startedAtRef.current = new Date().toISOString();
+  }, []);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -190,6 +196,8 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
     const month = today.substring(0, 7);
     const basePoints = safeScore * 10;
     const weightedScore = Math.round(basePoints * multiplier);
+    const completedAt = new Date().toISOString();
+    const secondsSpent = Math.round((new Date(completedAt).getTime() - new Date(startedAtRef.current).getTime()) / 1000);
 
     await supabase.from("plays").insert({
       quiz_slug: slug,
@@ -253,7 +261,8 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
       weighted_score: capped ? 0 : weightedScore,
       difficulty: quiz.difficulty,
       month,
-      completed_at: new Date().toISOString(),
+      started_at: startedAtRef.current,
+      completed_at: completedAt,
     });
 
     await supabase.from("users").upsert({
@@ -272,7 +281,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
     }
 
     setPlayedSlugs(prev => new Set([...prev, slug]));
-    setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped });
+    setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped, secondsSpent });
     await computePercentile(safeScore);
   }
 
@@ -308,7 +317,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
       } else {
         const finalScore = score + (isCorrect ? 1 : 0);
         setFinished(true);
-        // GA4 quiz_complete event
         trackEvent("quiz_complete", {
           quiz_slug: slug,
           game: quiz.game,
@@ -554,6 +562,9 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
                       {earnedPoints.newStreak >= 7 && earnedPoints.newStreak < 14 && " — reach day 14 for +200 bonus!"}
                     </div>
                   )}
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>
+                    ⏱️ Completed in {earnedPoints.secondsSpent}s
+                  </div>
                 </div>
               ) : (
                 <div style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 14 }}>Saving your score...</div>
@@ -603,7 +614,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
                   <span>{"All " + quiz.game + " Quizzes"}</span>
                 </a>
               )}
-              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); setEarnedPoints(null); setPercentile(null); }}
+              <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); setEarnedPoints(null); setPercentile(null); startedAtRef.current = new Date().toISOString(); }}
                 style={{ background: "var(--surface)", color: "var(--text)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "var(--font-body)", WebkitTextFillColor: "var(--text)" }}>
                 {"🔄 Play Again"}
               </button>
