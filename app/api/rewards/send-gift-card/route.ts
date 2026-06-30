@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   const username = user?.username || "Champion";
   const prizeAmount = PRIZE_AMOUNTS[rank] || "Gift Card";
   const rankLabel = RANK_LABELS[rank] || "Winner";
-  const seasonName = season?.name || "Season 1";
+  const seasonName = season?.name || "Current Season";
 
   const html = `<!DOCTYPE html>
 <html>
@@ -78,13 +78,13 @@ export async function POST(req: Request) {
     <div style="background:linear-gradient(135deg,rgba(255,227,71,0.12),rgba(184,76,255,0.08));border:2px solid rgba(255,227,71,0.35);border-radius:16px;padding:24px;text-align:center;margin-bottom:28px;">
       <div style="font-size:13px;font-weight:900;color:#FFE347;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">${rankLabel}</div>
       <div style="font-size:32px;font-weight:900;color:#00F5A0;margin-bottom:4px;">${prizeAmount} Roblox Gift Card</div>
-      <div style="font-size:14px;color:#8892B0;font-weight:600;">Redeemable on Amazon</div>
+      <div style="font-size:14px;color:#8892B0;font-weight:600;">Redeemable on Roblox.com</div>
     </div>
 
     <div style="background:#13172A;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;margin-bottom:28px;">
       <p style="font-size:15px;font-weight:700;margin:0 0 12px;color:#F0F4FF;">Hey ${username}! 🎉</p>
       <p style="font-size:14px;color:#8892B0;font-weight:600;line-height:1.7;margin:0 0 20px;">
-        Congratulations on finishing <strong style="color:#FFE347;">${rankLabel}</strong> in ${seasonName} on BloxQuiz.gg! Here is your <strong style="color:#00F5A0;">${prizeAmount} Amazon gift card code</strong>:
+        Congratulations on finishing <strong style="color:#FFE347;">${rankLabel}</strong> in ${seasonName} on BloxQuiz.gg! Here is your <strong style="color:#00F5A0;">${prizeAmount} Roblox gift card code</strong>:
       </p>
 
       <div style="background:#0B0E17;border:2px dashed rgba(0,245,160,0.4);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;">
@@ -95,9 +95,9 @@ export async function POST(req: Request) {
       <div style="background:rgba(255,227,71,0.06);border:1px solid rgba(255,227,71,0.2);border-radius:10px;padding:14px 16px;">
         <div style="font-size:12px;font-weight:900;color:#FFE347;margin-bottom:6px;">📋 How to Redeem</div>
         <ol style="margin:0;padding-left:18px;color:#8892B0;font-size:13px;font-weight:600;line-height:1.8;">
-          <li>Go to <a href="https://www.amazon.com/gc/redeem" style="color:#00b4d8;">amazon.com/gc/redeem</a></li>
+          <li>Go to <a href="https://www.roblox.com/redeem" style="color:#00b4d8;">roblox.com/redeem</a></li>
           <li>Enter the code above</li>
-          <li>Use your balance to buy Robux at <a href="https://www.roblox.com" style="color:#00b4d8;">roblox.com</a></li>
+          <li>Your Robux balance will be credited instantly</li>
         </ol>
       </div>
     </div>
