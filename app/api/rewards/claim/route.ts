@@ -12,6 +12,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  if (!seasonId) {
+    return NextResponse.json({ error: "Missing season information." }, { status: 400 });
+  }
+
   // Check account is at least 24 hours old
   const { data: userRecord } = await supabase
     .from("users")
@@ -26,27 +30,29 @@ export async function POST(req: Request) {
     }
   }
 
-  // Check they actually have a pending prize
+  // Check they actually have a pending prize FOR THIS SEASON
   const { data: prizeData } = await supabase
     .from("season_results")
     .select("rank, reward_status")
     .eq("user_id", userId)
+    .eq("season_id", seasonId)
     .eq("reward_status", "pending")
     .maybeSingle();
 
   if (!prizeData) {
-    return NextResponse.json({ error: "No pending prize found." }, { status: 403 });
+    return NextResponse.json({ error: "No pending prize found for this season." }, { status: 403 });
   }
 
-  // Check not already claimed
+  // Check not already claimed FOR THIS SEASON
   const { data: existing } = await supabase
     .from("prize_claims")
     .select("id")
     .eq("user_id", userId)
+    .eq("season_id", seasonId)
     .maybeSingle();
 
   if (existing) {
-    return NextResponse.json({ error: "Prize already claimed." }, { status: 409 });
+    return NextResponse.json({ error: "Prize already claimed for this season." }, { status: 409 });
   }
 
   // Insert claim FIRST
@@ -65,11 +71,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to save claim." }, { status: 500 });
   }
 
-  // THEN update season_results
+  // THEN update season_results — scoped to this season only
   await supabase
     .from("season_results")
     .update({ reward_status: "claimed" })
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("season_id", seasonId);
 
   return NextResponse.json({ success: true });
 }
