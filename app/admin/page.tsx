@@ -173,11 +173,17 @@ async function getAllUsers() {
   return data || [];
 }
 
-async function getPrizeClaims() {
-  const { data: claims } = await supabaseAdmin
+async function getPrizeClaims(seasonId?: string) {
+  let query = supabaseAdmin
     .from("prize_claims")
     .select("id, user_id, season_id, roblox_username, email, discord, status, submitted_at")
     .order("submitted_at", { ascending: false });
+
+  if (seasonId) {
+    query = query.eq("season_id", seasonId);
+  }
+
+  const { data: claims } = await query;
 
   if (!claims || claims.length === 0) return [];
 
@@ -217,7 +223,7 @@ export default async function AdminPage() {
     getCronLogs(),
     getSeasonStandings(activeSeason?.start_date, activeSeason?.end_date, activeSeason?.id),
     getFlaggedUsers(),
-    getPrizeClaims(),
+    getPrizeClaims(activeSeason?.id),
     getAllUsers(),
   ]);
 
