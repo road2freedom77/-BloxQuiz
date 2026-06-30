@@ -9,11 +9,13 @@ export default function ClaimClient({
   prizeData,
   existingClaim,
   prizeAmount,
+  seasonName,
 }: {
   username: string,
   prizeData: any | null,
   existingClaim: any | null,
   prizeAmount: string | null,
+  seasonName?: string,
 }) {
   const [robloxUsername, setRobloxUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -99,7 +101,7 @@ export default function ClaimClient({
           {"Congrats, " + username + "!"}
         </div>
         <div style={{ fontSize: 15, fontWeight: 800, color: "var(--neon-yellow)", marginBottom: 4 }}>
-          {RANK_LABELS[prizeData.rank] + " — Season 1"}
+          {RANK_LABELS[prizeData.rank] + " — " + (seasonName || "Current Season")}
         </div>
         <div style={{ fontSize: 22, fontWeight: 900, color: "var(--neon-green)", fontFamily: "var(--font-display)" }}>
           {prizeAmount + " Roblox Gift Card"}
