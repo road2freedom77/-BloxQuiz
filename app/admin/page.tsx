@@ -168,7 +168,7 @@ async function getFlaggedUsers() {
 async function getAllUsers() {
   const { data } = await supabaseAdmin
     .from("users")
-    .select("id, username, xp, streak, is_flagged, created_at, last_ip, email")
+    .select("id, username, xp, streak, is_flagged, flag_reason, created_at, last_ip, email")
     .order("created_at", { ascending: false });
   return data || [];
 }

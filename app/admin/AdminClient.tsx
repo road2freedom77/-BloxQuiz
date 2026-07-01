@@ -267,6 +267,25 @@ export default function AdminClient({
   const [creatingNewSeason, setCreatingNewSeason] = useState(false);
   const [newSeasonResult, setNewSeasonResult] = useState<{ name: string } | null>(null);
 
+  // User filter state
+  const [userSearch, setUserSearch] = useState("");
+  const [userStatusFilter, setUserStatusFilter] = useState<"All" | "Active" | "Flagged">("All");
+  const [userSort, setUserSort] = useState<"All" | "xp" | "created_at" | "streak">("All");
+
+  const filteredUsers = allUsers
+    .filter((u: any) => {
+      if (userStatusFilter === "Flagged" && !u.is_flagged) return false;
+      if (userStatusFilter === "Active" && u.is_flagged) return false;
+      if (userSearch && !u.username?.toLowerCase().includes(userSearch.toLowerCase()) && !u.email?.toLowerCase().includes(userSearch.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a: any, b: any) => {
+      if (userSort === "xp") return (b.xp || 0) - (a.xp || 0);
+      if (userSort === "streak") return (b.streak || 0) - (a.streak || 0);
+      if (userSort === "created_at") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      return 0;
+    });
+
   const selectedSeason = allSeasons.find(s => s.id === selectedSeasonId) || season;
 
   async function switchSeason(seasonId: string) {
@@ -1249,11 +1268,30 @@ ON CONFLICT DO NOTHING;`}</pre>
       {/* Users Tab */}
       {tab === "users" && (
         <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0 }}>👤 All Users ({allUsers.length})</h2>
+          {/* Filters */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <input type="text" placeholder="🔍 Search username or email..." value={userSearch} onChange={e => setUserSearch(e.target.value)}
+              style={{ padding: "9px 16px", background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 100, color: "var(--text)", fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 600, outline: "none", minWidth: 240 }} />
+            {(["All", "Active", "Flagged"] as const).map(f => (
+              <button key={f} onClick={() => setUserStatusFilter(f)}
+                style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: userStatusFilter === f ? (f === "Flagged" ? "var(--neon-pink)" : "var(--gradient-main)") : "var(--surface)", color: userStatusFilter === f ? "#fff" : "var(--text-muted)", WebkitTextFillColor: userStatusFilter === f ? "#fff" : "var(--text-muted)" }}>
+                {f === "Flagged" ? "⚠️ Flagged" : f}
+              </button>
+            ))}
+            {(["All", "xp", "created_at", "streak"] as const).map(s => (
+              <button key={s} onClick={() => setUserSort(s)}
+                style={{ padding: "8px 16px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: userSort === s ? "var(--neon-yellow)" : "var(--surface)", color: userSort === s ? "var(--bg)" : "var(--text-muted)", WebkitTextFillColor: userSort === s ? "var(--bg)" : "var(--text-muted)" }}>
+                {s === "All" ? "Default" : s === "xp" ? "XP ↓" : s === "created_at" ? "Newest" : "Streak ↓"}
+              </button>
+            ))}
           </div>
+
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-dim)", marginBottom: 12 }}>
+            {filteredUsers.length} of {allUsers.length} users
+          </div>
+
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 160px 120px 80px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 130px 180px 110px 80px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
               <div>Username</div>
               <div>XP</div>
               <div>Streak</div>
@@ -1263,38 +1301,45 @@ ON CONFLICT DO NOTHING;`}</pre>
               <div>Last IP</div>
               <div>Status</div>
             </div>
-            {allUsers.length === 0 ? (
-              <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No users yet.</div>
+            {filteredUsers.length === 0 ? (
+              <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontWeight: 700 }}>No users found.</div>
             ) : (
-              allUsers.map((u: any, i: number) => {
+              filteredUsers.map((u: any, i: number) => {
                 const xp = u.xp || 0;
                 const level = xp >= 10000 ? 50 : xp >= 5000 ? 30 : xp >= 2000 ? 20 : xp >= 1000 ? 15 : xp >= 500 ? 10 : xp >= 100 ? 5 : 1;
                 const regDate = u.created_at
                   ? new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                   : "—";
                 return (
-                  <div key={u.id} style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 160px 120px 80px", alignItems: "center", padding: "12px 20px", borderBottom: i < allUsers.length - 1 ? "1px solid var(--border)" : "none", background: u.is_flagged ? "rgba(255,60,172,0.02)" : "transparent" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "var(--text-muted)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
-                        {u.username?.[0]?.toUpperCase() || "?"}
+                  <div key={u.id} style={{ borderBottom: i < filteredUsers.length - 1 ? "1px solid var(--border)" : "none", background: u.is_flagged ? "rgba(255,60,172,0.03)" : "transparent" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 130px 180px 110px 80px", alignItems: "center", padding: "12px 20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "var(--text-muted)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
+                          {u.username?.[0]?.toUpperCase() || "?"}
+                        </div>
+                        <a href={"/profile/" + u.username} target="_blank" style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", textDecoration: "none" }}>
+                          {u.username || "—"}
+                        </a>
+                        {u.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
                       </div>
-                      <a href={"/profile/" + u.username} target="_blank" style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", textDecoration: "none" }}>
-                        {u.username || "—"}
-                      </a>
-                      {u.is_flagged && <span style={{ fontSize: 10, color: "var(--neon-pink)" }}>⚠️</span>}
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: 14, color: "var(--neon-green)" }}>{xp.toLocaleString()}</div>
+                      <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{u.streak || 0}🔥</div>
+                      <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>Lv {level}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{regDate}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={u.email || ""}>{u.email || "—"}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, fontFamily: "monospace" }}>{u.last_ip || "—"}</div>
+                      <div>
+                        {u.is_flagged
+                          ? <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)" }}>Flagged</span>
+                          : <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)" }}>Active</span>
+                        }
+                      </div>
                     </div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 14, color: "var(--neon-green)" }}>{xp.toLocaleString()}</div>
-                    <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{u.streak || 0}🔥</div>
-                    <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>Lv {level}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{regDate}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email || "—"}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, fontFamily: "monospace" }}>{u.last_ip || "—"}</div>
-                    <div>
-                      {u.is_flagged
-                        ? <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)" }}>Flagged</span>
-                        : <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "var(--neon-green)" }}>Active</span>
-                      }
-                    </div>
+                    {u.is_flagged && u.flag_reason && (
+                      <div style={{ padding: "6px 20px 10px 62px", fontSize: 11, color: "var(--neon-pink)", fontWeight: 700, background: "rgba(255,60,172,0.04)", borderTop: "1px solid rgba(255,60,172,0.1)" }}>
+                        ⚠️ {u.flag_reason}
+                      </div>
+                    )}
                   </div>
                 );
               })
