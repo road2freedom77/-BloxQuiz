@@ -271,6 +271,8 @@ export default function AdminClient({
   const [userSearch, setUserSearch] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState<"All" | "Active" | "Flagged">("All");
   const [userSort, setUserSort] = useState<"All" | "xp" | "created_at" | "streak">("All");
+  const [sharedIPs, setSharedIPs] = useState<{ ip: string, usernames: string[] }[] | null>(null);
+  const [loadingSharedIPs, setLoadingSharedIPs] = useState(false);
 
   const filteredUsers = allUsers
     .filter((u: any) => {
@@ -508,6 +510,15 @@ export default function AdminClient({
     await fetch("/api/season/close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seasonId: selectedSeason?.id }) });
     setClosingSeason(false);
     setSeasonClosed(true);
+  }
+
+  async function checkSharedIPs() {
+    setLoadingSharedIPs(true);
+    setSharedIPs(null);
+    const res = await fetch("/api/admin/shared-ips");
+    const data = await res.json();
+    setSharedIPs(data.results || []);
+    setLoadingSharedIPs(false);
   }
 
   async function createNewSeason() {
@@ -1284,7 +1295,40 @@ ON CONFLICT DO NOTHING;`}</pre>
                 {s === "All" ? "Default" : s === "xp" ? "XP ↓" : s === "created_at" ? "Newest" : "Streak ↓"}
               </button>
             ))}
+            <button onClick={checkSharedIPs} disabled={loadingSharedIPs}
+              style={{ padding: "8px 18px", borderRadius: 100, border: "none", cursor: loadingSharedIPs ? "default" : "pointer", fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, background: "rgba(255,60,172,0.15)", color: "var(--neon-pink)", opacity: loadingSharedIPs ? 0.7 : 1 }}>
+              {loadingSharedIPs ? "⏳ Checking..." : "🔍 Check Shared IPs"}
+            </button>
           </div>
+
+          {/* Shared IP results */}
+          {sharedIPs !== null && (
+            <div style={{ background: "var(--bg-card)", border: "1px solid rgba(255,60,172,0.3)", borderRadius: "var(--radius)", padding: 20, marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "var(--neon-pink)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+                🔍 Shared IP Results
+              </div>
+              {sharedIPs.length === 0 ? (
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--neon-green)" }}>✅ No shared IPs detected — all accounts have unique IPs.</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {sharedIPs.map((entry) => (
+                    <div key={entry.ip} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", background: "rgba(255,60,172,0.06)", borderRadius: 10, border: "1px solid rgba(255,60,172,0.2)" }}>
+                      <span style={{ fontSize: 12, fontFamily: "monospace", fontWeight: 800, color: "var(--neon-pink)", flexShrink: 0 }}>{entry.ip}</span>
+                      <span style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>→</span>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {entry.usernames.map(name => (
+                          <a key={name} href={"/profile/" + name} target="_blank"
+                            style={{ fontSize: 12, fontWeight: 800, padding: "2px 10px", borderRadius: 100, background: "rgba(255,60,172,0.1)", color: "var(--neon-pink)", textDecoration: "none" }}>
+                            {name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-dim)", marginBottom: 12 }}>
             {filteredUsers.length} of {allUsers.length} users
