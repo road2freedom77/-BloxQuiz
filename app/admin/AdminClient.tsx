@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const diffColors: Record<string, { color: string, bg: string }> = {
   Easy: { color: "var(--neon-green)", bg: "rgba(0,245,160,0.1)" },
