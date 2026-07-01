@@ -18,18 +18,28 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const seasonId = searchParams.get("seasonId");
   const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
 
   if (!seasonId || !startDate) {
     return NextResponse.json({ error: "Missing seasonId or startDate" }, { status: 400 });
   }
 
-  const seasonMonth = startDate.substring(0, 7);
+  // Build all YYYY-MM months between start and end date
+  const start = new Date(startDate.length === 7 ? startDate + "-01" : startDate);
+  const end = endDate ? new Date(endDate) : new Date();
+  const months: string[] = [];
+  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cursor <= end) {
+    months.push(cursor.toISOString().substring(0, 7));
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  if (months.length === 0) months.push(new Date().toISOString().substring(0, 7));
 
-  // Fetch scores for this season's month
+  // Fetch scores for ALL months in this season
   const { data: scores } = await supabase
     .from("scores")
     .select("user_id, weighted_score, score, total_questions")
-    .eq("month", seasonMonth)
+    .in("month", months)
     .eq("is_first_attempt", true);
 
   const standings: any[] = [];
@@ -85,22 +95,22 @@ export async function GET(req: Request) {
 
   const claims: any[] = [];
   if (rawClaims && rawClaims.length > 0) {
-    const userIds = rawClaims.map(c => c.user_id);
-    const { data: users } = await supabaseAdmin.from("users").select("id, username").in("id", userIds);
-    const usersById: Record<string, any> = {};
-    for (const u of users || []) usersById[u.id] = u;
+    const claimUserIds = rawClaims.map(c => c.user_id);
+    const { data: claimUsers } = await supabaseAdmin.from("users").select("id, username").in("id", claimUserIds);
+    const claimUsersById: Record<string, any> = {};
+    for (const u of claimUsers || []) claimUsersById[u.id] = u;
 
-    const { data: results } = await supabaseAdmin
+    const { data: claimResults } = await supabaseAdmin
       .from("season_results")
       .select("user_id, rank")
       .eq("season_id", seasonId)
-      .in("user_id", userIds);
+      .in("user_id", claimUserIds);
     const rankByUser: Record<string, number> = {};
-    for (const r of results || []) rankByUser[r.user_id] = r.rank;
+    for (const r of claimResults || []) rankByUser[r.user_id] = r.rank;
 
     claims.push(...rawClaims.map(c => ({
       ...c,
-      username: usersById[c.user_id]?.username || "Unknown",
+      username: claimUsersById[c.user_id]?.username || "Unknown",
       rank: rankByUser[c.user_id] || null,
     })));
   }

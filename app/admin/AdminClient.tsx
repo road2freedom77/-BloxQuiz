@@ -275,7 +275,7 @@ export default function AdminClient({
     if (!s) return;
     setLoadingSeasonData(true);
     try {
-      const res = await fetch(`/api/admin/season-data?seasonId=${seasonId}&startDate=${s.start_date}`);
+      const res = await fetch(`/api/admin/season-data?seasonId=${seasonId}&startDate=${s.start_date}&endDate=${s.end_date}`);
       const data = await res.json();
       if (data.standings) setStandings(data.standings);
       if (data.claims) setClaims(data.claims);
