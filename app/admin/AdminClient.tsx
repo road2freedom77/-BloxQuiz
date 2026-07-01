@@ -1253,12 +1253,13 @@ ON CONFLICT DO NOTHING;`}</pre>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0 }}>👤 All Users ({allUsers.length})</h2>
           </div>
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 120px 80px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 160px 120px 80px", padding: "10px 20px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 900, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
               <div>Username</div>
               <div>XP</div>
               <div>Streak</div>
               <div>Level</div>
               <div>Registered</div>
+              <div>Email</div>
               <div>Last IP</div>
               <div>Status</div>
             </div>
@@ -1272,7 +1273,7 @@ ON CONFLICT DO NOTHING;`}</pre>
                   ? new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                   : "—";
                 return (
-                  <div key={u.id} style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 120px 80px", alignItems: "center", padding: "12px 20px", borderBottom: i < allUsers.length - 1 ? "1px solid var(--border)" : "none", background: u.is_flagged ? "rgba(255,60,172,0.02)" : "transparent" }}>
+                  <div key={u.id} style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 80px 140px 160px 120px 80px", alignItems: "center", padding: "12px 20px", borderBottom: i < allUsers.length - 1 ? "1px solid var(--border)" : "none", background: u.is_flagged ? "rgba(255,60,172,0.02)" : "transparent" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "var(--text-muted)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
                         {u.username?.[0]?.toUpperCase() || "?"}
@@ -1286,6 +1287,7 @@ ON CONFLICT DO NOTHING;`}</pre>
                     <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>{u.streak || 0}🔥</div>
                     <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 700 }}>Lv {level}</div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>{regDate}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email || "—"}</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, fontFamily: "monospace" }}>{u.last_ip || "—"}</div>
                     <div>
                       {u.is_flagged
