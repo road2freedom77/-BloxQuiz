@@ -75,7 +75,7 @@ export default function RulesPage() {
           title: "Claiming Your Prize",
           items: [
             "Winners are notified via their BloxQuiz.gg profile page.",
-            "To claim, visit /rewards/claim and submit your Roblox username and email.",
+            "To claim, visit /rewards and submit your Roblox username and email.",
             "You must provide a valid email address to receive your gift card.",
             "Unclaimed prizes expire 14 days after the season ends.",
             "BloxQuiz.gg is not responsible for prizes lost due to incorrect contact information.",
