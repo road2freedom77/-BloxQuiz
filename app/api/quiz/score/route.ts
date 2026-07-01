@@ -17,10 +17,51 @@ const STREAK_BONUSES: Record<number, number> = {
 
 const DAILY_SCORE_CAP = 20;
 
+// Minimum seconds to complete a quiz legitimately
+const MIN_SECONDS: Record<string, number> = {
+  Easy: 30,
+  Medium: 45,
+  Hard: 60,
+};
+
 function getIP(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
   return req.headers.get("x-real-ip") || "unknown";
+}
+
+async function checkAndFlag(userId: string, ip: string, difficulty: string, secondsSpent: number) {
+  const flags: string[] = [];
+
+  // Check 1: completion too fast
+  const minSeconds = MIN_SECONDS[difficulty] || 30;
+  if (secondsSpent > 0 && secondsSpent < minSeconds) {
+    flags.push(`Impossible speed — ${difficulty} quiz completed in ${secondsSpent}s (min ${minSeconds}s)`);
+  }
+
+  // Check 2: same IP used by another account
+  if (ip && ip !== "unknown") {
+    const { data: otherScores } = await supabaseAdmin
+      .from("scores")
+      .select("user_id")
+      .eq("ip_address", ip)
+      .neq("user_id", userId)
+      .limit(1);
+
+    if (otherScores && otherScores.length > 0) {
+      flags.push(`Shared IP with another account — possible multi-accounting`);
+    }
+  }
+
+  if (flags.length === 0) return;
+
+  // Flag the user
+  const flagReason = flags.join(" | ");
+  await supabaseAdmin
+    .from("users")
+    .update({ is_flagged: true, flag_reason: flagReason })
+    .eq("id", userId)
+    .eq("is_flagged", false); // Only update if not already flagged — don't overwrite existing reason
 }
 
 export async function POST(req: NextRequest) {
@@ -47,6 +88,9 @@ export async function POST(req: NextRequest) {
   const basePoints = safeScore * 10;
   const weightedScore = Math.round(basePoints * multiplier);
   const completedAt = new Date().toISOString();
+  const secondsSpent = startedAt
+    ? Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 1000)
+    : 0;
 
   // Always log the play
   await supabase.from("plays").insert({
@@ -120,7 +164,7 @@ export async function POST(req: NextRequest) {
     ip_address: ip,
   });
 
-  // Update user — include last_ip
+  // Update user
   await supabase.from("users").upsert({
     id: userId,
     streak: newStreak,
@@ -134,6 +178,9 @@ export async function POST(req: NextRequest) {
   if (xpGained > 0) {
     await supabase.rpc("increment_xp", { user_id: userId, amount: xpGained });
   }
+
+  // Run cheat detection async — don't block response
+  checkAndFlag(userId, ip, difficulty, secondsSpent).catch(console.error);
 
   return NextResponse.json({
     success: true,
