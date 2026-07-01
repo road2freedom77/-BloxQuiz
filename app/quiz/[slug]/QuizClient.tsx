@@ -10,15 +10,6 @@ const DIFFICULTY_MULTIPLIER: Record<string, number> = {
   Hard: 2,
 };
 
-const STREAK_BONUSES: Record<number, number> = {
-  3: 25,
-  7: 100,
-  14: 200,
-  30: 500,
-};
-
-const DAILY_SCORE_CAP = 20;
-
 const gameSlugMap: Record<string, string> = {
   "Blox Fruits": "blox-fruits",
   "Brookhaven RP": "brookhaven-rp",
@@ -159,7 +150,6 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   const startedAtRef = useRef<string>(new Date().toISOString());
 
   useEffect(() => {
-    // Record when quiz started
     startedAtRef.current = new Date().toISOString();
   }, []);
 
@@ -191,98 +181,39 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
   const nextQuiz = relatedQuizzes.find(rq => !playedSlugs.has(rq.slug));
 
   async function saveScore(finalScore: number) {
-    const safeScore = Math.min(Math.max(0, Math.round(finalScore)), quiz.questions.length);
-    const today = new Date().toISOString().split("T")[0];
-    const month = today.substring(0, 7);
-    const basePoints = safeScore * 10;
-    const weightedScore = Math.round(basePoints * multiplier);
     const completedAt = new Date().toISOString();
-    const secondsSpent = Math.round((new Date(completedAt).getTime() - new Date(startedAtRef.current).getTime()) / 1000);
+    const secondsSpent = Math.round(
+      (new Date(completedAt).getTime() - new Date(startedAtRef.current).getTime()) / 1000
+    );
 
-    await supabase.from("plays").insert({
-      quiz_slug: slug,
-      score: safeScore,
-      total_questions: quiz.questions.length,
+    // Call server-side API — IP captured server-side
+    const res = await fetch("/api/quiz/score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug,
+        score: finalScore,
+        totalQuestions: quiz.questions.length,
+        difficulty: quiz.difficulty,
+        game: quiz.game,
+        startedAt: startedAtRef.current,
+      }),
     });
 
-    if (!user) {
-      await computePercentile(safeScore);
-      return;
+    const data = await res.json();
+
+    if (data.success && !data.anonymous) {
+      setPlayedSlugs(prev => new Set([...prev, slug]));
+      setEarnedPoints({
+        weighted: data.weightedScore,
+        streakBonus: data.streakBonus,
+        newStreak: data.newStreak,
+        capped: data.capped,
+        secondsSpent,
+      });
     }
 
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const { count: todayCount } = await supabase
-      .from("scores")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("completed_at", todayStart.toISOString());
-    const capped = (todayCount || 0) >= DAILY_SCORE_CAP;
-
-    const { data: userData } = await supabase
-      .from("users")
-      .select("streak, last_played, longest_streak, badges, monthly_score")
-      .eq("id", user.id)
-      .single();
-
-    let newStreak = 1;
-    if (userData?.last_played) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const lastPlayedDate = new Date(userData.last_played).toISOString().split("T")[0];
-      const yesterdayDate = yesterday.toISOString().split("T")[0];
-      if (lastPlayedDate === today) {
-        newStreak = userData.streak;
-      } else if (lastPlayedDate === yesterdayDate) {
-        newStreak = (userData.streak || 0) + 1;
-      } else {
-        newStreak = 1;
-      }
-    }
-
-    const streakBonus = (!capped && STREAK_BONUSES[newStreak]) ? STREAK_BONUSES[newStreak] : 0;
-    const longestStreak = Math.max(newStreak, userData?.longest_streak || 0);
-
-    const currentBadges: string[] = userData?.badges || [];
-    const newBadges = [...currentBadges];
-    if (newStreak >= 3 && !newBadges.includes("streak_3")) newBadges.push("streak_3");
-    if (newStreak >= 7 && !newBadges.includes("streak_7")) newBadges.push("streak_7");
-    if (newStreak >= 14 && !newBadges.includes("streak_14")) newBadges.push("streak_14");
-    if (newStreak >= 30 && !newBadges.includes("streak_30")) newBadges.push("streak_30");
-
-    const monthlyAdd = capped ? 0 : weightedScore + streakBonus;
-    const xpGained = capped ? 0 : safeScore * 10;
-
-    await supabase.from("scores").insert({
-      user_id: user.id,
-      quiz_slug: slug,
-      score: safeScore,
-      total_questions: quiz.questions.length,
-      weighted_score: capped ? 0 : weightedScore,
-      difficulty: quiz.difficulty,
-      month,
-      started_at: startedAtRef.current,
-      completed_at: completedAt,
-    });
-
-    await supabase.from("users").upsert({
-      id: user.id,
-      username: user.username || user.firstName || "Anonymous",
-      email: user.emailAddresses[0]?.emailAddress,
-      streak: newStreak,
-      last_played: today,
-      longest_streak: longestStreak,
-      badges: newBadges,
-      monthly_score: (userData?.monthly_score || 0) + monthlyAdd,
-    }, { onConflict: "id" });
-
-    if (xpGained > 0) {
-      await supabase.rpc("increment_xp", { user_id: user.id, amount: xpGained });
-    }
-
-    setPlayedSlugs(prev => new Set([...prev, slug]));
-    setEarnedPoints({ weighted: weightedScore, streakBonus, newStreak, capped, secondsSpent });
-    await computePercentile(safeScore);
+    await computePercentile(finalScore);
   }
 
   async function computePercentile(finalScore: number) {
@@ -342,62 +273,51 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     canvas.width = 1080;
     canvas.height = 1080;
     ctx.fillStyle = "#0B0E17";
     ctx.fillRect(0, 0, 1080, 1080);
-
     const gradient = ctx.createRadialGradient(540, 400, 0, 540, 400, 500);
     gradient.addColorStop(0, "rgba(0,245,160,0.12)");
     gradient.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 1080, 1080);
-
     const borderGrad = ctx.createLinearGradient(0, 0, 1080, 0);
     borderGrad.addColorStop(0, "#00F5A0");
     borderGrad.addColorStop(0.5, "#B84CFF");
     borderGrad.addColorStop(1, "#FF3CAC");
     ctx.fillStyle = borderGrad;
     ctx.fillRect(0, 0, 1080, 6);
-
     ctx.font = "120px serif";
     ctx.textAlign = "center";
     ctx.fillText(gameEmojis[quiz.game] || "🎮", 540, 220);
-
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 42px Arial";
     const title = quiz.title.length > 40 ? quiz.title.substring(0, 40) + "..." : quiz.title;
     ctx.fillText(title, 540, 300);
-
     ctx.font = "bold 200px Arial";
     const scoreGrad = ctx.createLinearGradient(0, 350, 0, 580);
     scoreGrad.addColorStop(0, "#00F5A0");
     scoreGrad.addColorStop(1, "#B84CFF");
     ctx.fillStyle = scoreGrad;
     ctx.fillText(score + "/" + quiz.questions.length, 540, 580);
-
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 52px Arial";
     ctx.fillText(getResultLabel().label, 540, 660);
-
     ctx.fillStyle = "#FFE347";
     ctx.font = "bold 36px Arial";
     ctx.fillText("+" + Math.round(score * 10 * multiplier) + " pts earned", 540, 730);
-
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(200, 780);
     ctx.lineTo(880, 780);
     ctx.stroke();
-
     ctx.fillStyle = "#00F5A0";
     ctx.font = "bold 48px Arial";
     ctx.fillText("BloxQuiz", 480, 860);
     ctx.fillStyle = "#FF3CAC";
     ctx.fillText(".gg", 620, 860);
-
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.font = "28px Arial";
     ctx.fillText("Can you beat my score? bloxquiz.gg", 540, 920);
@@ -470,10 +390,7 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
               </div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--neon-green)", display: "flex", alignItems: "center", gap: 4 }}>
                 {current > 0 || answered ? (
-                  <>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{"Score: "}</span>
-                    <span>{score}</span>
-                  </>
+                  <><span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{"Score: "}</span><span>{score}</span></>
                 ) : (
                   <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-dim)" }}>{(current + 1) + "/" + quiz.questions.length}</span>
                 )}
@@ -604,14 +521,12 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
               {nextQuiz ? (
                 <a href={"/quiz/" + nextQuiz.slug}
                   style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, WebkitTextFillColor: "var(--bg)" }}>
-                  <span>▶</span>
-                  <span>{"Next " + quiz.game + " Quiz"}</span>
+                  <span>▶</span><span>{"Next " + quiz.game + " Quiz"}</span>
                 </a>
               ) : (
                 <a href={"/games/" + gameSlug}
                   style={{ background: "var(--gradient-main)", color: "var(--bg)", fontWeight: 900, fontSize: 14, padding: "14px 24px", borderRadius: 100, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, WebkitTextFillColor: "var(--bg)" }}>
-                  <span>🎮</span>
-                  <span>{"All " + quiz.game + " Quizzes"}</span>
+                  <span>🎮</span><span>{"All " + quiz.game + " Quizzes"}</span>
                 </a>
               )}
               <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setAnswered(false); setFinished(false); setShared(false); setEarnedPoints(null); setPercentile(null); startedAtRef.current = new Date().toISOString(); }}
@@ -625,24 +540,19 @@ export default function QuizClient({ quiz, slug, faqs, relatedQuizzes, currentSe
               <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>Keep Playing</div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <a href={"/games/" + gameSlug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>🎮</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"More " + quiz.game + " Quizzes"}</span>
+                  <span style={{ fontSize: 18 }}>🎮</span><span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"More " + quiz.game + " Quizzes"}</span>
                 </a>
                 <a href={"/codes/" + gameSlug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>🎁</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"Free " + quiz.game + " Codes"}</span>
+                  <span style={{ fontSize: 18 }}>🎁</span><span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"Free " + quiz.game + " Codes"}</span>
                 </a>
                 <a href={"/stats/" + gameSlug} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>📊</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"Live " + quiz.game + " Stats"}</span>
+                  <span style={{ fontSize: 18 }}>📊</span><span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{"Live " + quiz.game + " Stats"}</span>
                 </a>
                 <a href="/browse" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>🏆</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Browse All Quizzes</span>
+                  <span style={{ fontSize: 18 }}>🏆</span><span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Browse All Quizzes</span>
                 </a>
                 <a href="/leaderboard" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>👑</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Leaderboard</span>
+                  <span style={{ fontSize: 18 }}>👑</span><span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Leaderboard</span>
                 </a>
               </div>
             </div>
