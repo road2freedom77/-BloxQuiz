@@ -521,6 +521,11 @@ export default function AdminClient({
     setLoadingSharedIPs(false);
   }
 
+  // Auto-run when Users tab opens
+  useEffect(() => {
+    if (tab === "users") checkSharedIPs();
+  }, [tab]);
+
   async function createNewSeason() {
     if (!confirm("Create next quarterly season? This will start a new Q-based season automatically.")) return;
     setCreatingNewSeason(true);
