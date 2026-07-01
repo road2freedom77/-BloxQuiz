@@ -10,27 +10,6 @@ export const metadata = {
 
 const PRIZE_AMOUNTS: Record<number, string> = { 1: "$20", 2: "$15", 3: "$10" };
 
-async function getCurrentSeason() {
-  const { data: active } = await supabase
-    .from("seasons")
-    .select("*")
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (active) return active;
-
-  const { data: fallback } = await supabase
-    .from("seasons")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  return fallback;
-}
-
 export default async function RewardsPage() {
   const { userId } = await auth();
 
@@ -39,7 +18,6 @@ export default async function RewardsPage() {
   const user = await currentUser();
   const clerkUsername = user?.username || user?.firstName || "Player";
 
-  // Get BloxQuiz username
   const { data: userRecord } = await supabase
     .from("users")
     .select("username")
@@ -48,24 +26,33 @@ export default async function RewardsPage() {
 
   const username = userRecord?.username || clerkUsername;
 
-  // Determine current season — claims are scoped to it
-  const currentSeason = await getCurrentSeason();
-
-  // Check for a pending prize in season_results, scoped to current season
+  // Find most recent pending prize across ALL seasons
   const { data: prizeData } = await supabase
     .from("season_results")
     .select("rank, reward_status, season_id, quizzes_completed")
     .eq("user_id", userId)
-    .eq("season_id", currentSeason?.id || "")
     .eq("reward_status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
-  // Check for existing claim, scoped to current season
+  // Get season name for that prize
+  let seasonName = "Current Season";
+  if (prizeData?.season_id) {
+    const { data: season } = await supabase
+      .from("seasons")
+      .select("name")
+      .eq("id", prizeData.season_id)
+      .single();
+    seasonName = season?.name || "Current Season";
+  }
+
+  // Check for existing claim scoped to that specific season
   const { data: existingClaim } = await supabase
     .from("prize_claims")
     .select("id, status, submitted_at")
     .eq("user_id", userId)
-    .eq("season_id", currentSeason?.id || "")
+    .eq("season_id", prizeData?.season_id || "")
     .maybeSingle();
 
   const prizeAmount = prizeData ? PRIZE_AMOUNTS[prizeData.rank] || null : null;
@@ -76,7 +63,7 @@ export default async function RewardsPage() {
       prizeData={prizeData}
       existingClaim={existingClaim}
       prizeAmount={prizeAmount}
-      seasonName={currentSeason?.name || "Current Season"}
+      seasonName={seasonName}
     />
   );
 }
