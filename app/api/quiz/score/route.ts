@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { supabase, supabaseAdmin } from "../../../lib/supabase";
 
 const DIFFICULTY_MULTIPLIER: Record<string, number> = {
@@ -17,7 +17,6 @@ const STREAK_BONUSES: Record<number, number> = {
 
 const DAILY_SCORE_CAP = 20;
 
-// Minimum seconds to complete a quiz legitimately
 const MIN_SECONDS: Record<string, number> = {
   Easy: 30,
   Medium: 45,
@@ -33,13 +32,11 @@ function getIP(req: NextRequest): string {
 async function checkAndFlag(userId: string, ip: string, difficulty: string, secondsSpent: number) {
   const flags: string[] = [];
 
-  // Check 1: completion too fast
   const minSeconds = MIN_SECONDS[difficulty] || 30;
   if (secondsSpent > 0 && secondsSpent < minSeconds) {
     flags.push(`Impossible speed — ${difficulty} quiz completed in ${secondsSpent}s (min ${minSeconds}s)`);
   }
 
-  // Check 2: same IP used by another account
   if (ip && ip !== "unknown") {
     const { data: otherScores } = await supabaseAdmin
       .from("scores")
@@ -55,13 +52,12 @@ async function checkAndFlag(userId: string, ip: string, difficulty: string, seco
 
   if (flags.length === 0) return;
 
-  // Flag the user
   const flagReason = flags.join(" | ");
   await supabaseAdmin
     .from("users")
     .update({ is_flagged: true, flag_reason: flagReason })
     .eq("id", userId)
-    .eq("is_flagged", false); // Only update if not already flagged — don't overwrite existing reason
+    .eq("is_flagged", false);
 }
 
 export async function POST(req: NextRequest) {
@@ -103,6 +99,11 @@ export async function POST(req: NextRequest) {
   if (!userId) {
     return NextResponse.json({ success: true, anonymous: true });
   }
+
+  // Fetch Clerk user for email and username
+  const clerkUser = await currentUser();
+  const email = clerkUser?.emailAddresses?.[0]?.emailAddress || null;
+  const username = clerkUser?.username || clerkUser?.firstName || null;
 
   // Check daily cap
   const todayStart = new Date();
@@ -164,9 +165,11 @@ export async function POST(req: NextRequest) {
     ip_address: ip,
   });
 
-  // Update user
+  // Update user — now includes email and username
   await supabase.from("users").upsert({
     id: userId,
+    ...(username && { username }),
+    ...(email && { email }),
     streak: newStreak,
     last_played: today,
     longest_streak: longestStreak,
