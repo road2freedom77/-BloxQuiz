@@ -10,8 +10,9 @@ import { supabase, supabaseAdmin } from "./lib/supabase";
 import WhySignUp from "./components/WhySignUp";
 
 const DAILY_CHALLENGE_THRESHOLD = 50;
+const ROBUX_URL = "https://www.amazon.com/s?k=roblox+figures+phatmojo&tag=bloxquiz-20";
 
-// ─── Manual editor slot — update this whenever you want to spotlight something ───
+// ─── Manual editor slot ───────────────────────────────────────────
 const EDITOR_PICK = {
   label: "Editor's Pick",
   emoji: "⚔️",
@@ -46,11 +47,76 @@ function formatFreshTimestamp(iso: string): string {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
-
   if (diffMins < 60) return `Updated ${diffMins}m ago`;
   if (diffHours < 24) return `Updated ${diffHours}h ago`;
   if (diffDays === 1) return "Updated yesterday";
   return `Updated ${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+}
+
+// ─── Affiliate banner — inline card between sections ──────────────
+function RobuxInlineBanner({ variant = "default" }: { variant?: "default" | "compact" | "wide" }) {
+  if (variant === "compact") {
+    return (
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 32px" }}>
+        <a href={ROBUX_URL} target="_blank" rel="noopener sponsored"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,165,0,0.04))", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 12, padding: "14px 20px", textDecoration: "none", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 24 }}>🧸</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#ffd700", marginBottom: 2 }}>Roblox Toys &amp; Figures on Amazon</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>Phatmojo, Blox Fruits, Adopt Me — free Prime shipping</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 900, color: "#ffd700", background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)", padding: "6px 16px", borderRadius: 100, whiteSpace: "nowrap" }}>Shop Amazon →</div>
+        </a>
+        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.15)", margin: "6px 0 0", textAlign: "right" }}>BloxQuiz may earn a commission from qualifying Amazon purchases.</p>
+      </div>
+    );
+  }
+
+  if (variant === "wide") {
+    return (
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 48px" }}>
+        <a href={ROBUX_URL} target="_blank" rel="noopener sponsored"
+          style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 24, background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", border: "1px solid rgba(255,215,0,0.25)", borderLeft: "3px solid #ffd700", borderRadius: 14, padding: "24px 28px", textDecoration: "none" }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ffd700", marginBottom: 8 }}>🧸 Sponsored — Amazon</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "#fff", marginBottom: 6 }}>Roblox Toys &amp; Figures</div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+              Official Phatmojo mystery figures, Blox Fruits sets, Adopt Me plush, and more. Free Prime shipping on eligible orders.
+            </div>
+          </div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#ffd700", color: "#0a0a14", fontWeight: 900, fontSize: 14, padding: "12px 24px", borderRadius: 100, whiteSpace: "nowrap", flexShrink: 0 }}>
+            🛒 Shop Now →
+          </div>
+        </a>
+        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.15)", margin: "6px 0 0", textAlign: "right" }}>BloxQuiz may earn a commission from qualifying Amazon purchases.</p>
+      </div>
+    );
+  }
+
+  // default
+  return (
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 48px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
+        {[
+          { emoji: "🧸", label: "Phatmojo Mystery Figures", sub: "Random characters from top Roblox games", url: "https://www.amazon.com/s?k=roblox+phatmojo+figures&tag=bloxquiz-20" },
+          { emoji: "⚔️", label: "Blox Fruits Toys & Sets",  sub: "Official Blox Fruits collectibles on Amazon", url: "https://www.amazon.com/s?k=blox+fruits+phatmojo+dlc&tag=bloxquiz-20" },
+          { emoji: "🐾", label: "Adopt Me Plush & Figures", sub: "Pets, toys, and accessories from Adopt Me", url: "https://www.amazon.com/s?k=adopt+me+roblox+toys&tag=bloxquiz-20" },
+        ].map((item) => (
+          <a key={item.label} href={item.url} target="_blank" rel="noopener sponsored"
+            style={{ display: "flex", alignItems: "center", gap: 14, background: "linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,165,0,0.03))", border: "1px solid rgba(255,215,0,0.18)", borderRadius: 12, padding: "16px 18px", textDecoration: "none" }}>
+            <span style={{ fontSize: 28, flexShrink: 0 }}>{item.emoji}</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#ffd700", marginBottom: 2 }}>{item.label}</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>{item.sub}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+      <p style={{ fontSize: 10, color: "rgba(255,255,255,0.15)", margin: "6px 0 0", textAlign: "right" }}>BloxQuiz may earn a commission from qualifying Amazon purchases.</p>
+    </div>
+  );
 }
 
 function GuidesSection({ guides }: { guides: any[] }) {
@@ -75,9 +141,7 @@ function GuidesSection({ guides }: { guides: any[] }) {
                 <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{guide.game_name}</span>
                 <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 100, background: "rgba(0,245,160,0.1)", color: "#00f5a0", border: "1px solid rgba(0,245,160,0.2)" }}>{guide.difficulty} Guide</span>
               </div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>
-                {cardTitle}
-              </h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>{cardTitle}</h3>
               {guide.excerpt && (
                 <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 12, flex: 1 }}>{guide.excerpt.substring(0, 90)}...</p>
               )}
@@ -143,12 +207,8 @@ function FreshOnBloxQuiz({
                 {card.label}
               </span>
             </div>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>
-              {card.title}
-            </h3>
-            <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 12, flex: 1 }}>
-              {card.description}
-            </p>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--text)", marginBottom: 8, lineHeight: 1.3 }}>{card.title}</h3>
+            <p style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, lineHeight: 1.6, marginBottom: 12, flex: 1 }}>{card.description}</p>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto" }}>
               <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>{card.timestamp}</span>
               <span style={{ fontSize: 12, fontWeight: 800, color: "var(--neon-green)" }}>View →</span>
@@ -169,13 +229,9 @@ async function getInitialQuizzes() {
       .order("published_at", { ascending: false })
       .limit(8);
     return (data ?? []).map(q => ({
-      slug: q.slug,
-      title: q.title,
-      game: q.game,
-      difficulty: q.difficulty,
+      slug: q.slug, title: q.title, game: q.game, difficulty: q.difficulty,
       questions: Array.isArray(q.questions) ? q.questions.length : 10,
-      emoji: "🎮",
-      thumb: "linear-gradient(135deg, rgba(0,245,160,0.15), rgba(184,76,255,0.15))",
+      emoji: "🎮", thumb: "linear-gradient(135deg, rgba(0,245,160,0.15), rgba(184,76,255,0.15))",
     }));
   } catch { return []; }
 }
@@ -183,11 +239,8 @@ async function getInitialQuizzes() {
 async function getInitialDaily() {
   try {
     const { data } = await supabaseAdmin
-      .from("quizzes")
-      .select("slug, title, game, difficulty")
-      .eq("status", "published")
-      .order("published_at", { ascending: false })
-      .limit(100);
+      .from("quizzes").select("slug, title, game, difficulty")
+      .eq("status", "published").order("published_at", { ascending: false }).limit(100);
     if (!data || data.length === 0) return null;
     const today = new Date().toISOString().split("T")[0];
     const seed = parseInt(today.replace(/-/g, "")) % data.length;
@@ -199,26 +252,20 @@ async function getInitialDaily() {
 async function getPublishedGuides() {
   try {
     const { data } = await supabaseAdmin
-      .from("game_guides")
-      .select("slug, title, game_name, game_slug, difficulty, excerpt, created_at")
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .limit(10);
+      .from("game_guides").select("slug, title, game_name, game_slug, difficulty, excerpt, created_at")
+      .eq("status", "published").order("created_at", { ascending: false }).limit(10);
     if (!data || data.length === 0) return [];
     const seed = parseInt(new Date().toISOString().split("T")[0].replace(/-/g, "")) % data.length;
     const rotated = [...data.slice(seed), ...data.slice(0, seed)];
     return rotated.slice(0, 3);
   } catch { return []; }
 }
+
 async function getNewestGuide() {
   try {
     const { data } = await supabaseAdmin
-      .from("game_guides")
-      .select("slug, title, game_name, game_slug, created_at")
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+      .from("game_guides").select("slug, title, game_name, game_slug, created_at")
+      .eq("status", "published").order("created_at", { ascending: false }).limit(1).single();
     return data ?? null;
   } catch { return null; }
 }
@@ -226,11 +273,8 @@ async function getNewestGuide() {
 async function getTrendingGame() {
   try {
     const { data: games } = await supabaseAdmin
-      .from("roblox_games")
-      .select("slug, name, current_players, last_updated")
-      .eq("is_tracked", true)
-      .order("current_players", { ascending: false, nullsFirst: false })
-      .limit(20);
+      .from("roblox_games").select("slug, name, current_players, last_updated")
+      .eq("is_tracked", true).order("current_players", { ascending: false, nullsFirst: false }).limit(20);
     if (!games || games.length === 0) return null;
     return games[1] ?? games[0];
   } catch { return null; }
@@ -252,11 +296,23 @@ export default async function Home() {
     <>
       <Hero />
       <TrendingGames />
+
+      {/* Affiliate placement 1 — after trending games, high purchase intent */}
+      <RobuxInlineBanner variant="compact" />
+
       <GuidesSection guides={guides} />
       <FreshOnBloxQuiz newestGuide={newestGuide} trendingGame={trendingGame} />
       <GameCategories />
+
+      {/* Affiliate placement 2 — mid-page, 3-card grid */}
+      <RobuxInlineBanner variant="default" />
+
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
+
+      {/* Affiliate placement 3 — after quizzes, wide card */}
+      <RobuxInlineBanner variant="wide" />
+
       <WhySignUp />
       {showDailyChallenge && <DailyChallenge initialDaily={initialDaily} />}
       <Codes />

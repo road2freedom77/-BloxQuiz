@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
+import RobuxAffiliateOverlay from "./components/RobuxAffiliateOverlay";
+import RobuxBackground from "./components/RobuxBackground";
 import "./globals.css";
 
 const lilitaOne = Lilita_One({
@@ -36,20 +38,11 @@ export const metadata: Metadata = {
     title: "BloxQuiz — Roblox Quizzes, Live Stats & Game Codes (2026)",
     description: "Test your Roblox knowledge! Free trivia quizzes for Blox Fruits, Brookhaven, Adopt Me & more.",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: "https://www.bloxquiz.gg",
-  }
+  robots: { index: true, follow: true },
+  alternates: { canonical: "https://www.bloxquiz.gg" },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
       appearance={{
@@ -64,48 +57,23 @@ export default function RootLayout({
           borderRadius: "12px",
         },
         elements: {
-          card: {
-            background: "#13172A",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
-            borderRadius: "16px",
-          },
+          card: { background: "#13172A", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 40px rgba(0,0,0,0.4)", borderRadius: "16px" },
           headerTitle: { color: "#F0F4FF", fontWeight: 800 },
           headerSubtitle: { color: "#8892B0" },
-          socialButtonsBlockButton: {
-            background: "#1A1F35",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "#F0F4FF",
-            borderRadius: "10px",
-            fontWeight: 700,
-          },
+          socialButtonsBlockButton: { background: "#1A1F35", border: "1px solid rgba(255,255,255,0.1)", color: "#F0F4FF", borderRadius: "10px", fontWeight: 700 },
           socialButtonsBlockButtonText: { color: "#F0F4FF" },
           dividerLine: { background: "rgba(255,255,255,0.08)" },
           dividerText: { color: "#8892B0" },
           formFieldLabel: { color: "#8892B0", fontWeight: 700, fontSize: "13px" },
-          formFieldInput: {
-            background: "#1A1F35",
-            border: "1.5px solid rgba(255,255,255,0.1)",
-            color: "#F0F4FF",
-            borderRadius: "10px",
-          },
-          formButtonPrimary: {
-            background: "linear-gradient(135deg, #00F5A0, #B84CFF)",
-            color: "#0B0E17",
-            fontWeight: 900,
-            borderRadius: "100px",
-            border: "none",
-          },
+          formFieldInput: { background: "#1A1F35", border: "1.5px solid rgba(255,255,255,0.1)", color: "#F0F4FF", borderRadius: "10px" },
+          formButtonPrimary: { background: "linear-gradient(135deg, #00F5A0, #B84CFF)", color: "#0B0E17", fontWeight: 900, borderRadius: "100px", border: "none" },
           footerActionLink: { color: "#00F5A0", fontWeight: 700 },
         }
       }}
     >
       <html lang="en">
         <head>
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-X1WQ0GMZDN"
-            strategy="afterInteractive"
-          />
+          <Script src="https://www.googletagmanager.com/gtag/js?id=G-X1WQ0GMZDN" strategy="afterInteractive" />
           <Script id="google-analytics" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
@@ -114,14 +82,15 @@ export default function RootLayout({
               gtag('config', 'G-X1WQ0GMZDN');
             `}
           </Script>
-          <script data-grow-initializer="" dangerouslySetInnerHTML={{ __html: `!(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","U2l0ZToxMWI5YzM4ZS01OWFjLTQ1YjMtYjA0ZC0wNTYzNzI4YjY2ZTQ=");var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t);})();` }} />
         </head>
         <body className={`${lilitaOne.variable} ${nunito.variable}`} style={{ position: "relative" }}>
+          <RobuxBackground />
           <div style={{ position: "relative", zIndex: 1 }}>
             <Nav />
             {children}
             <Footer />
           </div>
+          <RobuxAffiliateOverlay />
         </body>
       </html>
     </ClerkProvider>
