@@ -12,7 +12,6 @@ import WhySignUp from "./components/WhySignUp";
 const DAILY_CHALLENGE_THRESHOLD = 50;
 const ROBUX_URL = "https://www.amazon.com/s?k=roblox+figures+phatmojo&tag=bloxquiz-20";
 
-// ─── Manual editor slot ───────────────────────────────────────────
 const EDITOR_PICK = {
   label: "Editor's Pick",
   emoji: "⚔️",
@@ -53,7 +52,29 @@ function formatFreshTimestamp(iso: string): string {
   return `Updated ${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
 }
 
-// ─── Affiliate banner — inline card between sections ──────────────
+function DisclaimerBanner() {
+  return (
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 24px" }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        borderRadius: 10,
+        padding: "10px 16px",
+        flexWrap: "wrap",
+      }}>
+        <span style={{ fontSize: 14, flexShrink: 0 }}>ℹ️</span>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", fontWeight: 600, margin: 0, lineHeight: 1.5 }}>
+          <strong style={{ color: "rgba(255,255,255,0.5)" }}>BloxQuiz is an independent fan site.</strong>{" "}
+          We are not affiliated with Roblox Corporation and do not generate or distribute Robux. Prizes are Roblox gift cards awarded to top quiz players each quarter.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function RobuxInlineBanner({ variant = "default" }: { variant?: "default" | "compact" | "wide" }) {
   if (variant === "compact") {
     return (
@@ -95,13 +116,12 @@ function RobuxInlineBanner({ variant = "default" }: { variant?: "default" | "com
     );
   }
 
-  // default
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 48px" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
         {[
           { emoji: "🧸", label: "Phatmojo Mystery Figures", sub: "Random characters from top Roblox games", url: "https://www.amazon.com/s?k=roblox+phatmojo+figures&tag=bloxquiz-20" },
-          { emoji: "⚔️", label: "Blox Fruits Toys & Sets",  sub: "Official Blox Fruits collectibles on Amazon", url: "https://www.amazon.com/s?k=blox+fruits+phatmojo+dlc&tag=bloxquiz-20" },
+          { emoji: "⚔️", label: "Blox Fruits Toys & Sets", sub: "Official Blox Fruits collectibles on Amazon", url: "https://www.amazon.com/s?k=blox+fruits+phatmojo+dlc&tag=bloxquiz-20" },
           { emoji: "🐾", label: "Adopt Me Plush & Figures", sub: "Pets, toys, and accessories from Adopt Me", url: "https://www.amazon.com/s?k=adopt+me+roblox+toys&tag=bloxquiz-20" },
         ].map((item) => (
           <a key={item.label} href={item.url} target="_blank" rel="noopener sponsored"
@@ -295,22 +315,25 @@ export default async function Home() {
   return (
     <>
       <Hero />
+
+      <DisclaimerBanner />
+
       <TrendingGames />
 
-      {/* Affiliate placement 1 — after trending games, high purchase intent */}
+      {/* Affiliate placement 1 — after trending games */}
       <RobuxInlineBanner variant="compact" />
 
       <GuidesSection guides={guides} />
       <FreshOnBloxQuiz newestGuide={newestGuide} trendingGame={trendingGame} />
       <GameCategories />
 
-      {/* Affiliate placement 2 — mid-page, 3-card grid */}
+      {/* Affiliate placement 2 — mid-page 3-card grid */}
       <RobuxInlineBanner variant="default" />
 
       <UsernameGeneratorBanner />
       <PopularQuizzes initialQuizzes={initialQuizzes} />
 
-      {/* Affiliate placement 3 — after quizzes, wide card */}
+      {/* Affiliate placement 3 — after quizzes wide card */}
       <RobuxInlineBanner variant="wide" />
 
       <WhySignUp />
