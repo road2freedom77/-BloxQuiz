@@ -53,15 +53,10 @@ export async function GET() {
         <li>Quizzes and all content will no longer be accessible after ${SHUTDOWN_DATE}.</li>
       </ul>
       <p style="font-size:14px;color:#8892B0;font-weight:600;line-height:1.7;margin:0;">
-        Thank you to everyone who played, competed, and made this community what it was. The engine that powered
-        BloxQuiz lives on at <a href="https://www.faithblitz.com/" style="color:#00F5A0;font-weight:800;text-decoration:none;">FaithBlitz</a>
-        — free Bible quizzes, daily challenges, and real prizes every season.
+        Thank you to everyone who played, competed, and made this community what it was.
       </p>
     </div>
-    <div style="text-align:center;margin-bottom:24px;">
-      <a href="https://www.faithblitz.com/" style="display:inline-block;background:linear-gradient(135deg,#00F5A0,#B84CFF);color:#0B0E17;font-weight:900;font-size:15px;padding:14px 36px;border-radius:100px;text-decoration:none;">Visit FaithBlitz →</a>
-    </div>
-    <p style="font-size:12px;color:#4A5568;font-weight:600;text-align:center;margin:0;">— Marcin<br>© 2026 BloxQuiz.gg</p>
+    <p style="font-size:12px;color:#4A5568;font-weight:600;text-align:center;margin:0;">— The BloxQuiz Team<br>© 2026 BloxQuiz.gg</p>
   </div>
 </body>
 </html>`;
@@ -79,7 +74,7 @@ export async function GET() {
       body: JSON.stringify({
         from: "BloxQuiz <prizes@bloxquiz.gg>",
         to: email,
-        subject: "BloxQuiz is shutting down — thank you for playing",
+        subject: "BloxQuiz is shutting down",
         html,
       }),
     });
