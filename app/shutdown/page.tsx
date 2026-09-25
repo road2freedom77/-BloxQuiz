@@ -1,6 +1,6 @@
 // app/shutdown/page.tsx
 // BloxQuiz shutdown announcement page. Every route on the site is rewritten
-// here by middleware.ts until the site goes offline on the shutdown date.
+// here by proxy.ts until the site goes offline on the shutdown date.
 export const metadata = {
   title: "BloxQuiz is Shutting Down",
   description: "BloxQuiz.gg is closing. Thank you to everyone who played.",
@@ -31,20 +31,11 @@ export default function ShutdownPage() {
           </ul>
         </div>
 
-        <p style={{ fontSize: 15, color: "#8892B0", fontWeight: 600, lineHeight: 1.8, marginBottom: 28 }}>
-          Thank you to everyone who played, competed, and made this community what it was. The engine that
-          powered BloxQuiz lives on at{" "}
-          <a href="https://www.faithblitz.com/" style={{ color: "#00F5A0", fontWeight: 800, textDecoration: "none" }}>
-            FaithBlitz
-          </a>
-          {" "}— free Bible quizzes, daily challenges, and real prizes every season.
+        <p style={{ fontSize: 15, color: "#8892B0", fontWeight: 600, lineHeight: 1.8, marginBottom: 32 }}>
+          Thank you to everyone who played, competed, and made this community what it was.
         </p>
 
-        <a href="https://www.faithblitz.com/" style={{ display: "inline-block", background: "linear-gradient(135deg, #00F5A0, #B84CFF)", color: "#0B0E17", fontWeight: 900, fontSize: 15, padding: "14px 36px", borderRadius: 100, textDecoration: "none", marginBottom: 32 }}>
-          Visit FaithBlitz →
-        </a>
-
-        <p style={{ fontSize: 13, color: "#4A5568", fontWeight: 600, margin: 0 }}>— Marcin</p>
+        <p style={{ fontSize: 13, color: "#4A5568", fontWeight: 600, margin: 0 }}>— The BloxQuiz Team</p>
       </div>
     </div>
   );
